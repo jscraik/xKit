@@ -16,6 +16,8 @@ pnpm run binary  # Creates the 'bird' executable
 - `bird tweet "<text>"` — post a new tweet.
 - `bird reply <tweet-id-or-url> "<text>"` — reply to a tweet using its ID or URL.
 - `bird read <tweet-id-or-url> [--json]` — fetch tweet content as text or JSON.
+- `bird search "<query>" [-n count] [--json]` — search for tweets matching a query.
+- `bird mentions [-n count] [--json]` — find tweets mentioning @clawdbot.
 - `bird check` — show which credentials are available and where they were sourced from.
 
 ### Post a tweet
@@ -40,6 +42,24 @@ bird reply 1234567890 "This is my reply"
 # Get tweet content by URL or ID
 bird read "https://x.com/user/status/1234567890"
 bird read 1234567890 --json
+```
+
+### Search tweets
+
+```bash
+# Search for tweets containing a query
+bird search "claude AI" -n 10
+
+# Search for mentions of a user
+bird search "@clawdbot"
+```
+
+### Find mentions
+
+```bash
+# Shortcut to search for @clawdbot mentions
+bird mentions -n 10
+bird mentions --json
 ```
 
 ### Check credentials

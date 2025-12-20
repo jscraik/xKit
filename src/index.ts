@@ -15,6 +15,7 @@ import { join } from 'node:path';
 import { Command } from 'commander';
 import JSON5 from 'json5';
 import kleur from 'kleur';
+import { resolveCliInvocation } from './lib/cli-args.js';
 import { resolveCredentials } from './lib/cookies.js';
 import { extractTweetId } from './lib/extract-tweet-id.js';
 import { SweetisticsClient } from './lib/sweetistics-client.js';
@@ -50,6 +51,7 @@ type BirdConfig = {
   sweetisticsBaseUrl?: string;
   allowChrome?: boolean;
   allowFirefox?: boolean;
+  timeoutMs?: number;
 };
 
 function readConfigFile(path: string): Partial<BirdConfig> {
@@ -77,6 +79,18 @@ function loadConfig(): BirdConfig {
 }
 
 const config = loadConfig();
+
+const KNOWN_COMMANDS = new Set([
+  'tweet',
+  'reply',
+  'read',
+  'replies',
+  'thread',
+  'search',
+  'mentions',
+  'whoami',
+  'check',
+]);
 
 program.addHelpText(
   'beforeAll',
@@ -117,7 +131,8 @@ program
     '--engine <engine>',
     'Engine: graphql | sweetistics | auto',
     process.env.BIRD_ENGINE || config.engine || 'graphql',
-  );
+  )
+  .option('--timeout <ms>', 'Request timeout in milliseconds');
 
 type EngineMode = 'graphql' | 'sweetistics' | 'auto';
 
@@ -144,6 +159,19 @@ function shouldUseSweetistics(engine: EngineMode, hasApiKey: boolean): boolean {
   if (engine === 'sweetistics') return true;
   if (engine === 'graphql') return false;
   return hasApiKey; // auto
+}
+
+function resolveTimeoutMs(...values: Array<string | number | undefined | null>): number | undefined {
+  for (const value of values) {
+    if (value === undefined || value === null || value === '') continue;
+    const parsed = typeof value === 'number' ? value : Number(value);
+    if (Number.isFinite(parsed) && parsed > 0) return parsed;
+  }
+  return undefined;
+}
+
+function resolveTimeoutFromOptions(options: { timeout?: string | number }): number | undefined {
+  return resolveTimeoutMs(options.timeout, config.timeoutMs, process.env.BIRD_TIMEOUT_MS);
 }
 
 function detectMime(path: string): string | null {
@@ -208,6 +236,7 @@ program
   .argument('<text>', 'Tweet text')
   .action(async (text: string) => {
     const opts = program.opts();
+    const timeoutMs = resolveTimeoutFromOptions(opts);
     let media: MediaSpec[] = [];
     try {
       media = loadMedia({ media: opts.media ?? [], alts: opts.alt ?? [] });
@@ -231,6 +260,7 @@ program
         const client = new SweetisticsClient({
           baseUrl: sweetistics.baseUrl,
           apiKey: sweetistics.apiKey,
+          timeoutMs,
         });
         let mediaIds: string[] | undefined;
         if (media.length > 0) {
@@ -265,7 +295,9 @@ program
     }
 
     if (media.length > 0) {
-      console.error('❌ Media uploads are only supported via Sweetistics. Provide SWEETISTICS_API_KEY or --engine sweetistics.');
+      console.error(
+        '❌ Media uploads are only supported via Sweetistics. Provide SWEETISTICS_API_KEY or --engine sweetistics.',
+      );
       process.exit(1);
     }
 
@@ -291,7 +323,7 @@ program
       console.error(`📍 Using credentials from: ${cookies.source}`);
     }
 
-    const client = new TwitterClient({ cookies });
+    const client = new TwitterClient({ cookies, timeoutMs });
     const result = await client.tweet(text);
 
     if (result.success) {
@@ -302,6 +334,7 @@ program
       const fallback = await new SweetisticsClient({
         baseUrl: sweetistics.baseUrl,
         apiKey: sweetistics.apiKey,
+        timeoutMs,
       }).tweet(text);
       if (fallback.success) {
         console.log('✅ Tweet posted via Sweetistics (fallback)!');
@@ -326,6 +359,7 @@ program
   .argument('<text>', 'Reply text')
   .action(async (tweetIdOrUrl: string, text: string) => {
     const opts = program.opts();
+    const timeoutMs = resolveTimeoutFromOptions(opts);
     let media: MediaSpec[] = [];
     try {
       media = loadMedia({ media: opts.media ?? [], alts: opts.alt ?? [] });
@@ -350,6 +384,7 @@ program
         const client = new SweetisticsClient({
           baseUrl: sweetistics.baseUrl,
           apiKey: sweetistics.apiKey,
+          timeoutMs,
         });
         let mediaIds: string[] | undefined;
         if (media.length > 0) {
@@ -384,7 +419,9 @@ program
     }
 
     if (media.length > 0) {
-      console.error('❌ Media uploads are only supported via Sweetistics. Provide SWEETISTICS_API_KEY or --engine sweetistics.');
+      console.error(
+        '❌ Media uploads are only supported via Sweetistics. Provide SWEETISTICS_API_KEY or --engine sweetistics.',
+      );
       process.exit(1);
     }
 
@@ -412,7 +449,7 @@ program
 
     console.error(`📝 Replying to tweet: ${tweetId}`);
 
-    const client = new TwitterClient({ cookies });
+    const client = new TwitterClient({ cookies, timeoutMs });
     const result = await client.reply(text, tweetId);
 
     if (result.success) {
@@ -423,6 +460,7 @@ program
       const fallback = await new SweetisticsClient({
         baseUrl: sweetistics.baseUrl,
         apiKey: sweetistics.apiKey,
+        timeoutMs,
       }).tweet(text, tweetId);
       if (fallback.success) {
         console.log('✅ Reply posted via Sweetistics (fallback)!');
@@ -447,6 +485,7 @@ program
   .option('--json', 'Output as JSON')
   .action(async (tweetIdOrUrl: string, cmdOpts: { json?: boolean }) => {
     const opts = program.opts();
+    const timeoutMs = resolveTimeoutFromOptions(opts);
     const sweetistics = resolveSweetisticsConfig({
       sweetisticsApiKey: opts.sweetisticsApiKey || config.sweetisticsApiKey,
       sweetisticsBaseUrl: opts.sweetisticsBaseUrl || config.sweetisticsBaseUrl,
@@ -460,7 +499,11 @@ program
         console.error('❌ Sweetistics engine selected but no API key provided.');
         process.exit(1);
       }
-      const client = new SweetisticsClient({ baseUrl: sweetistics.baseUrl, apiKey: sweetistics.apiKey });
+      const client = new SweetisticsClient({
+        baseUrl: sweetistics.baseUrl,
+        apiKey: sweetistics.apiKey,
+        timeoutMs,
+      });
       const result = await client.read(tweetId);
       if (result.success && result.tweet) {
         if (cmdOpts.json) {
@@ -499,7 +542,7 @@ program
       process.exit(1);
     }
 
-    const client = new TwitterClient({ cookies });
+    const client = new TwitterClient({ cookies, timeoutMs });
     const result = await client.getTweet(tweetId);
 
     if (result.success && result.tweet) {
@@ -517,9 +560,11 @@ program
       }
     } else if (sweetistics.apiKey) {
       console.error(`⚠️ GraphQL read failed (${result.error}); trying Sweetistics fallback...`);
-      const fallback = await new SweetisticsClient({ baseUrl: sweetistics.baseUrl, apiKey: sweetistics.apiKey }).read(
-        tweetId,
-      );
+      const fallback = await new SweetisticsClient({
+        baseUrl: sweetistics.baseUrl,
+        apiKey: sweetistics.apiKey,
+        timeoutMs,
+      }).read(tweetId);
       if (fallback.success && fallback.tweet) {
         if (cmdOpts.json) {
           console.log(JSON.stringify(fallback.tweet, null, 2));
@@ -551,6 +596,7 @@ program
   .option('--json', 'Output as JSON')
   .action(async (tweetIdOrUrl: string, cmdOpts: { json?: boolean }) => {
     const opts = program.opts();
+    const timeoutMs = resolveTimeoutFromOptions(opts);
     const sweetistics = resolveSweetisticsConfig({
       sweetisticsApiKey: opts.sweetisticsApiKey || config.sweetisticsApiKey,
       sweetisticsBaseUrl: opts.sweetisticsBaseUrl || config.sweetisticsBaseUrl,
@@ -563,7 +609,11 @@ program
         console.error('❌ Sweetistics engine selected but no API key provided.');
         process.exit(1);
       }
-      const client = new SweetisticsClient({ baseUrl: sweetistics.baseUrl, apiKey: sweetistics.apiKey });
+      const client = new SweetisticsClient({
+        baseUrl: sweetistics.baseUrl,
+        apiKey: sweetistics.apiKey,
+        timeoutMs,
+      });
       const result = await client.replies(tweetId);
       if (result.success && result.tweets) {
         printTweets(result.tweets, { json: cmdOpts.json, emptyMessage: 'No replies found.' });
@@ -589,7 +639,7 @@ program
       process.exit(1);
     }
 
-    const client = new TwitterClient({ cookies });
+    const client = new TwitterClient({ cookies, timeoutMs });
     const result = await client.getReplies(tweetId);
 
     if (result.success && result.tweets) {
@@ -599,6 +649,7 @@ program
       const fallback = await new SweetisticsClient({
         baseUrl: sweetistics.baseUrl,
         apiKey: sweetistics.apiKey,
+        timeoutMs,
       }).replies(tweetId);
       if (fallback.success && fallback.tweets) {
         printTweets(fallback.tweets, { json: cmdOpts.json, emptyMessage: 'No replies found.' });
@@ -620,6 +671,7 @@ program
   .option('--json', 'Output as JSON')
   .action(async (tweetIdOrUrl: string, cmdOpts: { json?: boolean }) => {
     const opts = program.opts();
+    const timeoutMs = resolveTimeoutFromOptions(opts);
     const sweetistics = resolveSweetisticsConfig({
       sweetisticsApiKey: opts.sweetisticsApiKey || config.sweetisticsApiKey,
       sweetisticsBaseUrl: opts.sweetisticsBaseUrl || config.sweetisticsBaseUrl,
@@ -632,7 +684,11 @@ program
         console.error('❌ Sweetistics engine selected but no API key provided.');
         process.exit(1);
       }
-      const client = new SweetisticsClient({ baseUrl: sweetistics.baseUrl, apiKey: sweetistics.apiKey });
+      const client = new SweetisticsClient({
+        baseUrl: sweetistics.baseUrl,
+        apiKey: sweetistics.apiKey,
+        timeoutMs,
+      });
       const result = await client.thread(tweetId);
       if (result.success && result.tweets) {
         printTweets(result.tweets, { json: cmdOpts.json, emptyMessage: 'No thread tweets found.' });
@@ -658,16 +714,18 @@ program
       process.exit(1);
     }
 
-    const client = new TwitterClient({ cookies });
+    const client = new TwitterClient({ cookies, timeoutMs });
     const result = await client.getThread(tweetId);
 
     if (result.success && result.tweets) {
       printTweets(result.tweets, { json: cmdOpts.json, emptyMessage: 'No thread tweets found.' });
     } else if (sweetistics.apiKey) {
       console.error(`⚠️ GraphQL thread failed (${result.error}); trying Sweetistics fallback...`);
-      const fallback = await new SweetisticsClient({ baseUrl: sweetistics.baseUrl, apiKey: sweetistics.apiKey }).thread(
-        tweetId,
-      );
+      const fallback = await new SweetisticsClient({
+        baseUrl: sweetistics.baseUrl,
+        apiKey: sweetistics.apiKey,
+        timeoutMs,
+      }).thread(tweetId);
       if (fallback.success && fallback.tweets) {
         printTweets(fallback.tweets, { json: cmdOpts.json, emptyMessage: 'No thread tweets found.' });
       } else {
@@ -689,6 +747,7 @@ program
   .option('--json', 'Output as JSON')
   .action(async (query: string, cmdOpts: { count?: string; json?: boolean }) => {
     const opts = program.opts();
+    const timeoutMs = resolveTimeoutFromOptions(opts);
     const count = Number.parseInt(cmdOpts.count || '10', 10);
     const sweetistics = resolveSweetisticsConfig({
       sweetisticsApiKey: opts.sweetisticsApiKey || config.sweetisticsApiKey,
@@ -702,7 +761,11 @@ program
         console.error('❌ Sweetistics engine selected but no API key provided.');
         process.exit(1);
       }
-      const client = new SweetisticsClient({ baseUrl: sweetistics.baseUrl, apiKey: sweetistics.apiKey });
+      const client = new SweetisticsClient({
+        baseUrl: sweetistics.baseUrl,
+        apiKey: sweetistics.apiKey,
+        timeoutMs,
+      });
       const result = await client.search(query, count);
       if (result.success && result.tweets) {
         printTweets(result.tweets, { json: cmdOpts.json, emptyMessage: 'No tweets found.' });
@@ -728,17 +791,18 @@ program
       process.exit(1);
     }
 
-    const client = new TwitterClient({ cookies });
+    const client = new TwitterClient({ cookies, timeoutMs });
     const result = await client.search(query, count);
 
     if (result.success && result.tweets) {
       printTweets(result.tweets, { json: cmdOpts.json, emptyMessage: 'No tweets found.' });
     } else if (sweetistics.apiKey) {
       console.error(`⚠️ GraphQL search failed (${result.error}); trying Sweetistics fallback...`);
-      const fallback = await new SweetisticsClient({ baseUrl: sweetistics.baseUrl, apiKey: sweetistics.apiKey }).search(
-        query,
-        count,
-      );
+      const fallback = await new SweetisticsClient({
+        baseUrl: sweetistics.baseUrl,
+        apiKey: sweetistics.apiKey,
+        timeoutMs,
+      }).search(query, count);
       if (fallback.success && fallback.tweets) {
         printTweets(fallback.tweets, { json: cmdOpts.json, emptyMessage: 'No tweets found.' });
       } else {
@@ -759,6 +823,7 @@ program
   .option('--json', 'Output as JSON')
   .action(async (cmdOpts: { count?: string; json?: boolean }) => {
     const opts = program.opts();
+    const timeoutMs = resolveTimeoutFromOptions(opts);
     const count = Number.parseInt(cmdOpts.count || '10', 10);
     const sweetistics = resolveSweetisticsConfig(opts);
     const engine = resolveEngineMode(opts.engine);
@@ -769,7 +834,11 @@ program
         console.error('❌ Sweetistics engine selected but no API key provided.');
         process.exit(1);
       }
-      const client = new SweetisticsClient({ baseUrl: sweetistics.baseUrl, apiKey: sweetistics.apiKey });
+      const client = new SweetisticsClient({
+        baseUrl: sweetistics.baseUrl,
+        apiKey: sweetistics.apiKey,
+        timeoutMs,
+      });
       const result = await client.search('@clawdbot', count);
       if (result.success && result.tweets) {
         printTweets(result.tweets, { json: cmdOpts.json, emptyMessage: 'No mentions found.' });
@@ -794,17 +863,18 @@ program
       process.exit(1);
     }
 
-    const client = new TwitterClient({ cookies });
+    const client = new TwitterClient({ cookies, timeoutMs });
     const result = await client.search('@clawdbot', count);
 
     if (result.success && result.tweets) {
       printTweets(result.tweets, { json: cmdOpts.json, emptyMessage: 'No mentions found.' });
     } else if (sweetistics.apiKey) {
       console.error(`⚠️ GraphQL mentions failed (${result.error}); trying Sweetistics fallback...`);
-      const fallback = await new SweetisticsClient({ baseUrl: sweetistics.baseUrl, apiKey: sweetistics.apiKey }).search(
-        '@clawdbot',
-        count,
-      );
+      const fallback = await new SweetisticsClient({
+        baseUrl: sweetistics.baseUrl,
+        apiKey: sweetistics.apiKey,
+        timeoutMs,
+      }).search('@clawdbot', count);
       if (fallback.success && fallback.tweets) {
         printTweets(fallback.tweets, { json: cmdOpts.json, emptyMessage: 'No mentions found.' });
       } else {
@@ -823,6 +893,7 @@ program
   .description('Show which Twitter account the current credentials belong to')
   .action(async () => {
     const opts = program.opts();
+    const timeoutMs = resolveTimeoutFromOptions(opts);
     const sweetistics = resolveSweetisticsConfig({
       sweetisticsApiKey: opts.sweetisticsApiKey || config.sweetisticsApiKey,
       sweetisticsBaseUrl: opts.sweetisticsBaseUrl || config.sweetisticsBaseUrl,
@@ -836,7 +907,11 @@ program
         process.exit(1);
       }
 
-      const client = new SweetisticsClient({ baseUrl: sweetistics.baseUrl, apiKey: sweetistics.apiKey });
+      const client = new SweetisticsClient({
+        baseUrl: sweetistics.baseUrl,
+        apiKey: sweetistics.apiKey,
+        timeoutMs,
+      });
       const result = await client.getCurrentUser();
 
       if (result.success && result.user) {
@@ -878,7 +953,7 @@ program
       console.error(`📍 Using credentials from: ${cookies.source}`);
     }
 
-    const client = new TwitterClient({ cookies });
+    const client = new TwitterClient({ cookies, timeoutMs });
     const result = await client.getCurrentUser();
 
     const credentialSource = cookies.source ?? 'env/auto-detected cookies';
@@ -894,6 +969,7 @@ program
         const fallback = await new SweetisticsClient({
           baseUrl: sweetistics.baseUrl,
           apiKey: sweetistics.apiKey,
+          timeoutMs,
         }).getCurrentUser();
         if (fallback.success && fallback.user) {
           const handle = fallback.user.username ? `@${fallback.user.username}` : '(no handle)';
@@ -962,10 +1038,16 @@ program
     }
   });
 
-// Show help when invoked without any subcommand
-if (process.argv.length <= 2) {
+const rawArgs = process.argv.slice(2);
+const { argv, showHelp } = resolveCliInvocation(rawArgs, KNOWN_COMMANDS);
+
+if (showHelp) {
   program.outputHelp();
   process.exit(0);
 }
 
-program.parse();
+if (argv) {
+  program.parse(argv);
+} else {
+  program.parse();
+}

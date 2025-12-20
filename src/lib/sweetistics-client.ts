@@ -4,6 +4,7 @@ export interface SweetisticsClientOptions {
   baseUrl: string;
   apiKey: string;
   userAgent?: string;
+  timeoutMs?: number;
 }
 
 export interface SweetisticsTweetResult {
@@ -63,13 +64,15 @@ export class SweetisticsClient {
   private readonly baseUrl: string;
   private readonly apiKey: string;
   private readonly userAgent?: string;
+  private readonly timeoutMs: number;
   // Prevent hanging requests; keep Sweetistics calls snappy for CLI users.
-  private static readonly REQUEST_TIMEOUT_MS = 15_000;
+  private static readonly DEFAULT_REQUEST_TIMEOUT_MS = 15_000;
 
   constructor(options: SweetisticsClientOptions) {
     this.baseUrl = normalizeBaseUrl(options.baseUrl);
     this.apiKey = options.apiKey.trim();
     this.userAgent = options.userAgent;
+    this.timeoutMs = options.timeoutMs ?? SweetisticsClient.DEFAULT_REQUEST_TIMEOUT_MS;
     if (!this.apiKey) {
       throw new Error('Sweetistics API key is required');
     }
@@ -310,7 +313,7 @@ export class SweetisticsClient {
           {
             method: 'GET',
             headers,
-          }
+          },
         );
       } catch (error) {
         return { success: false, error: this.normalizeError(error) };
@@ -466,7 +469,11 @@ export class SweetisticsClient {
     return { success: true, tweets };
   }
 
-  async uploadMedia(input: { data: string; mimeType: string; alt?: string }): Promise<{ success: boolean; mediaId?: string; error?: string }> {
+  async uploadMedia(input: {
+    data: string;
+    mimeType: string;
+    alt?: string;
+  }): Promise<{ success: boolean; mediaId?: string; error?: string }> {
     try {
       const response = await this.fetchWithTimeout(`${this.baseUrl}/api/actions/media/upload`, {
         method: 'POST',
@@ -504,8 +511,8 @@ export class SweetisticsClient {
   private async fetchWithTimeout(url: string, init?: RequestInit): Promise<Response> {
     const controller = new AbortController();
     const timeoutId = setTimeout(
-      () => controller.abort(new Error(`Request timed out after ${SweetisticsClient.REQUEST_TIMEOUT_MS}ms`)),
-      SweetisticsClient.REQUEST_TIMEOUT_MS,
+      () => controller.abort(new Error(`Request timed out after ${this.timeoutMs}ms`)),
+      this.timeoutMs,
     );
 
     try {

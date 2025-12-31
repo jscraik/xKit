@@ -1072,6 +1072,78 @@ describe('TwitterClient', () => {
     });
   });
 
+  describe('bookmarks', () => {
+    let mockFetch: ReturnType<typeof vi.fn>;
+
+    beforeEach(() => {
+      mockFetch = vi.fn();
+      global.fetch = mockFetch as unknown as typeof fetch;
+    });
+
+    it('fetches bookmarks and parses tweet results', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          data: {
+            bookmark_timeline_v2: {
+              timeline: {
+                instructions: [
+                  {
+                    entries: [
+                      {
+                        content: {
+                          itemContent: {
+                            tweet_results: {
+                              result: {
+                                rest_id: '1',
+                                legacy: {
+                                  full_text: 'saved',
+                                  created_at: '2024-01-01T00:00:00Z',
+                                  reply_count: 0,
+                                  retweet_count: 0,
+                                  favorite_count: 0,
+                                  conversation_id_str: '1',
+                                },
+                                core: {
+                                  user_results: {
+                                    result: {
+                                      rest_id: 'u1',
+                                      legacy: { screen_name: 'root', name: 'Root' },
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+        }),
+      });
+
+      const client = new TwitterClient({ cookies: validCookies });
+      const result = await client.getBookmarks(2);
+
+      expect(result.success).toBe(true);
+      expect(result.tweets?.[0].id).toBe('1');
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+
+      const [url, options] = mockFetch.mock.calls[0];
+      expect(options.method).toBe('GET');
+      expect(String(url)).toContain('/Bookmarks?');
+      const parsedVars = JSON.parse(new URL(url as string).searchParams.get('variables') as string);
+      expect(parsedVars.count).toBe(2);
+      const parsedFeatures = JSON.parse(new URL(url as string).searchParams.get('features') as string);
+      expect(parsedFeatures.graphql_timeline_v2_bookmark_timeline).toBe(true);
+    });
+  });
+
   describe('conversation helpers', () => {
     let mockFetch: ReturnType<typeof vi.fn>;
 

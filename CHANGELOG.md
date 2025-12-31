@@ -2,8 +2,12 @@
 
 ## 0.4.1 — Unreleased
 
+### Added
+- `bookmarks` command to list your bookmarked tweets.
+
 ### Changed
 - Cookie extraction now uses `@steipete/sweet-cookie` (drops `sqlite3` CLI + custom browser readers in `bird`).
+- Query ID updater now tracks the Bookmarks GraphQL operation.
 
 ## 0.4.0 — 2025-12-26
 

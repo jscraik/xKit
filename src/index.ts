@@ -32,16 +32,19 @@ import { runtimeQueryIds } from './lib/runtime-query-ids.js';
 import { type TweetData, TwitterClient } from './lib/twitter-client.js';
 import { getCliVersion } from './lib/version.js';
 
-const program = new Command();
+const program: Command = new Command();
 
-const rawArgs = process.argv.slice(2);
-const normalizedArgs = rawArgs[0] === '--' ? rawArgs.slice(1) : rawArgs;
-const isTty = process.stdout.isTTY;
+const rawArgs: string[] = process.argv.slice(2);
+const normalizedArgs: string[] = rawArgs[0] === '--' ? rawArgs.slice(1) : rawArgs;
+const isTty: boolean = process.stdout.isTTY;
 let output: OutputConfig = resolveOutputConfigFromArgv(normalizedArgs, process.env, isTty);
 kleur.enabled = output.color;
 
-const wrap = (styler: (text: string) => string) => (text: string) => (isTty ? styler(text) : text);
-const collect = (value: string, previous: string[] = []) => {
+const wrap =
+  (styler: (text: string) => string): ((text: string) => string) =>
+  (text: string): string =>
+    isTty ? styler(text) : text;
+const collect = (value: string, previous: string[] = []): string[] => {
   previous.push(value);
   return previous;
 };
@@ -50,16 +53,22 @@ const COOKIE_SOURCES: CookieSource[] = ['safari', 'chrome', 'firefox'];
 
 function parseCookieSource(value: string): CookieSource {
   const normalized = value.trim().toLowerCase();
-  if (normalized === 'safari' || normalized === 'chrome' || normalized === 'firefox') return normalized;
+  if (normalized === 'safari' || normalized === 'chrome' || normalized === 'firefox') {
+    return normalized;
+  }
   throw new Error(`Invalid --cookie-source "${value}". Allowed: safari, chrome, firefox.`);
 }
 
 function resolveCookieSourceOrder(input: unknown): CookieSource[] | undefined {
-  if (typeof input === 'string') return [parseCookieSource(input)];
+  if (typeof input === 'string') {
+    return [parseCookieSource(input)];
+  }
   if (Array.isArray(input)) {
     const result: CookieSource[] = [];
     for (const entry of input) {
-      if (typeof entry !== 'string') continue;
+      if (typeof entry !== 'string') {
+        continue;
+      }
       result.push(parseCookieSource(entry));
     }
     return result.length > 0 ? result : undefined;
@@ -67,15 +76,15 @@ function resolveCookieSourceOrder(input: unknown): CookieSource[] | undefined {
   return undefined;
 }
 
-const collectCookieSource = (value: string, previous: CookieSource[] = []) => {
+const collectCookieSource = (value: string, previous: CookieSource[] = []): CookieSource[] => {
   previous.push(parseCookieSource(value));
   return previous;
 };
 
-const p = (kind: Parameters<typeof statusPrefix>[0]) => statusPrefix(kind, output);
-const l = (kind: Parameters<typeof labelPrefix>[0]) => labelPrefix(kind, output);
+const p = (kind: Parameters<typeof statusPrefix>[0]): string => statusPrefix(kind, output);
+const l = (kind: Parameters<typeof labelPrefix>[0]): string => labelPrefix(kind, output);
 
-function applyOutputFromCommand(command: Command) {
+function applyOutputFromCommand(command: Command): void {
   const opts = command.optsWithGlobals() as { plain?: boolean; emoji?: boolean; color?: boolean };
   output = resolveOutputConfigFromCommander(opts, process.env, isTty);
   kleur.enabled = output.color;
@@ -102,7 +111,9 @@ type BirdConfig = {
 };
 
 function readConfigFile(path: string): Partial<BirdConfig> {
-  if (!existsSync(path)) return {};
+  if (!existsSync(path)) {
+    return {};
+  }
   try {
     const raw = readFileSync(path, 'utf8');
     const parsed = JSON5.parse(raw) as Partial<BirdConfig>;
@@ -151,7 +162,7 @@ program.addHelpText(
 
 program.name('bird').description('Post tweets and replies via Twitter/X GraphQL API').version(getCliVersion());
 
-const formatExample = (command: string, description: string) =>
+const formatExample = (command: string, description: string): string =>
   `${colors.command(`  ${command}`)}\n${colors.muted(`    ${description}`)}`;
 
 program.addHelpText(
@@ -192,7 +203,7 @@ type CredentialsOptions = {
   cookieSource?: CookieSource[];
 };
 
-function resolveCredentialsFromOptions(opts: CredentialsOptions) {
+function resolveCredentialsFromOptions(opts: CredentialsOptions): ReturnType<typeof resolveCredentials> {
   const cookieSource = opts.cookieSource?.length
     ? opts.cookieSource
     : (resolveCookieSourceOrder(config.cookieSource) ?? COOKIE_SOURCES);
@@ -213,9 +224,13 @@ type MediaSpec = { path: string; alt?: string; mime: string; buffer: Buffer };
 
 function resolveTimeoutMs(...values: Array<string | number | undefined | null>): number | undefined {
   for (const value of values) {
-    if (value === undefined || value === null || value === '') continue;
+    if (value === undefined || value === null || value === '') {
+      continue;
+    }
     const parsed = typeof value === 'number' ? value : Number(value);
-    if (Number.isFinite(parsed) && parsed > 0) return parsed;
+    if (Number.isFinite(parsed) && parsed > 0) {
+      return parsed;
+    }
   }
   return undefined;
 }
@@ -226,17 +241,31 @@ function resolveTimeoutFromOptions(options: { timeout?: string | number }): numb
 
 function detectMime(path: string): string | null {
   const ext = path.toLowerCase();
-  if (ext.endsWith('.jpg') || ext.endsWith('.jpeg')) return 'image/jpeg';
-  if (ext.endsWith('.png')) return 'image/png';
-  if (ext.endsWith('.webp')) return 'image/webp';
-  if (ext.endsWith('.gif')) return 'image/gif';
-  if (ext.endsWith('.mp4') || ext.endsWith('.m4v')) return 'video/mp4';
-  if (ext.endsWith('.mov')) return 'video/quicktime';
+  if (ext.endsWith('.jpg') || ext.endsWith('.jpeg')) {
+    return 'image/jpeg';
+  }
+  if (ext.endsWith('.png')) {
+    return 'image/png';
+  }
+  if (ext.endsWith('.webp')) {
+    return 'image/webp';
+  }
+  if (ext.endsWith('.gif')) {
+    return 'image/gif';
+  }
+  if (ext.endsWith('.mp4') || ext.endsWith('.m4v')) {
+    return 'video/mp4';
+  }
+  if (ext.endsWith('.mov')) {
+    return 'video/quicktime';
+  }
   return null;
 }
 
 function loadMedia(opts: { media: string[]; alts: string[] }): MediaSpec[] {
-  if (opts.media.length === 0) return [];
+  if (opts.media.length === 0) {
+    return [];
+  }
   const specs: MediaSpec[] = [];
   for (const [index, path] of opts.media.entries()) {
     const mime = detectMime(path);
@@ -248,9 +277,15 @@ function loadMedia(opts: { media: string[]; alts: string[] }): MediaSpec[] {
   }
 
   const videoCount = specs.filter((m) => m.mime.startsWith('video/')).length;
-  if (videoCount > 1) throw new Error('Only one video can be attached');
-  if (videoCount === 1 && specs.length > 1) throw new Error('Video cannot be combined with other media');
-  if (specs.length > 4) throw new Error('Maximum 4 media attachments');
+  if (videoCount > 1) {
+    throw new Error('Only one video can be attached');
+  }
+  if (videoCount === 1 && specs.length > 1) {
+    throw new Error('Video cannot be combined with other media');
+  }
+  if (specs.length > 4) {
+    throw new Error('Maximum 4 media attachments');
+  }
   return specs;
 }
 

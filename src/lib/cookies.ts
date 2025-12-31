@@ -21,10 +21,12 @@ export type CookieSource = 'safari' | 'chrome' | 'firefox';
 
 const TWITTER_COOKIE_NAMES = ['auth_token', 'ct0'] as const;
 const TWITTER_URL = 'https://x.com/';
-const TWITTER_ORIGINS = ['https://x.com/', 'https://twitter.com/'];
+const TWITTER_ORIGINS: string[] = ['https://x.com/', 'https://twitter.com/'];
 
 function normalizeValue(value: unknown): string | null {
-  if (typeof value !== 'string') return null;
+  if (typeof value !== 'string') {
+    return null;
+  }
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
 }
@@ -38,24 +40,36 @@ function buildEmpty(): TwitterCookies {
 }
 
 function readEnvCookie(cookies: TwitterCookies, keys: readonly string[], field: 'authToken' | 'ct0'): void {
-  if (cookies[field]) return;
+  if (cookies[field]) {
+    return;
+  }
   for (const key of keys) {
     const value = normalizeValue(process.env[key]);
-    if (!value) continue;
+    if (!value) {
+      continue;
+    }
     cookies[field] = value;
-    if (!cookies.source) cookies.source = `env ${key}`;
+    if (!cookies.source) {
+      cookies.source = `env ${key}`;
+    }
     break;
   }
 }
 
 function resolveSources(cookieSource?: CookieSource | CookieSource[]): CookieSource[] {
-  if (Array.isArray(cookieSource)) return cookieSource;
-  if (cookieSource) return [cookieSource];
+  if (Array.isArray(cookieSource)) {
+    return cookieSource;
+  }
+  if (cookieSource) {
+    return [cookieSource];
+  }
   return ['safari', 'chrome', 'firefox'];
 }
 
 function labelForSource(source: CookieSource, profile?: string): string {
-  if (source === 'safari') return 'Safari';
+  if (source === 'safari') {
+    return 'Safari';
+  }
   if (source === 'chrome') {
     return profile ? `Chrome profile "${profile}"` : 'Chrome default profile';
   }
@@ -67,13 +81,19 @@ function pickCookieValue(
   name: (typeof TWITTER_COOKIE_NAMES)[number],
 ): string | null {
   const matches = cookies.filter((c) => c?.name === name && typeof c.value === 'string');
-  if (matches.length === 0) return null;
+  if (matches.length === 0) {
+    return null;
+  }
 
   const preferred = matches.find((c) => (c.domain ?? '').endsWith('x.com'));
-  if (preferred?.value) return preferred.value;
+  if (preferred?.value) {
+    return preferred.value;
+  }
 
   const twitter = matches.find((c) => (c.domain ?? '').endsWith('twitter.com'));
-  if (twitter?.value) return twitter.value;
+  if (twitter?.value) {
+    return twitter.value;
+  }
 
   return matches[0]?.value ?? null;
 }
@@ -99,8 +119,12 @@ async function readTwitterCookiesFromBrowser(options: {
 
   const authToken = pickCookieValue(cookies, 'auth_token');
   const ct0 = pickCookieValue(cookies, 'ct0');
-  if (authToken) out.authToken = authToken;
-  if (ct0) out.ct0 = ct0;
+  if (authToken) {
+    out.authToken = authToken;
+  }
+  if (ct0) {
+    out.ct0 = ct0;
+  }
 
   if (out.authToken && out.ct0) {
     out.cookieHeader = cookieHeader(out.authToken, out.ct0);
@@ -156,7 +180,9 @@ export async function resolveCredentials(options: {
   }
   if (options.ct0) {
     cookies.ct0 = options.ct0;
-    if (!cookies.source) cookies.source = 'CLI argument';
+    if (!cookies.source) {
+      cookies.source = 'CLI argument';
+    }
   }
 
   readEnvCookie(cookies, ['AUTH_TOKEN', 'TWITTER_AUTH_TOKEN'], 'authToken');

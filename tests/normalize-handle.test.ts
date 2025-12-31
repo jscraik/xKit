@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { mentionsQueryFromUserOption, normalizeHandle } from '../src/lib/normalize-handle.js';
 
+const INVALID_HANDLE_REGEX = /Invalid --user handle/;
+
 describe('normalizeHandle', () => {
   it('accepts bare handle', () => {
     expect(normalizeHandle('steipete')).toBe('steipete');
@@ -36,6 +38,6 @@ describe('mentionsQueryFromUserOption', () => {
   it('returns error for invalid handle', () => {
     const result = mentionsQueryFromUserOption('@stei-pete');
     expect(result.query).toBeNull();
-    expect(result.error).toMatch(/Invalid --user handle/);
+    expect(result.error).toMatch(INVALID_HANDLE_REGEX);
   });
 });

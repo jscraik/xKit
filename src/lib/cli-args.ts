@@ -8,7 +8,9 @@ const TWEET_ID_REGEX = /^\d{8,}$/;
 
 export function looksLikeTweetInput(value: string): boolean {
   const trimmed = value.trim();
-  if (!trimmed) return false;
+  if (!trimmed) {
+    return false;
+  }
   return TWEET_URL_REGEX.test(trimmed) || TWEET_ID_REGEX.test(trimmed);
 }
 

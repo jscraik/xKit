@@ -3,7 +3,13 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { afterEach, describe, expect, it } from 'vitest';
-import { FALLBACK_VERSION, formatVersionLine, resolveGitSha, resolvePackageVersion } from '../src/lib/version.js';
+import {
+  FALLBACK_VERSION,
+  formatVersionLine,
+  getCliVersion,
+  resolveGitSha,
+  resolvePackageVersion,
+} from '../src/lib/version.js';
 
 function withTempDir<T>(fn: (dir: string) => T): T {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'bird-version-test-'));
@@ -53,6 +59,17 @@ describe('getCliVersion', () => {
     });
   });
 
+  it('falls back to VERSION file when package.json has no version', () => {
+    withTempDir((dir) => {
+      fs.writeFileSync(path.join(dir, 'package.json'), JSON.stringify({}));
+      fs.writeFileSync(path.join(dir, 'VERSION'), '5.5.5\n');
+      const entry = path.join(dir, 'entry.ts');
+      fs.writeFileSync(entry, '// noop');
+
+      expect(resolvePackageVersion(pathToFileURL(entry).href)).toBe('5.5.5');
+    });
+  });
+
   it('falls back to unknown when no version files exist', () => {
     withTempDir((dir) => {
       const entry = path.join(dir, 'a', 'b', 'c', 'entry.ts');
@@ -60,6 +77,31 @@ describe('getCliVersion', () => {
       fs.writeFileSync(entry, '// noop');
 
       expect(resolvePackageVersion(pathToFileURL(entry).href)).toBe(FALLBACK_VERSION);
+    });
+  });
+
+  it('returns null when git HEAD is missing', () => {
+    withTempDir((dir) => {
+      const gitDir = path.join(dir, '.git');
+      fs.mkdirSync(gitDir, { recursive: true });
+
+      const entry = path.join(dir, 'entry.ts');
+      fs.writeFileSync(entry, '// noop');
+
+      expect(resolveGitSha(pathToFileURL(entry).href)).toBeNull();
+    });
+  });
+
+  it('returns null when git ref cannot be resolved', () => {
+    withTempDir((dir) => {
+      const gitDir = path.join(dir, '.git');
+      fs.mkdirSync(gitDir, { recursive: true });
+      fs.writeFileSync(path.join(gitDir, 'HEAD'), 'ref: refs/heads/main\n');
+
+      const entry = path.join(dir, 'entry.ts');
+      fs.writeFileSync(entry, '// noop');
+
+      expect(resolveGitSha(pathToFileURL(entry).href)).toBeNull();
     });
   });
 
@@ -113,6 +155,16 @@ describe('getCliVersion', () => {
     });
   });
 
+  it('returns null when no git directory exists', () => {
+    withTempDir((dir) => {
+      const entry = path.join(dir, 'nested', 'entry.ts');
+      fs.mkdirSync(path.dirname(entry), { recursive: true });
+      fs.writeFileSync(entry, '// noop');
+
+      expect(resolveGitSha(pathToFileURL(entry).href)).toBeNull();
+    });
+  });
+
   it('formats version line with version + sha when both available', () => {
     withTempDir((dir) => {
       fs.writeFileSync(path.join(dir, 'package.json'), JSON.stringify({ version: '3.3.3' }));
@@ -125,5 +177,11 @@ describe('getCliVersion', () => {
 
       expect(formatVersionLine(pathToFileURL(entry).href)).toBe('3.3.3 (dddddddd)');
     });
+  });
+
+  it('returns a CLI version string', () => {
+    const value = getCliVersion();
+    expect(typeof value).toBe('string');
+    expect(value.length).toBeGreaterThan(0);
   });
 });

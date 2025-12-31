@@ -53,14 +53,22 @@ export function resolveOutputConfigFromCommander(
 }
 
 export function statusPrefix(kind: StatusKind, cfg: OutputConfig): string {
-  if (cfg.plain) return `${STATUS[kind].plain} `;
-  if (cfg.emoji) return `${STATUS[kind].emoji} `;
+  if (cfg.plain) {
+    return `${STATUS[kind].plain} `;
+  }
+  if (cfg.emoji) {
+    return `${STATUS[kind].emoji} `;
+  }
   return `${STATUS[kind].text} `;
 }
 
 export function labelPrefix(kind: LabelKind, cfg: OutputConfig): string {
-  if (cfg.plain) return `${LABELS[kind].plain} `;
-  if (cfg.emoji) return `${LABELS[kind].emoji} `;
+  if (cfg.plain) {
+    return `${LABELS[kind].plain} `;
+  }
+  if (cfg.emoji) {
+    return `${LABELS[kind].emoji} `;
+  }
   return `${LABELS[kind].text} `;
 }
 
@@ -72,8 +80,12 @@ export function formatStatsLine(
   const retweetCount = stats.retweetCount ?? 0;
   const replyCount = stats.replyCount ?? 0;
 
-  if (cfg.plain) return `likes: ${likeCount}  retweets: ${retweetCount}  replies: ${replyCount}`;
-  if (!cfg.emoji) return `Likes ${likeCount}  Retweets ${retweetCount}  Replies ${replyCount}`;
+  if (cfg.plain) {
+    return `likes: ${likeCount}  retweets: ${retweetCount}  replies: ${replyCount}`;
+  }
+  if (!cfg.emoji) {
+    return `Likes ${likeCount}  Retweets ${retweetCount}  Replies ${replyCount}`;
+  }
   return `❤️ ${likeCount}  🔁 ${retweetCount}  💬 ${replyCount}`;
 }
 

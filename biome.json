@@ -11,10 +11,28 @@
     "rules": {
       "recommended": true,
       "complexity": {
-        "noForEach": "off"
+        "noForEach": "error"
+      },
+      "correctness": {
+        "useImportExtensions": {
+          "level": "error",
+          "options": {
+            "forceJsExtensions": true
+          }
+        }
+      },
+      "performance": {
+        "useTopLevelRegex": "error"
       },
       "style": {
-        "noNonNullAssertion": "off"
+        "noNonNullAssertion": "error",
+        "useBlockStatements": "error"
+      },
+      "suspicious": {
+        "noExplicitAny": "error"
+      },
+      "nursery": {
+        "useRegexpExec": "error"
       }
     }
   },

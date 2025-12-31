@@ -5,6 +5,9 @@ import { fileURLToPath } from 'node:url';
 declare const __dirname: string | undefined;
 
 export const FALLBACK_VERSION = 'unknown';
+const REF_PREFIX_REGEX = /^ref:\s*/i;
+const LINE_SPLIT_REGEX = /\r?\n/;
+const GITDIR_REGEX = /gitdir:\s*(.+)\s*$/i;
 
 function readPackageVersionFromJsonFile(candidate: string): string | null {
   try {
@@ -37,7 +40,9 @@ function resolveStartDir(importMetaUrl?: string): string {
     }
   }
 
-  if (typeof __dirname === 'string' && __dirname.length > 0) return __dirname;
+  if (typeof __dirname === 'string' && __dirname.length > 0) {
+    return __dirname;
+  }
 
   return process.cwd();
 }
@@ -47,27 +52,37 @@ export function resolvePackageVersion(importMetaUrl?: string): string {
     typeof process !== 'undefined' && typeof process.env.BIRD_VERSION === 'string'
       ? process.env.BIRD_VERSION.trim()
       : '';
-  if (injected.length > 0) return injected;
+  if (injected.length > 0) {
+    return injected;
+  }
 
   let dir = resolveStartDir(importMetaUrl);
   for (let i = 0; i < 10; i += 1) {
     const version =
       readPackageVersionFromJsonFile(path.join(dir, 'package.json')) ??
       readVersionFromTextFile(path.join(dir, 'VERSION'));
-    if (version) return version;
+    if (version) {
+      return version;
+    }
 
     const parent = path.dirname(dir);
-    if (parent === dir) break;
+    if (parent === dir) {
+      break;
+    }
     dir = parent;
   }
 
   return FALLBACK_VERSION;
 }
 
-function truncateSha(sha: string, length = 8): string {
+function truncateSha(sha: string, length: number = 8): string {
   const trimmed = sha.trim();
-  if (!trimmed) return '';
-  if (trimmed.length <= length) return trimmed;
+  if (!trimmed) {
+    return '';
+  }
+  if (trimmed.length <= length) {
+    return trimmed;
+  }
   return trimmed.slice(0, length);
 }
 
@@ -80,14 +95,18 @@ function resolveGitShaFromGitDir(gitDir: string): string | null {
     return null;
   }
 
-  if (!head) return null;
+  if (!head) {
+    return null;
+  }
   if (!head.startsWith('ref:')) {
     const sha = truncateSha(head);
     return sha.length > 0 ? sha : null;
   }
 
-  const ref = head.replace(/^ref:\s*/i, '').trim();
-  if (!ref) return null;
+  const ref = head.replace(REF_PREFIX_REGEX, '').trim();
+  if (!ref) {
+    return null;
+  }
 
   const refPath = path.join(gitDir, ref);
   try {
@@ -100,9 +119,11 @@ function resolveGitShaFromGitDir(gitDir: string): string | null {
   const packedRefsPath = path.join(gitDir, 'packed-refs');
   try {
     const packed = fs.readFileSync(packedRefsPath, 'utf8');
-    const lines = packed.split(/\r?\n/);
+    const lines = packed.split(LINE_SPLIT_REGEX);
     for (const line of lines) {
-      if (!line || line.startsWith('#') || line.startsWith('^')) continue;
+      if (!line || line.startsWith('#') || line.startsWith('^')) {
+        continue;
+      }
       const [shaRaw, refName] = line.split(' ');
       if (refName?.trim() === ref) {
         const sha = truncateSha(shaRaw ?? '');
@@ -121,7 +142,9 @@ export function resolveGitSha(importMetaUrl?: string): string | null {
     typeof process !== 'undefined' && typeof process.env.BIRD_GIT_SHA === 'string'
       ? process.env.BIRD_GIT_SHA.trim()
       : '';
-  if (injected.length > 0) return truncateSha(injected);
+  if (injected.length > 0) {
+    return truncateSha(injected);
+  }
 
   let dir = resolveStartDir(importMetaUrl);
   for (let i = 0; i < 10; i += 1) {
@@ -130,15 +153,19 @@ export function resolveGitSha(importMetaUrl?: string): string | null {
       const stat = fs.statSync(dotGit);
       if (stat.isDirectory()) {
         const sha = resolveGitShaFromGitDir(dotGit);
-        if (sha) return sha;
+        if (sha) {
+          return sha;
+        }
       } else if (stat.isFile()) {
         const txt = fs.readFileSync(dotGit, 'utf8');
-        const match = txt.match(/gitdir:\s*(.+)\s*$/i);
+        const match = GITDIR_REGEX.exec(txt);
         const gitDir = match?.[1]?.trim();
         if (gitDir) {
           const resolved = path.isAbsolute(gitDir) ? gitDir : path.resolve(dir, gitDir);
           const sha = resolveGitShaFromGitDir(resolved);
-          if (sha) return sha;
+          if (sha) {
+            return sha;
+          }
         }
       }
     } catch {
@@ -146,7 +173,9 @@ export function resolveGitSha(importMetaUrl?: string): string | null {
     }
 
     const parent = path.dirname(dir);
-    if (parent === dir) break;
+    if (parent === dir) {
+      break;
+    }
     dir = parent;
   }
 

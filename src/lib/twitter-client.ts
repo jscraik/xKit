@@ -1871,10 +1871,10 @@ export class TwitterClient {
     return { success: true, tweets: thread };
   }
 
-  private buildBookmarksFeatures(): Record<string, boolean> {
+  // Shared timeline features for likes/bookmarks-style timelines.
+  private buildTimelineFeatures(): Record<string, boolean> {
     return {
       ...this.buildSearchFeatures(),
-      graphql_timeline_v2_bookmark_timeline: true,
       blue_business_profile_image_shape_enabled: true,
       responsive_web_text_conversations_enabled: false,
       tweetypie_unmention_optimization_enabled: true,
@@ -1884,6 +1884,17 @@ export class TwitterClient {
       longform_notetweets_richtext_consumption_enabled: true,
       responsive_web_media_download_video_enabled: false,
     };
+  }
+
+  private buildBookmarksFeatures(): Record<string, boolean> {
+    return {
+      ...this.buildTimelineFeatures(),
+      graphql_timeline_v2_bookmark_timeline: true,
+    };
+  }
+
+  private buildLikesFeatures(): Record<string, boolean> {
+    return this.buildTimelineFeatures();
   }
 
   private async getBookmarksQueryIds(): Promise<string[]> {
@@ -2012,7 +2023,7 @@ export class TwitterClient {
       withVoice: true,
     };
 
-    const features = this.buildBookmarksFeatures();
+    const features = this.buildLikesFeatures();
 
     const params = new URLSearchParams({
       variables: JSON.stringify(variables),

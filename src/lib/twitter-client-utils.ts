@@ -297,78 +297,21 @@ export function findTweetInInstructions(
                 result?: GraphqlTweetResult;
               };
             };
-            item?: {
-              itemContent?: {
-                tweet_results?: {
-                  result?: GraphqlTweetResult;
-                };
-              };
-            };
-            items?: Array<{
-              item?: {
-                itemContent?: {
-                  tweet_results?: {
-                    result?: GraphqlTweetResult;
-                  };
-                };
-              };
-              itemContent?: {
-                tweet_results?: {
-                  result?: GraphqlTweetResult;
-                };
-              };
-              content?: {
-                itemContent?: {
-                  tweet_results?: {
-                    result?: GraphqlTweetResult;
-                  };
-                };
-              };
-            }>;
           };
         }>;
       }>
     | undefined,
-  id: string,
-  options: MapTweetResultOptions,
-): TweetData | undefined {
-  for (const instruction of instructions ?? []) {
-    for (const entry of instruction.entries ?? []) {
-      const content = entry.content;
-      if (!content) {
-        continue;
-      }
+  tweetId: string,
+): GraphqlTweetResult | undefined {
+  if (!instructions) {
+    return undefined;
+  }
 
-      const itemTweet = content.itemContent?.tweet_results?.result;
-      const itemResult = itemTweet ? unwrapTweetResult(itemTweet) : undefined;
-      if (itemResult?.rest_id === id) {
-        return mapTweetResult(itemResult, options);
-      }
-
-      const innerItemTweet = content.item?.itemContent?.tweet_results?.result;
-      const innerItemResult = innerItemTweet ? unwrapTweetResult(innerItemTweet) : undefined;
-      if (innerItemResult?.rest_id === id) {
-        return mapTweetResult(innerItemResult, options);
-      }
-
-      for (const item of content.items ?? []) {
-        const itemTweetResult = item.item?.itemContent?.tweet_results?.result;
-        const itemResult = itemTweetResult ? unwrapTweetResult(itemTweetResult) : undefined;
-        if (itemResult?.rest_id === id) {
-          return mapTweetResult(itemResult, options);
-        }
-
-        const itemContentResult = item.itemContent?.tweet_results?.result;
-        const itemContentTweet = itemContentResult ? unwrapTweetResult(itemContentResult) : undefined;
-        if (itemContentTweet?.rest_id === id) {
-          return mapTweetResult(itemContentTweet, options);
-        }
-
-        const itemEntryResult = item.content?.itemContent?.tweet_results?.result;
-        const itemEntryTweet = itemEntryResult ? unwrapTweetResult(itemEntryResult) : undefined;
-        if (itemEntryTweet?.rest_id === id) {
-          return mapTweetResult(itemEntryTweet, options);
-        }
+  for (const instruction of instructions) {
+    for (const entry of instruction.entries || []) {
+      const result = entry.content?.itemContent?.tweet_results?.result;
+      if (result?.rest_id === tweetId) {
+        return result;
       }
     }
   }

@@ -224,7 +224,19 @@ export function unwrapTweetResult(result: GraphqlTweetResult | undefined): Graph
   return result;
 }
 
-export function mapTweetResult(result: GraphqlTweetResult | undefined, quoteDepth: number): TweetData | undefined {
+export interface MapTweetResultOptions {
+  quoteDepth: number;
+  includeRaw?: boolean;
+}
+
+export function mapTweetResult(
+  result: GraphqlTweetResult | undefined,
+  quoteDepthOrOptions: number | MapTweetResultOptions,
+): TweetData | undefined {
+  const options: MapTweetResultOptions =
+    typeof quoteDepthOrOptions === 'number' ? { quoteDepth: quoteDepthOrOptions } : quoteDepthOrOptions;
+  const { quoteDepth, includeRaw = false } = options;
+
   const userResult = result?.core?.user_results?.result;
   const userLegacy = userResult?.legacy;
   const userCore = userResult?.core;
@@ -244,13 +256,13 @@ export function mapTweetResult(result: GraphqlTweetResult | undefined, quoteDept
   if (quoteDepth > 0) {
     const quotedResult = unwrapTweetResult(result.quoted_status_result?.result);
     if (quotedResult) {
-      quotedTweet = mapTweetResult(quotedResult, quoteDepth - 1);
+      quotedTweet = mapTweetResult(quotedResult, { quoteDepth: quoteDepth - 1, includeRaw });
     }
   }
 
   const media = extractMedia(result);
 
-  return {
+  const tweetData: TweetData = {
     id: result.rest_id,
     text,
     createdAt: result.legacy?.created_at,
@@ -267,6 +279,12 @@ export function mapTweetResult(result: GraphqlTweetResult | undefined, quoteDept
     quotedTweet,
     media,
   };
+
+  if (includeRaw) {
+    (tweetData as TweetData & { _raw: GraphqlTweetResult })._raw = result;
+  }
+
+  return tweetData;
 }
 
 export function findTweetInInstructions(
@@ -358,6 +376,11 @@ export function collectTweetResultsFromEntry(entry: {
   return results;
 }
 
+export interface ParseTweetsOptions {
+  quoteDepth: number;
+  includeRaw?: boolean;
+}
+
 export function parseTweetsFromInstructions(
   instructions:
     | Array<{
@@ -400,8 +423,12 @@ export function parseTweetsFromInstructions(
         }>;
       }>
     | undefined,
-  quoteDepth: number,
+  quoteDepthOrOptions: number | ParseTweetsOptions,
 ): TweetData[] {
+  const options: ParseTweetsOptions =
+    typeof quoteDepthOrOptions === 'number' ? { quoteDepth: quoteDepthOrOptions } : quoteDepthOrOptions;
+  const { quoteDepth, includeRaw = false } = options;
+
   const tweets: TweetData[] = [];
   const seen = new Set<string>();
 
@@ -409,7 +436,7 @@ export function parseTweetsFromInstructions(
     for (const entry of instruction.entries ?? []) {
       const results = collectTweetResultsFromEntry(entry);
       for (const result of results) {
-        const mapped = mapTweetResult(result, quoteDepth);
+        const mapped = mapTweetResult(result, { quoteDepth, includeRaw });
         if (!mapped || seen.has(mapped.id)) {
           continue;
         }

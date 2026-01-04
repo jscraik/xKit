@@ -185,6 +185,55 @@ describe('TwitterClient lists', () => {
       expect(result.lists?.[0].isPrivate).toBe(true);
     });
 
+    it('handles missing mode', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          data: {
+            user: {
+              result: {
+                timeline: {
+                  timeline: {
+                    instructions: [
+                      {
+                        entries: [
+                          {
+                            content: {
+                              itemContent: {
+                                list: {
+                                  id_str: '9999',
+                                  name: 'No Mode',
+                                  mode: null,
+                                },
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        }),
+      });
+
+      const client = new TwitterClient({ cookies: validCookies });
+      const clientPrivate = client as unknown as TwitterClientPrivate;
+      clientPrivate.getCurrentUser = async () => ({
+        success: true,
+        user: { id: '12345', username: 'testuser', name: 'Test User' },
+      });
+      clientPrivate.getListOwnershipsQueryIds = async () => ['test'];
+
+      const result = await client.getOwnedLists(100);
+
+      expect(result.success).toBe(true);
+      expect(result.lists?.[0].isPrivate).toBe(false);
+    });
+
     it('returns empty array when no lists exist', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,

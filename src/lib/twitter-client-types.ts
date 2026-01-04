@@ -227,6 +227,8 @@ export interface TweetData {
   quotedTweet?: TweetData;
   // Media attachments (photos, videos, GIFs)
   media?: TweetMedia[];
+  // Raw GraphQL tweet result (only when includeRaw is enabled)
+  _raw?: GraphqlTweetResult;
 }
 
 export interface GetTweetResult {

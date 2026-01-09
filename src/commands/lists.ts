@@ -1,6 +1,3 @@
-// ABOUTME: CLI command for fetching Twitter Lists.
-// ABOUTME: Supports listing owned lists, memberships, and list timelines.
-
 import type { Command } from 'commander';
 import type { CliContext } from '../cli/shared.js';
 import { extractListId } from '../lib/extract-list-id.js';
@@ -28,6 +25,12 @@ function printLists(lists: TwitterList[], ctx: CliContext): void {
   }
 }
 
+/**
+ * Register list-related commands (lists and list-timeline).
+ *
+ * @param program Commander program instance.
+ * @param ctx CLI context for shared helpers.
+ */
 export function registerListsCommand(program: Command, ctx: CliContext): void {
   program
     .command('lists')

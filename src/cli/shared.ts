@@ -15,6 +15,9 @@ import {
 } from '../lib/output.js';
 import type { TweetData } from '../lib/twitter-client.js';
 
+/**
+ * JSON5-backed CLI configuration stored in ~/.config/xkit/config.json5 or ./.xkitrc.json5.
+ */
 export type XKitConfig = {
   chromeProfile?: string;
   firefoxProfile?: string;
@@ -24,8 +27,14 @@ export type XKitConfig = {
   quoteDepth?: number;
 };
 
+/**
+ * Loaded media attachment metadata and content.
+ */
 export type MediaSpec = { path: string; alt?: string; mime: string; buffer: Buffer };
 
+/**
+ * Shared CLI helpers and resolved configuration used by command handlers.
+ */
 export type CliContext = {
   isTty: boolean;
   getOutput: () => OutputConfig;
@@ -63,6 +72,14 @@ function parseCookieSource(value: string): CookieSource {
   throw new Error(`Invalid --cookie-source "${value}". Allowed: safari, chrome, firefox.`);
 }
 
+/**
+ * Commander collector for `--cookie-source` flags.
+ *
+ * @param value Raw flag value.
+ * @param previous Accumulated values.
+ * @returns Updated cookie source list.
+ * @throws When the cookie source is invalid.
+ */
 export const collectCookieSource = (value: string, previous: CookieSource[] = []): CookieSource[] => {
   previous.push(parseCookieSource(value));
   return previous;
@@ -167,6 +184,13 @@ type CredentialsOptions = {
   cookieTimeout?: string | number;
 };
 
+/**
+ * Create the CLI context with resolved configuration, output formatting, and helpers.
+ *
+ * @param normalizedArgs CLI argv (post normalization).
+ * @param env Process environment variables.
+ * @returns CLI context for command registration and execution.
+ */
 export function createCliContext(normalizedArgs: string[], env: NodeJS.ProcessEnv = process.env): CliContext {
   const isTty = process.stdout.isTTY;
   let output: OutputConfig = resolveOutputConfigFromArgv(normalizedArgs, env, isTty);

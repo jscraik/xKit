@@ -1,6 +1,12 @@
 import type { Command } from 'commander';
 import type { CliContext } from '../cli/shared.js';
 
+/**
+ * Register the help command for command-specific usage output.
+ *
+ * @param program Commander program instance.
+ * @param ctx CLI context for shared helpers.
+ */
 export function registerHelpCommand(program: Command, ctx: CliContext): void {
   program
     .command('help [command]')

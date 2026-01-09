@@ -7,8 +7,8 @@ _Last updated: 2026-01-09_
 - Audience: maintainers publishing npm releases and Homebrew updates.
 - Scope: release checklist, npm publish, Git tag/GitHub release, Homebrew tap update.
 - Non-scope: CI/CD automation details or marketing comms.
-- Owner: TBD.
-- Review cadence: TBD (suggest each release).
+- Owner: Jamie Craik.
+- Review cadence: Quarterly.
 
 Target destinations:
 

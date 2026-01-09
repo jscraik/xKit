@@ -1,5 +1,9 @@
-// ABOUTME: Extract list ID from an X/Twitter list URL.
-// ABOUTME: Returns list ID or null if input is invalid.
+/**
+ * Extract an X/Twitter list ID from a list URL or raw list ID.
+ *
+ * @param input List URL or list ID.
+ * @returns List ID or null when invalid.
+ */
 
 const LIST_URL_REGEX = /(?:twitter\.com|x\.com)\/i\/lists\/(\d+)/i;
 const LIST_ID_REGEX = /^\d{5,}$/;

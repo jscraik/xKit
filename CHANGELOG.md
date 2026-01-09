@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.7.0
+
+### Minor Changes
+
+- aea2666: Rebrand from bird to xKit
+
+  - Changed package name from @steipete/bird to @brainwav/xkit
+  - Updated CLI command from `bird` to `xkit`
+  - Updated all environment variables from BIRD*\*to XKIT*\*
+  - Updated configuration paths from ~/.config/bird/ to ~/.config/xkit/
+  - Changed repository owner from steipete to jscraik
+  - Added xKit branding and logo
+  - Set up automated release pipeline with changesets
+
 ## 0.6.0 — 2026-01-05
 
 ### Added

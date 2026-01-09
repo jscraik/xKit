@@ -3,6 +3,12 @@ import type { CliContext } from '../cli/shared.js';
 import { formatStatsLine } from '../lib/output.js';
 import { TwitterClient } from '../lib/twitter-client.js';
 
+/**
+ * Register read/replies/thread commands.
+ *
+ * @param program Commander program instance.
+ * @param ctx CLI context for shared helpers.
+ */
 export function registerReadCommands(program: Command, ctx: CliContext): void {
   program
     .command('read')

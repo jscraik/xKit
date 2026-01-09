@@ -12,6 +12,9 @@ import { registerUserCommands } from '../commands/users.js';
 import { getCliVersion } from '../lib/version.js';
 import { type CliContext, collectCookieSource } from './shared.js';
 
+/**
+ * Known CLI commands used to detect shorthand invocations.
+ */
 export const KNOWN_COMMANDS = new Set([
   'tweet',
   'reply',
@@ -33,6 +36,12 @@ export const KNOWN_COMMANDS = new Set([
   'check',
 ]);
 
+/**
+ * Create and configure the Commander program with all xkit commands.
+ *
+ * @param ctx CLI context used for shared formatting and config.
+ * @returns Configured Commander program instance.
+ */
 export function createProgram(ctx: CliContext): Command {
   const program: Command = new Command();
 

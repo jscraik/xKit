@@ -20,6 +20,12 @@ function countFeatureOverrides(overrides: FeatureOverrides): number {
   return count;
 }
 
+/**
+ * Register the query-ids command for inspecting or refreshing cached query IDs.
+ *
+ * @param program Commander program instance.
+ * @param ctx CLI context for shared helpers.
+ */
 export function registerQueryIdsCommand(program: Command, ctx: CliContext): void {
   program
     .command('query-ids')

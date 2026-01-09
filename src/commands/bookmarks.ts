@@ -3,6 +3,12 @@ import type { CliContext } from '../cli/shared.js';
 import { extractBookmarkFolderId } from '../lib/extract-bookmark-folder-id.js';
 import { TwitterClient } from '../lib/twitter-client.js';
 
+/**
+ * Register the bookmarks command.
+ *
+ * @param program Commander program instance.
+ * @param ctx CLI context for shared helpers.
+ */
 export function registerBookmarksCommand(program: Command, ctx: CliContext): void {
   program
     .command('bookmarks')

@@ -3,6 +3,12 @@ import type { CliContext } from '../cli/shared.js';
 import { mentionsQueryFromUserOption, normalizeHandle } from '../lib/normalize-handle.js';
 import { TwitterClient } from '../lib/twitter-client.js';
 
+/**
+ * Register search and mentions commands.
+ *
+ * @param program Commander program instance.
+ * @param ctx CLI context for shared helpers.
+ */
 export function registerSearchCommands(program: Command, ctx: CliContext): void {
   program
     .command('search')

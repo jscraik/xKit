@@ -3,6 +3,12 @@
  */
 const TWEET_URL_REGEX = /(?:twitter\.com|x\.com)\/(?:\w+\/status|i\/web\/status)\/(\d+)/i;
 
+/**
+ * Extract a tweet ID from a URL or return the input unchanged if it is already an ID.
+ *
+ * @param input Tweet URL or ID.
+ * @returns Extracted tweet ID.
+ */
 export function extractTweetId(input: string): string {
   // If it's a URL, extract the tweet ID
   const urlMatch = TWEET_URL_REGEX.exec(input);

@@ -24,6 +24,12 @@ async function uploadMediaOrExit(
   return uploaded;
 }
 
+/**
+ * Register tweet and reply commands.
+ *
+ * @param program Commander program instance.
+ * @param ctx CLI context for shared helpers.
+ */
 export function registerPostCommands(program: Command, ctx: CliContext): void {
   program
     .command('tweet')

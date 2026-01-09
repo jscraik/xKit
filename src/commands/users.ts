@@ -2,6 +2,12 @@ import type { Command } from 'commander';
 import type { CliContext } from '../cli/shared.js';
 import { TwitterClient } from '../lib/twitter-client.js';
 
+/**
+ * Register user-related commands (following, followers, likes, whoami).
+ *
+ * @param program Commander program instance.
+ * @param ctx CLI context for shared helpers.
+ */
 export function registerUserCommands(program: Command, ctx: CliContext): void {
   program
     .command('following')

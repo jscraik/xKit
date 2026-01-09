@@ -1,6 +1,12 @@
 import type { Command } from 'commander';
 import type { CliContext } from '../cli/shared.js';
 
+/**
+ * Register the credential check command.
+ *
+ * @param program Commander program instance.
+ * @param ctx CLI context for shared helpers.
+ */
 export function registerCheckCommand(program: Command, ctx: CliContext): void {
   program
     .command('check')

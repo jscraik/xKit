@@ -4,6 +4,12 @@
 const BOOKMARK_FOLDER_URL_REGEX = /(?:twitter\.com|x\.com)\/i\/bookmarks\/(\d+)/i;
 const BOOKMARK_FOLDER_ID_REGEX = /^\d{5,}$/;
 
+/**
+ * Extract a bookmark folder ID from a bookmarks URL or raw ID.
+ *
+ * @param input Bookmark folder URL or ID.
+ * @returns Bookmark folder ID or null when invalid.
+ */
 export function extractBookmarkFolderId(input: string): string | null {
   const trimmed = input.trim();
   if (!trimmed) {

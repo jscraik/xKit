@@ -6,22 +6,22 @@ This project uses [Changesets](https://github.com/changesets/changesets) for ver
 
 ### 1. Create a Changeset
 
-When you make changes that should be released, create a changeset:
+When you make changes for release, create a changeset:
 
 ```bash
 pnpm changeset
 ```
 
-This will prompt you to:
+The prompt asks for:
 
-- Select the type of change (major, minor, patch)
+- Select the change type (major, minor, patch)
 - Write a summary of the change
 
-The changeset file will be committed with your PR.
+Commit the changeset file with your PR.
 
 ### 2. Merge to Main
 
-When your PR is merged to `main`, the Release workflow will automatically:
+After your PR merges to `main`, the Release workflow automatically:
 
 - Create or update a "Release PR" that:
   - Bumps version in `package.json`
@@ -30,11 +30,11 @@ When your PR is merged to `main`, the Release workflow will automatically:
 
 ### 3. Publish the Release
 
-When you're ready to publish:
+When you want to publish:
 
 1. Review the Release PR
 2. Merge the Release PR
-3. The workflow will automatically:
+3. The workflow then:
    - Publish to npm
    - Create a GitHub release with the changelog
 
@@ -81,7 +81,7 @@ To enable automatic publishing, add your npm token to GitHub secrets:
 
 ## Manual Release
 
-To release manually:
+For a manual release:
 
 ```bash
 # 1. Create a changeset

@@ -26,6 +26,7 @@
     "lint": "pnpm run lint:biome && pnpm run lint:oxlint",
     "lint:biome": "biome check .",
     "lint:oxlint": "oxlint --type-aware --tsconfig tsconfig.oxlint.json --import-plugin --node-plugin --vitest-plugin --deny-warnings src tests scripts",
+    "lint:docs": "vale sync && vale README.md docs/*.md && markdownlint-cli2 \"**/*.md\"",
     "lint:fix": "pnpm run lint:biome:fix && pnpm run lint:oxlint:fix",
     "lint:biome:fix": "biome check --write .",
     "lint:oxlint:fix": "oxlint --type-aware --tsconfig tsconfig.oxlint.json --import-plugin --node-plugin --vitest-plugin --deny-warnings --fix src tests scripts",

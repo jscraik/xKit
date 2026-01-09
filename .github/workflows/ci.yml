@@ -36,3 +36,6 @@ jobs:
 
       - name: Run tests
         run: pnpm test
+
+      - name: Lint docs
+        run: pnpm run lint:docs

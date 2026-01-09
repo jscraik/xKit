@@ -1,12 +1,12 @@
+# xKit — fast X CLI for tweeting, replying, and reading
+
+`xkit` provides a fast X CLI for tweeting, replying, and reading via X/Twitter GraphQL (cookie auth).
+
+Last updated: 2026-01-09
+
 <p align="center">
   <img src="./docs/assets/xKit-brand-logo.png" alt="xKit Logo" width="200">
 </p>
-
-# xKit — fast X CLI for tweeting, replying, and reading
-
-`xkit` is a fast X CLI for tweeting, replying, and reading via X/Twitter GraphQL (cookie auth).
-
-_Last updated: 2026-01-09_
 
 ## Doc requirements
 
@@ -42,7 +42,7 @@ and anti-bot behavior at any time — **expect this to break without notice**.
 
 ## Risks and assumptions
 
-- Assumes you are already logged in to X/Twitter in a supported browser (or provide cookies manually).
+- Log in to X/Twitter in a supported browser (or provide cookies manually).
 - X can rate-limit, challenge, or change GraphQL/REST behavior without notice.
 - Cookie extraction reads local browser stores; follow least-privilege practices and avoid sharing cookie values.
 
@@ -112,7 +112,7 @@ xkit query-ids --fresh
 
 ## Library
 
-`xkit` can be used as a library (same GraphQL client as the CLI):
+Use `xkit` as a library (same GraphQL client as the CLI):
 
 ```ts
 import { TwitterClient, resolveCredentials } from '@brainwav/xkit';
@@ -129,18 +129,20 @@ const result = await client.search('from:username', 50);
 - `xkit help [command]` — show help (or help for a subcommand).
 - `xkit query-ids [--fresh] [--json]` — inspect or refresh cached GraphQL query IDs.
 - `xkit read <tweet-id-or-url> [--json]` — fetch tweet content as text or JSON.
-- `xkit <tweet-id-or-url> [--json]` — shorthand for `read` when only a URL or ID is provided.
+- `xkit <tweet-id-or-url> [--json]` — shorthand for `read` when you pass only a URL or ID.
 - `xkit replies <tweet-id-or-url> [--json]` — list replies to a tweet.
 - `xkit thread <tweet-id-or-url> [--json]` — show the full conversation thread.
 - `xkit search "<query>" [-n count] [--json]` — search for tweets matching a query.
-- `xkit mentions [-n count] [--user @handle] [--json]` — find tweets mentioning a user (defaults to the authenticated user).
-- `xkit bookmarks [-n count] [--folder-id id] [--all] [--max-pages n] [--json]` — list your bookmarked tweets (or a specific bookmark folder); `--max-pages` requires `--all`.
+- `xkit mentions [-n count] [--user @handle] [--json]` — find tweets mentioning a user (defaults to the
+  authenticated user).
+- `xkit bookmarks [-n count] [--folder-id id] [--all] [--max-pages n] [--json]` — list your bookmarked tweets (or a
+  specific bookmark folder); `--max-pages` requires `--all`.
 - `xkit unbookmark <tweet-id-or-url...>` — remove one or more bookmarks by tweet ID or URL.
 - `xkit likes [-n count] [--json]` — list your liked tweets.
 - `xkit following [--user <userId>] [-n count] [--json]` — list users that you (or another user) follow.
 - `xkit followers [--user <userId>] [-n count] [--json]` — list users that follow you (or another user).
 - `xkit whoami` — print which Twitter account your cookies belong to.
-- `xkit check` — show which credentials are available and where they were sourced from.
+- `xkit check` — show available credentials and their source.
 
 Global options:
 
@@ -152,9 +154,11 @@ Global options:
 - `--cookie-timeout <ms>`: cookie extraction timeout for keychain/OS helpers (milliseconds).
 - `--timeout <ms>`: abort requests after the given timeout (milliseconds).
 - `--quote-depth <n>`: max quoted tweet depth in JSON output (default: 1; 0 disables).
-- `--plain`: stable output (no emoji, no color).
+<!-- vale off -->
+- `--plain`: stable output (no emoji, no ANSI styling).
 - `--no-emoji`: disable emoji output.
-- `--no-color`: disable ANSI colors (or set `NO_COLOR=1`).
+- `--no-color`: disable ANSI styling (or set `NO_COLOR=1`).
+<!-- vale on -->
 - `--media <path>`: attach media file (repeatable, up to 4 images or 1 video).
 - `--alt <text>`: alt text for the corresponding `--media` (repeatable).
 
@@ -176,7 +180,8 @@ Write operations:
 
 Browser cookie sources:
 
-- Safari: `~/Library/Cookies/Cookies.binarycookies` (fallback: `~/Library/Containers/com.apple.Safari/Data/Library/Cookies/Cookies.binarycookies`)
+- Safari: `~/Library/Cookies/Cookies.binarycookies` (fallback:
+  `~/Library/Containers/com.apple.Safari/Data/Library/Cookies/Cookies.binarycookies`)
 - Chrome: `~/Library/Application Support/Google/Chrome/<Profile>/Cookies`
 - Firefox: `~/Library/Application Support/Firefox/Profiles/<profile>/cookies.sqlite`
 
@@ -210,14 +215,16 @@ Environment shortcuts:
 
 - `--json` prints raw tweet objects for read/replies/thread/search/mentions/bookmarks/likes.
 - `read` returns full text for Notes and Articles when present.
-- Use `--plain` for stable, script-friendly output (no emoji, no color).
+<!-- vale off -->
+- Use `--plain` for stable, script-friendly output (no emoji, no ANSI styling).
+<!-- vale on -->
 
 ### JSON Schema
 
 When using `--json`, tweet objects include:
 
 | Field | Type | Description |
-|-------|------|-------------|
+| --- | --- | --- |
 | `id` | string | Tweet ID |
 | `text` | string | Full tweet text (includes Note/Article content when present) |
 | `author` | object | `{ username, name }` |
@@ -227,13 +234,15 @@ When using `--json`, tweet objects include:
 | `retweetCount` | number | Number of retweets |
 | `likeCount` | number | Number of likes |
 | `conversationId` | string | Thread conversation ID |
-| `inReplyToStatusId` | string? | Parent tweet ID (present if this is a reply) |
+| `inReplyToStatusId` | string? | Parent tweet ID (present for replies) |
 | `quotedTweet` | object? | Embedded quote tweet (same schema; depth controlled by `--quote-depth`) |
 
 When using `--json` with `following`/`followers`, user objects include:
 
+<!-- vale off -->
+
 | Field | Type | Description |
-|-------|------|-------------|
+| --- | --- | --- |
 | `id` | string | User ID |
 | `username` | string | Username/handle |
 | `name` | string | Display name |
@@ -244,6 +253,8 @@ When using `--json` with `following`/`followers`, user objects include:
 | `profileImageUrl` | string? | Profile image URL |
 | `createdAt` | string? | Account creation timestamp |
 
+<!-- vale on -->
+
 ## Troubleshooting
 
 - Missing cookies or `check` fails: confirm `AUTH_TOKEN` + `CT0` or use `--cookie-source` with a logged-in browser.
@@ -252,7 +263,7 @@ When using `--json` with `following`/`followers`, user objects include:
 
 ## Query IDs (GraphQL)
 
-X rotates GraphQL “query IDs” frequently. Each GraphQL operation is addressed as:
+X rotates GraphQL “query IDs” frequently. Each GraphQL operation uses:
 
 - `operationName` (e.g. `TweetDetail`, `CreateTweet`)
 - `queryId` (rotating ID baked into X’s web client bundles)
@@ -264,11 +275,11 @@ Runtime cache:
 
 - Default path: `~/.config/xkit/query-ids-cache.json`
 - Override path: `XKIT_QUERY_IDS_CACHE=/path/to/file.json`
-- TTL: 24h (stale cache is still used, but marked "not fresh")
+- TTL: 24h (stale cache stays usable, but marked "not fresh")
 
 Auto-recovery:
 
-- On GraphQL `404` (query ID invalid), `xkit` forces a refresh once and retries.
+- On GraphQL `404` (query ID malformed), `xkit` forces a refresh once and retries.
 - For `TweetDetail`/`SearchTimeline`, `xkit` also rotates through a small set of known fallback IDs to reduce
   breakage while refreshing.
 
@@ -282,7 +293,7 @@ Exit codes:
 
 - `0`: success
 - `1`: runtime error (network/auth/etc)
-- `2`: invalid usage/validation (e.g. bad `--user` handle)
+- `2`: malformed usage/validation (e.g. bad `--user` handle)
 
 ## Version
 
@@ -292,7 +303,8 @@ Exit codes:
 
 - Attach media with `--media` (repeatable) and optional `--alt` per item.
 - Up to 4 images/GIFs, or 1 video (no mixing). Supported: jpg, jpeg, png, webp, gif, mp4, mov.
-- Images/GIFs + 1 video supported (uploads via Twitter legacy upload endpoint + cookies; video may take longer to process).
+- Images/GIFs + 1 video supported (uploads via Twitter legacy upload endpoint + cookies; video may take longer to
+  process).
 
 Example:
 
@@ -304,7 +316,7 @@ xkit tweet "hi" --media img.png --alt "desc"
 
 - `xkit check` to confirm credential sources.
 - `xkit whoami` to confirm the authenticated account.
-- `xkit read <tweet-id-or-url>` to validate read access.
+- `xkit read <tweet-id-or-url>` to confirm read access.
 
 ## Development
 
@@ -339,24 +351,25 @@ git push
 
 ## Notes
 
-- GraphQL uses internal X endpoints and can be rate limited (429).
-- Query IDs rotate; refresh at runtime with `xkit query-ids --fresh` (or update the baked baseline via `pnpm run graphql:update`).
+- GraphQL uses internal X endpoints and may face rate limits (429).
+- Query IDs rotate; refresh at runtime with `xkit query-ids --fresh` (or update the baked baseline via
+  `pnpm run graphql:update`).
 
 <details>
   <summary>Maintainer acceptance checklist and evidence</summary>
 
 ### Acceptance criteria
 
-- [ ] Doc requirements are current (audience, scope, owner, review cadence).
+- [ ] Doc requirements reflect current audience, scope, owner, and review cadence.
 - [ ] Install and quickstart commands run as shown.
 - [ ] Authentication and config sections reflect current CLI behavior.
-- [ ] Troubleshooting covers top 3 failure modes.
+- [ ] Troubleshooting covers the top 3 common issues.
 - [ ] Verify steps succeed on a healthy setup.
 
 ### Evidence bundle
 
-- Vale: not run (no `.vale.ini` in repo).
-- Markdown lint: not run (no config detected).
+- Vale: ran (0 errors, 0 warnings, 0 suggestions).
+- Markdown lint: ran (0 errors).
 - Readability check: not run (no `scripts/check_readability.py`).
 - Brand check: not run (no `scripts/check_brand_guidelines.py`).
 

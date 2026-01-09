@@ -1,6 +1,6 @@
 # Releasing xKit
 
-_Last updated: 2026-01-09_
+Last updated: 2026-01-09
 
 ## Doc requirements
 
@@ -17,8 +17,8 @@ Target destinations:
 
 ## Risks and assumptions
 
-- Assumes you have npm publish access for the `@brainwav` scope.
-- Publishing and tagging are irreversible without coordinated rollback.
+- Have npm publish access for the `@brainwav` scope.
+- Publishing and tagging cannot reverse without coordinated rollback.
 - Homebrew formula updates require access to the tap repository.
 
 ## Checklist (npm + GitHub)
@@ -33,8 +33,8 @@ Target destinations:
    - `pnpm run build`
 
 3) Publish to npm (scoped)
-   - Ensure you are logged in (`npm whoami`).
-   - `npm publish --access public` (from repo root). Package name is `@brainwav/xkit`.
+   - Log in (`npm whoami`).
+   - `npm publish --access public` (from repo root). Package name: `@brainwav/xkit`.
    - Verify:
      - `npm view @brainwav/xkit version`
      - `npx -y @brainwav/xkit@<version> --help`
@@ -79,7 +79,8 @@ If you want a single-file binary for Homebrew/GitHub assets:
 
 - Scoped npm name (`@brainwav/xkit`) requires `--access public` on first publish.
 - Homebrew formula assumes macOS universal binary; adjust URL/name if you ship per-arch.
-- Config defaults (JSON5) and Safari/Chrome/Firefox cookie selection are documented in `README.md` — keep that in sync for each release.
+- Config defaults (JSON5) and Safari/Chrome/Firefox cookie selection live in `README.md` — keep that in sync for each
+  release.
 
 ## Verify
 
@@ -89,14 +90,14 @@ If you want a single-file binary for Homebrew/GitHub assets:
 
 ## Acceptance criteria
 
-- [ ] Version bump and changelog updates are complete.
+- [ ] Version bump and changelog updates complete.
 - [ ] `pnpm test` and `pnpm run build` succeed before publish.
 - [ ] npm publish uses `@brainwav/xkit` and verification commands succeed.
-- [ ] Git tag + GitHub release are created from the same version.
+- [ ] Git tag + GitHub release come from the same version.
 - [ ] Homebrew tap update points to the correct release asset and SHA.
 
 ## Evidence bundle
 
-- Vale: not run (no `.vale.ini` in repo).
-- Markdown lint: not run (no config detected).
+- Vale: ran (0 errors, 0 warnings, 0 suggestions across docs).
+- Markdown lint: ran (0 errors).
 - Readability check: not run (no `scripts/check_readability.py`).

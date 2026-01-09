@@ -87,11 +87,11 @@ async function fetchText(fetchImpl: typeof fetch, url: string): Promise<string> 
 }
 
 function resolveDefaultCachePath(): string {
-  const override = process.env.BIRD_QUERY_IDS_CACHE;
+  const override = process.env.XKIT_QUERY_IDS_CACHE;
   if (override && override.trim().length > 0) {
     return path.resolve(override.trim());
   }
-  return path.join(homedir(), '.config', 'bird', DEFAULT_CACHE_FILENAME);
+  return path.join(homedir(), '.config', 'xkit', DEFAULT_CACHE_FILENAME);
 }
 
 function parseSnapshot(raw: unknown): RuntimeQueryIdSnapshot | null {
@@ -232,6 +232,12 @@ async function fetchAndExtract(
   return discovered;
 }
 
+/**
+ * Create a runtime query ID store that caches GraphQL query IDs on disk.
+ *
+ * @param options Store configuration (cache path, TTL, or custom fetch).
+ * @returns A store with snapshot inspection, lookup, refresh, and cache clearing helpers.
+ */
 export function createRuntimeQueryIdStore(options: RuntimeQueryIdsOptions = {}): RuntimeQueryIdStore {
   const fetchImpl = options.fetchImpl ?? fetch;
   const ttlMs = options.ttlMs ?? DEFAULT_TTL_MS;
@@ -338,4 +344,7 @@ export function createRuntimeQueryIdStore(options: RuntimeQueryIdsOptions = {}):
   };
 }
 
+/**
+ * Default runtime query ID store using the standard cache path and TTL.
+ */
 export const runtimeQueryIds = createRuntimeQueryIdStore();

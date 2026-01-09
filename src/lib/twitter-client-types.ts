@@ -218,6 +218,9 @@ export interface TweetMedia {
   durationMs?: number;
 }
 
+/**
+ * Normalized tweet data returned by read/search/timeline helpers.
+ */
 export interface TweetData {
   id: string;
   text: string;
@@ -232,28 +235,37 @@ export interface TweetData {
   likeCount?: number;
   conversationId?: string;
   inReplyToStatusId?: string;
-  // Optional quoted tweet; depth controlled by quoteDepth (default: 1).
+  /** Optional quoted tweet; depth controlled by quoteDepth (default: 1). */
   quotedTweet?: TweetData;
-  // Media attachments (photos, videos, GIFs)
+  /** Media attachments (photos, videos, GIFs). */
   media?: TweetMedia[];
-  // Raw GraphQL tweet result (only when includeRaw is enabled)
+  /** Raw GraphQL tweet result (only when includeRaw is enabled). */
   _raw?: GraphqlTweetResult;
 }
 
+/**
+ * Result payload for a single tweet fetch.
+ */
 export interface GetTweetResult {
   success: boolean;
   tweet?: TweetData;
   error?: string;
 }
 
+/**
+ * Result payload for search queries.
+ */
 export interface SearchResult {
   success: boolean;
   tweets?: TweetData[];
   error?: string;
-  /** Cursor for fetching the next page of results */
+  /** Cursor for fetching the next page of results. */
   nextCursor?: string;
 }
 
+/**
+ * Result payload for the authenticated user lookup.
+ */
 export interface CurrentUserResult {
   success: boolean;
   user?: {
@@ -264,6 +276,9 @@ export interface CurrentUserResult {
   error?: string;
 }
 
+/**
+ * Normalized Twitter/X user data used across list and follow APIs.
+ */
 export interface TwitterUser {
   id: string;
   username: string;
@@ -276,17 +291,26 @@ export interface TwitterUser {
   createdAt?: string;
 }
 
+/**
+ * Result payload for following/follower list queries.
+ */
 export interface FollowingResult {
   success: boolean;
   users?: TwitterUser[];
   error?: string;
 }
 
+/**
+ * Options for constructing a TwitterClient instance.
+ */
 export interface TwitterClientOptions {
+  /** Resolved cookies required for auth (`auth_token` + `ct0`). */
   cookies: TwitterCookies;
+  /** Optional user-agent override for outbound requests. */
   userAgent?: string;
+  /** Request timeout in milliseconds. */
   timeoutMs?: number;
-  // Max depth for quoted tweets (0 disables). Defaults to 1.
+  /** Max depth for quoted tweets (0 disables). Defaults to 1. */
   quoteDepth?: number;
 }
 

@@ -1,12 +1,12 @@
 {
-  "name": "@steipete/bird",
+  "name": "@brainwav/xkit",
   "version": "0.6.0",
   "description": "CLI tool for tweeting and replying via Twitter/X GraphQL API",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "bird": "dist/cli.js"
+    "xkit": "dist/cli.js"
   },
   "files": [
     "dist",
@@ -17,12 +17,12 @@
   "scripts": {
     "build": "pnpm run build:dist && pnpm run build:binary",
     "build:dist": "tsc && node scripts/copy-dist-assets.js",
-    "build:binary": "BIRD_VERSION=$(node -p \"require('./package.json').version\") BIRD_GIT_SHA=$(git rev-parse --short=8 HEAD 2>/dev/null || true) bun build --compile --minify --env=BIRD_* src/cli.ts --outfile bird",
+    "build:binary": "XKIT_VERSION=$(node -p \"require('./package.json').version\") XKIT_GIT_SHA=$(git rev-parse --short=8 HEAD 2>/dev/null || true) bun build --compile --minify --env=XKIT_* src/cli.ts --outfile xkit",
     "dev": "tsx src/index.ts",
-    "bird": "pnpm run build:dist && node dist/cli.js",
+    "xkit": "pnpm run build:dist && node dist/cli.js",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:live": "pnpm run build:dist && BIRD_LIVE=1 vitest run --no-file-parallelism tests/live/live.test.ts",
+    "test:live": "pnpm run build:dist && XKIT_LIVE=1 vitest run --no-file-parallelism tests/live/live.test.ts",
     "lint": "pnpm run lint:biome && pnpm run lint:oxlint",
     "lint:biome": "biome check .",
     "lint:oxlint": "oxlint --type-aware --tsconfig tsconfig.oxlint.json --import-plugin --node-plugin --vitest-plugin --deny-warnings src tests scripts",
@@ -31,7 +31,11 @@
     "lint:oxlint:fix": "oxlint --type-aware --tsconfig tsconfig.oxlint.json --import-plugin --node-plugin --vitest-plugin --deny-warnings --fix src tests scripts",
     "format": "biome format --write .",
     "binary": "pnpm run build:binary",
-    "graphql:update": "tsx scripts/update-query-ids.ts"
+    "graphql:update": "tsx scripts/update-query-ids.ts",
+    "changeset": "changeset",
+    "version": "changeset version && pnpm install --lockfile-only",
+    "release": "pnpm run build:dist && changeset publish",
+    "prepublishOnly": "pnpm run build:dist"
   },
   "dependencies": {
     "@steipete/sweet-cookie": "0.1.0",
@@ -41,6 +45,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.10",
+    "@changesets/cli": "^2.29.8",
     "@types/node": "^25.0.3",
     "@vitest/coverage-v8": "4.0.16",
     "oxlint": "^1.36.0",
@@ -51,5 +56,27 @@
   },
   "engines": {
     "node": ">=22"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jscraik/xKit.git"
+  },
+  "keywords": [
+    "twitter",
+    "x",
+    "cli",
+    "tweet",
+    "post",
+    "graphql",
+    "api"
+  ],
+  "author": "Jamie Craik",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jscraik/xKit/issues"
+  },
+  "homepage": "https://github.com/jscraik/xKit#readme",
+  "publishConfig": {
+    "access": "public"
   }
 }

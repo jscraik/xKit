@@ -2,12 +2,12 @@ const by = (sel, root = document) => root.querySelector(sel);
 const all = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
 const demoSnippets = {
-  tweet: `bird tweet "ship it"`,
-  reply: `bird reply https://x.com/user/status/1234567890123456789 "same"`,
-  read: `bird read https://x.com/user/status/1234567890123456789`,
-  thread: `bird thread 1234567890123456789`,
-  search: `bird search "from:steipete" -n 5`,
-  mentions: `bird mentions -n 5`,
+  tweet: `xkit tweet "ship it"`,
+  reply: `xkit reply https://x.com/user/status/1234567890123456789 "same"`,
+  read: `xkit read https://x.com/user/status/1234567890123456789`,
+  thread: `xkit thread 1234567890123456789`,
+  search: `xkit search "from:steipete" -n 5`,
+  mentions: `xkit mentions -n 5`,
 };
 
 const setDemo = (key) => {
@@ -77,4 +77,3 @@ window.setTimeout(() => document.body.classList.add("is-ready"), 20);
 wireTabs();
 wireCopy();
 wireOrbs();
-

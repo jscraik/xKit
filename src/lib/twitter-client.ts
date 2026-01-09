@@ -23,6 +23,18 @@ const MixedTwitterClient = withUsers(
   withLists(withTimelines(withSearch(withTweetDetails(withPosting(withBookmarks(withMedia(TwitterClientBase))))))),
 ) as AbstractConstructor<TwitterClientInstance>;
 
+/**
+ * Create a Twitter/X GraphQL client with read + write helpers.
+ *
+ * @example
+ * ```ts
+ * import { TwitterClient, resolveCredentials } from '@brainwav/xkit';
+ *
+ * const { cookies } = await resolveCredentials({ cookieSource: 'safari' });
+ * const client = new TwitterClient({ cookies });
+ * const results = await client.search('from:username', 5);
+ * ```
+ */
 export class TwitterClient extends MixedTwitterClient {}
 
 export type {

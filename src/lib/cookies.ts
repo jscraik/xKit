@@ -151,14 +151,34 @@ async function readTwitterCookiesFromBrowser(options: {
   return { cookies: out, warnings };
 }
 
+/**
+ * Extract Twitter/X cookies from the default Safari profile.
+ *
+ * @returns Cookie extraction result with warnings when cookies are missing.
+ * @throws When the underlying cookie extraction helper fails.
+ */
 export async function extractCookiesFromSafari(): Promise<CookieExtractionResult> {
   return readTwitterCookiesFromBrowser({ source: 'safari' });
 }
 
+/**
+ * Extract Twitter/X cookies from Chrome.
+ *
+ * @param profile Chrome profile name (defaults to the Chrome default profile).
+ * @returns Cookie extraction result with warnings when cookies are missing.
+ * @throws When the underlying cookie extraction helper fails.
+ */
 export async function extractCookiesFromChrome(profile?: string): Promise<CookieExtractionResult> {
   return readTwitterCookiesFromBrowser({ source: 'chrome', chromeProfile: profile });
 }
 
+/**
+ * Extract Twitter/X cookies from Firefox.
+ *
+ * @param profile Firefox profile name (defaults to the Firefox default profile).
+ * @returns Cookie extraction result with warnings when cookies are missing.
+ * @throws When the underlying cookie extraction helper fails.
+ */
 export async function extractCookiesFromFirefox(profile?: string): Promise<CookieExtractionResult> {
   return readTwitterCookiesFromBrowser({ source: 'firefox', firefoxProfile: profile });
 }
@@ -166,6 +186,16 @@ export async function extractCookiesFromFirefox(profile?: string): Promise<Cooki
 /**
  * Resolve Twitter credentials from multiple sources.
  * Priority: CLI args > environment variables > browsers (ordered).
+ *
+ * @param options Credential discovery options and overrides.
+ * @param options.authToken Explicit `auth_token` cookie value (highest priority).
+ * @param options.ct0 Explicit `ct0` cookie value (highest priority).
+ * @param options.cookieSource Browser cookie source(s) to try when env vars are missing.
+ * @param options.chromeProfile Chrome profile name for cookie extraction.
+ * @param options.firefoxProfile Firefox profile name for cookie extraction.
+ * @param options.cookieTimeoutMs Timeout for cookie extraction helpers (ms).
+ * @returns Cookie extraction result with source metadata and warnings.
+ * @throws When browser cookie extraction fails unexpectedly.
  */
 export async function resolveCredentials(options: {
   authToken?: string;

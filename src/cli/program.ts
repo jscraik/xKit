@@ -62,12 +62,12 @@ export function createProgram(ctx: CliContext): Command {
   program.addHelpText(
     'beforeAll',
     () =>
-      `${ctx.colors.banner('bird')} ${ctx.colors.muted(getCliVersion())} ${ctx.colors.subtitle(
+      `${ctx.colors.banner('xkit')} ${ctx.colors.muted(getCliVersion())} ${ctx.colors.subtitle(
         '— fast X CLI for tweeting, replying, and reading',
       )}`,
   );
 
-  program.name('bird').description('Post tweets and replies via Twitter/X GraphQL API').version(getCliVersion());
+  program.name('xkit').description('Post tweets and replies via Twitter/X GraphQL API').version(getCliVersion());
 
   const formatExample = (command: string, description: string): string =>
     `${ctx.colors.command(`  ${command}`)}\n${ctx.colors.muted(`    ${description}`)}`;
@@ -76,31 +76,31 @@ export function createProgram(ctx: CliContext): Command {
     'afterAll',
     () =>
       `\n${ctx.colors.section('Examples')}\n${[
-        formatExample('bird whoami', 'Show the logged-in account via GraphQL cookies'),
-        formatExample('bird --firefox-profile default-release whoami', 'Use Firefox profile cookies'),
-        formatExample('bird tweet "hello from bird"', 'Send a tweet'),
+        formatExample('xkit whoami', 'Show the logged-in account via GraphQL cookies'),
+        formatExample('xkit --firefox-profile default-release whoami', 'Use Firefox profile cookies'),
+        formatExample('xkit tweet "hello from xkit"', 'Send a tweet'),
         formatExample(
-          'bird 1234567890123456789 --json',
+          'xkit 1234567890123456789 --json',
           'Read a tweet (ID or URL shorthand for `read`) and print JSON',
         ),
       ].join('\n\n')}\n\n${ctx.colors.section('Shortcuts')}\n${[
-        formatExample('bird <tweet-id-or-url> [--json]', 'Shorthand for `bird read <tweet-id-or-url>`'),
+        formatExample('xkit <tweet-id-or-url> [--json]', 'Shorthand for `xkit read <tweet-id-or-url>`'),
       ].join('\n\n')}\n\n${ctx.colors.section('JSON Output')}\n${ctx.colors.muted(
         `  Add ${ctx.colors.option('--json')} to: read, replies, thread, search, mentions, bookmarks, likes, following, followers, lists, list-timeline, query-ids`,
       )}\n${ctx.colors.muted(
         `  Add ${ctx.colors.option('--json-full')} to include raw API response in ${ctx.colors.argument('_raw')} field (tweet commands only)`,
-      )}\n${ctx.colors.muted(`  (Run ${ctx.colors.command('bird <command> --help')} to see per-command flags.)`)}`,
+      )}\n${ctx.colors.muted(`  (Run ${ctx.colors.command('xkit <command> --help')} to see per-command flags.)`)}`,
   );
 
   program.addHelpText(
     'afterAll',
     () =>
       `\n\n${ctx.colors.section('Config')}\n${ctx.colors.muted(
-        `  Reads ${ctx.colors.argument('~/.config/bird/config.json5')} and ${ctx.colors.argument('./.birdrc.json5')} (JSON5)`,
+        `  Reads ${ctx.colors.argument('~/.config/xkit/config.json5')} and ${ctx.colors.argument('./.xkitrc.json5')} (JSON5)`,
       )}\n${ctx.colors.muted(
         `  Supports: chromeProfile, firefoxProfile, cookieSource, cookieTimeoutMs, timeoutMs, quoteDepth`,
       )}\n\n${ctx.colors.section('Env')}\n${ctx.colors.muted(
-        `  ${ctx.colors.option('NO_COLOR')}, ${ctx.colors.option('BIRD_TIMEOUT_MS')}, ${ctx.colors.option('BIRD_COOKIE_TIMEOUT_MS')}, ${ctx.colors.option('BIRD_QUOTE_DEPTH')}`,
+        `  ${ctx.colors.option('NO_COLOR')}, ${ctx.colors.option('XKIT_TIMEOUT_MS')}, ${ctx.colors.option('XKIT_COOKIE_TIMEOUT_MS')}, ${ctx.colors.option('XKIT_QUOTE_DEPTH')}`,
       )}`,
   );
 

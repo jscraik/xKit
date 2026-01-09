@@ -13,7 +13,7 @@ coverage/
 .turbo/
 .eslintcache
 twitter-cli.bin
-bird
+xkit
 .env
 .*.bun-build
 *.zip

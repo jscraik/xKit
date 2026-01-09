@@ -15,7 +15,7 @@ import {
 } from '../lib/output.js';
 import type { TweetData } from '../lib/twitter-client.js';
 
-export type BirdConfig = {
+export type XKitConfig = {
   chromeProfile?: string;
   firefoxProfile?: string;
   cookieSource?: CookieSource | CookieSource[];
@@ -43,7 +43,7 @@ export type CliContext = {
   };
   p: (kind: Parameters<typeof statusPrefix>[0]) => string;
   l: (kind: Parameters<typeof labelPrefix>[0]) => string;
-  config: BirdConfig;
+  config: XKitConfig;
   applyOutputFromCommand: (command: Command) => void;
   resolveTimeoutFromOptions: (options: { timeout?: string | number }) => number | undefined;
   resolveQuoteDepthFromOptions: (options: { quoteDepth?: string | number }) => number | undefined;
@@ -134,13 +134,13 @@ function detectMime(path: string): string | null {
   return null;
 }
 
-function readConfigFile(path: string, warn: (message: string) => void): Partial<BirdConfig> {
+function readConfigFile(path: string, warn: (message: string) => void): Partial<XKitConfig> {
   if (!existsSync(path)) {
     return {};
   }
   try {
     const raw = readFileSync(path, 'utf8');
-    const parsed = JSON5.parse(raw) as Partial<BirdConfig>;
+    const parsed = JSON5.parse(raw) as Partial<XKitConfig>;
     return parsed ?? {};
   } catch (error) {
     warn(`Failed to parse config at ${path}: ${error instanceof Error ? error.message : String(error)}`);
@@ -148,9 +148,9 @@ function readConfigFile(path: string, warn: (message: string) => void): Partial<
   }
 }
 
-function loadConfig(warn: (message: string) => void): BirdConfig {
-  const globalPath = join(homedir(), '.config', 'bird', 'config.json5');
-  const localPath = join(process.cwd(), '.birdrc.json5');
+function loadConfig(warn: (message: string) => void): XKitConfig {
+  const globalPath = join(homedir(), '.config', 'xkit', 'config.json5');
+  const localPath = join(process.cwd(), '.xkitrc.json5');
 
   return {
     ...readConfigFile(globalPath, warn),
@@ -253,15 +253,15 @@ export function createCliContext(normalizedArgs: string[], env: NodeJS.ProcessEn
   }
 
   function resolveTimeoutFromOptions(options: { timeout?: string | number }): number | undefined {
-    return resolveTimeoutMs(options.timeout, config.timeoutMs, env.BIRD_TIMEOUT_MS);
+    return resolveTimeoutMs(options.timeout, config.timeoutMs, env.XKIT_TIMEOUT_MS);
   }
 
   function resolveCookieTimeoutFromOptions(options: { cookieTimeout?: string | number }): number | undefined {
-    return resolveTimeoutMs(options.cookieTimeout, config.cookieTimeoutMs, env.BIRD_COOKIE_TIMEOUT_MS);
+    return resolveTimeoutMs(options.cookieTimeout, config.cookieTimeoutMs, env.XKIT_COOKIE_TIMEOUT_MS);
   }
 
   function resolveQuoteDepthFromOptions(options: { quoteDepth?: string | number }): number | undefined {
-    return resolveQuoteDepth(options.quoteDepth, config.quoteDepth, env.BIRD_QUOTE_DEPTH);
+    return resolveQuoteDepth(options.quoteDepth, config.quoteDepth, env.XKIT_QUOTE_DEPTH);
   }
 
   function resolveCredentialsFromOptions(opts: CredentialsOptions): ReturnType<typeof resolveCredentials> {

@@ -35,13 +35,13 @@ export function withTimelines<TBase extends AbstractConstructor<TwitterClientBas
     }
 
     private logBookmarksDebug(message: string, data?: Record<string, unknown>): void {
-      if (process.env.BIRD_DEBUG_BOOKMARKS !== '1') {
+      if (process.env.XKIT_DEBUG_BOOKMARKS !== '1') {
         return;
       }
       if (data) {
-        console.error(`[bird][debug][bookmarks] ${message}`, JSON.stringify(data));
+        console.error(`[xkit][debug][bookmarks] ${message}`, JSON.stringify(data));
       } else {
-        console.error(`[bird][debug][bookmarks] ${message}`);
+        console.error(`[xkit][debug][bookmarks] ${message}`);
       }
     }
 

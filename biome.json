@@ -33,9 +33,6 @@
       },
       "suspicious": {
         "noExplicitAny": "error"
-      },
-      "nursery": {
-        "useRegexpExec": "error"
       }
     }
   },

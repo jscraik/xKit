@@ -84,11 +84,11 @@ function toFeatureOverrides(overrides: NormalizedFeatureOverrides): FeatureOverr
 }
 
 function resolveFeaturesCachePath(): string {
-  const override = process.env.BIRD_FEATURES_CACHE ?? process.env.BIRD_FEATURES_PATH;
+  const override = process.env.XKIT_FEATURES_CACHE ?? process.env.XKIT_FEATURES_PATH;
   if (override && override.trim().length > 0) {
     return path.resolve(override.trim());
   }
-  return path.join(homedir(), '.config', 'bird', DEFAULT_CACHE_FILENAME);
+  return path.join(homedir(), '.config', 'xkit', DEFAULT_CACHE_FILENAME);
 }
 
 function readOverridesFromFile(cachePath: string): NormalizedFeatureOverrides | null {
@@ -104,7 +104,7 @@ function readOverridesFromFile(cachePath: string): NormalizedFeatureOverrides | 
 }
 
 function readOverridesFromEnv(): NormalizedFeatureOverrides | null {
-  const raw = process.env.BIRD_FEATURES_JSON;
+  const raw = process.env.XKIT_FEATURES_JSON;
   if (!raw || raw.trim().length === 0) {
     return null;
   }

@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
 /**
- * bird - CLI tool for posting tweets and replies
+ * xkit - CLI tool for posting tweets and replies
  *
  * Usage:
- *   bird tweet "Hello world!"
- *   bird reply <tweet-id> "This is a reply"
- *   bird reply <tweet-url> "This is a reply"
- *   bird read <tweet-id-or-url>
+ *   xkit tweet "Hello world!"
+ *   xkit reply <tweet-id> "This is a reply"
+ *   xkit reply <tweet-url> "This is a reply"
+ *   xkit read <tweet-id-or-url>
  */
 
 import { createProgram, KNOWN_COMMANDS } from './cli/program.js';
@@ -31,5 +31,5 @@ if (showHelp) {
 if (argv) {
   program.parse(argv);
 } else {
-  program.parse(['node', 'bird', ...normalizedArgs]);
+  program.parse(['node', 'xkit', ...normalizedArgs]);
 }

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/xKit-brand-logo.png" alt="xKit Logo" width="200">
+  <img src="./docs/assets/xKit-brand-logo.png" alt="xKit Logo" width="200">
 </p>
 
 # xKit — fast X CLI for tweeting, replying, and reading

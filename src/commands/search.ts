@@ -21,7 +21,13 @@ export function registerSearchCommands(program: Command, ctx: CliContext): void 
       const opts = program.opts();
       const timeoutMs = ctx.resolveTimeoutFromOptions(opts);
       const quoteDepth = ctx.resolveQuoteDepthFromOptions(opts);
-      const count = Number.parseInt(cmdOpts.count || '10', 10);
+
+      const countResult = ctx.parseIntegerOption(cmdOpts.count, { name: '--count', min: 1 });
+      if (!countResult.ok) {
+        console.error(`${ctx.p('err')}${countResult.error}`);
+        process.exit(2);
+      }
+      const count = countResult.value;
 
       const { cookies, warnings } = await ctx.resolveCredentialsFromOptions(opts);
 
@@ -57,7 +63,13 @@ export function registerSearchCommands(program: Command, ctx: CliContext): void 
       const opts = program.opts();
       const timeoutMs = ctx.resolveTimeoutFromOptions(opts);
       const quoteDepth = ctx.resolveQuoteDepthFromOptions(opts);
-      const count = Number.parseInt(cmdOpts.count || '10', 10);
+
+      const countResult = ctx.parseIntegerOption(cmdOpts.count, { name: '--count', min: 1 });
+      if (!countResult.ok) {
+        console.error(`${ctx.p('err')}${countResult.error}`);
+        process.exit(2);
+      }
+      const count = countResult.value;
 
       const fromUserOpt = mentionsQueryFromUserOption(cmdOpts.user);
       if (fromUserOpt.error) {

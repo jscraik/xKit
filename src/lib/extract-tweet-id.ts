@@ -1,7 +1,7 @@
 /**
  * Extract tweet ID from a Twitter/X URL or return the input unchanged if it's already an ID.
  */
-const TWEET_URL_REGEX = /(?:twitter\.com|x\.com)\/(?:\w+\/status|i\/web\/status)\/(\d+)/i;
+const TWEET_URL_REGEX = /(?:twitter\.com|x\.com)\/(?:\w+\/status|i\/web\/status|i\/status)\/(\d+)/i;
 
 /**
  * Extract a tweet ID from a URL or return the input unchanged if it is already an ID.
@@ -10,11 +10,14 @@ const TWEET_URL_REGEX = /(?:twitter\.com|x\.com)\/(?:\w+\/status|i\/web\/status)
  * @returns Extracted tweet ID.
  */
 export function extractTweetId(input: string): string {
+  const trimmed = input.trim();
+
   // If it's a URL, extract the tweet ID
-  const urlMatch = TWEET_URL_REGEX.exec(input);
+  const urlMatch = TWEET_URL_REGEX.exec(trimmed);
   if (urlMatch) {
     return urlMatch[1];
   }
-  // Assume it's already an ID
-  return input;
+
+  // Assume it's already an ID (but keep whitespace trimming consistent)
+  return trimmed;
 }

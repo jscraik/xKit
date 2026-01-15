@@ -3,6 +3,7 @@ import { TwitterClientBase } from './twitter-client-base.js';
 import { type TwitterClientBookmarkMethods, withBookmarks } from './twitter-client-bookmarks.js';
 import { type TwitterClientListMethods, withLists } from './twitter-client-lists.js';
 import { type TwitterClientMediaMethods, withMedia } from './twitter-client-media.js';
+import { type TwitterClientNewsMethods, withNews } from './twitter-client-news.js';
 import { type TwitterClientPostingMethods, withPosting } from './twitter-client-posting.js';
 import { type TwitterClientSearchMethods, withSearch } from './twitter-client-search.js';
 import { type TwitterClientTimelineMethods, withTimelines } from './twitter-client-timelines.js';
@@ -13,6 +14,7 @@ type TwitterClientInstance = TwitterClientBase &
   TwitterClientBookmarkMethods &
   TwitterClientListMethods &
   TwitterClientMediaMethods &
+  TwitterClientNewsMethods &
   TwitterClientPostingMethods &
   TwitterClientSearchMethods &
   TwitterClientTimelineMethods &
@@ -20,7 +22,9 @@ type TwitterClientInstance = TwitterClientBase &
   TwitterClientUserMethods;
 
 const MixedTwitterClient = withUsers(
-  withLists(withTimelines(withSearch(withTweetDetails(withPosting(withBookmarks(withMedia(TwitterClientBase))))))),
+  withNews(
+    withLists(withTimelines(withSearch(withTweetDetails(withPosting(withBookmarks(withMedia(TwitterClientBase))))))),
+  ),
 ) as AbstractConstructor<TwitterClientInstance>;
 
 /**
@@ -43,6 +47,8 @@ export type {
   FollowingResult,
   GetTweetResult,
   ListsResult,
+  NewsItem,
+  NewsResult,
   SearchResult,
   TweetData,
   TweetResult,

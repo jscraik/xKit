@@ -350,3 +350,28 @@ export interface CreateTweetResponse {
   };
   errors?: Array<{ message: string; code?: number }>;
 }
+
+/**
+ * News/trending item from X's Explore page.
+ */
+export interface NewsItem {
+  id: string;
+  headline: string;
+  category?: string;
+  timeAgo?: string;
+  postCount?: number;
+  description?: string;
+  url?: string;
+  tab?: string;
+  /** Raw GraphQL response (only when includeRaw is enabled). */
+  _raw?: unknown;
+}
+
+/**
+ * Result payload for news/trending queries.
+ */
+export interface NewsResult {
+  success: boolean;
+  items?: NewsItem[];
+  error?: string;
+}

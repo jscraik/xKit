@@ -24,6 +24,11 @@ describe('cli-args', () => {
     expect(looksLikeTweetInput('https://x.com/user/status/1234567890')).toBe(true);
     expect(looksLikeTweetInput('http://twitter.com/user/status/1234567890')).toBe(true);
     expect(looksLikeTweetInput('x.com/user/status/1234567890')).toBe(true);
+
+    expect(looksLikeTweetInput('https://x.com/i/web/status/1234567890')).toBe(true);
+    expect(looksLikeTweetInput('https://x.com/i/status/1234567890')).toBe(true);
+    expect(looksLikeTweetInput('https://twitter.com/i/web/status/1234567890')).toBe(true);
+    expect(looksLikeTweetInput('https://twitter.com/i/status/1234567890')).toBe(true);
   });
 
   it('detects numeric tweet ids', () => {

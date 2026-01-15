@@ -58,7 +58,7 @@ export function withSearch<TBase extends AbstractConstructor<TwitterClientBase>>
             const response = await this.fetchWithTimeout(url, {
               method: 'POST',
               headers: this.getHeaders(),
-              body: JSON.stringify({ features, queryId }),
+              body: JSON.stringify({ variables, features, queryId }),
             });
 
             if (response.status === 404) {

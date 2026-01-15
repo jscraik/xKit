@@ -79,6 +79,8 @@ describe('TwitterClient search', () => {
     const [url, options] = mockFetch.mock.calls[1];
     expect(options.method).toBe('POST');
     const body = JSON.parse(options.body);
+    expect(body.variables).toBeDefined();
+    expect(body.variables.rawQuery).toBe('needle');
     expect(body.features).toBeDefined();
     expect(body.queryId).toBeDefined();
     const urlVars = new URL(url as string).searchParams.get('variables');

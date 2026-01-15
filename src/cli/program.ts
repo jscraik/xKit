@@ -1,8 +1,11 @@
 import { Command } from 'commander';
+import { registerBookmarkAnalysisCommand } from '../commands/bookmark-analysis.js';
+import { registerBookmarkExportCommand } from '../commands/bookmark-export.js';
 import { registerBookmarksCommand } from '../commands/bookmarks.js';
 import { registerCheckCommand } from '../commands/check.js';
 import { registerHelpCommand } from '../commands/help.js';
 import { registerListsCommand } from '../commands/lists.js';
+import { registerNewsCommands } from '../commands/news.js';
 import { registerPostCommands } from '../commands/post.js';
 import { registerQueryIdsCommand } from '../commands/query-ids.js';
 import { registerReadCommands } from '../commands/read.js';
@@ -31,9 +34,12 @@ export const KNOWN_COMMANDS = new Set([
   'likes',
   'lists',
   'list-timeline',
+  'news',
   'help',
   'whoami',
   'check',
+  'export-bookmarks',
+  'analyze-bookmarks',
 ]);
 
 /**
@@ -95,9 +101,9 @@ export function createProgram(ctx: CliContext): Command {
       ].join('\n\n')}\n\n${ctx.colors.section('Shortcuts')}\n${[
         formatExample('xkit <tweet-id-or-url> [--json]', 'Shorthand for `xkit read <tweet-id-or-url>`'),
       ].join('\n\n')}\n\n${ctx.colors.section('JSON Output')}\n${ctx.colors.muted(
-        `  Add ${ctx.colors.option('--json')} to: read, replies, thread, search, mentions, bookmarks, likes, following, followers, lists, list-timeline, query-ids`,
+        `  Add ${ctx.colors.option('--json')} to: read, replies, thread, search, mentions, bookmarks, likes, following, followers, lists, list-timeline, news, query-ids`,
       )}\n${ctx.colors.muted(
-        `  Add ${ctx.colors.option('--json-full')} to include raw API response in ${ctx.colors.argument('_raw')} field (tweet commands only)`,
+        `  Add ${ctx.colors.option('--json-full')} to include raw API response in ${ctx.colors.argument('_raw')} field (tweet and news commands)`,
       )}\n${ctx.colors.muted(`  (Run ${ctx.colors.command('xkit <command> --help')} to see per-command flags.)`)}`,
   );
 
@@ -111,6 +117,16 @@ export function createProgram(ctx: CliContext): Command {
       )}\n\n${ctx.colors.section('Env')}\n${ctx.colors.muted(
         `  ${ctx.colors.option('NO_COLOR')}, ${ctx.colors.option('XKIT_TIMEOUT_MS')}, ${ctx.colors.option('XKIT_COOKIE_TIMEOUT_MS')}, ${ctx.colors.option('XKIT_QUOTE_DEPTH')}`,
       )}`,
+  );
+
+  program.addHelpText(
+    'afterAll',
+    () =>
+      `\n${ctx.colors.section('JSON Output')}\n${ctx.colors.muted(
+        `  Add ${ctx.colors.option('--json')} to: read, replies, thread, search, mentions, bookmarks, likes, following, followers, lists, list-timeline, news, query-ids`,
+      )}\n${ctx.colors.muted(
+        `  Add ${ctx.colors.option('--json-full')} to include raw API response in ${ctx.colors.argument('_raw')} field (tweet and news commands)`,
+      )}\n${ctx.colors.muted(`  (Run ${ctx.colors.command('xkit <command> --help')} to see per-command flags.)`)}`,
   );
 
   program
@@ -137,11 +153,14 @@ export function createProgram(ctx: CliContext): Command {
   registerPostCommands(program, ctx);
   registerReadCommands(program, ctx);
   registerSearchCommands(program, ctx);
+  registerNewsCommands(program, ctx);
   registerBookmarksCommand(program, ctx);
   registerUnbookmarkCommand(program, ctx);
   registerListsCommand(program, ctx);
   registerUserCommands(program, ctx);
   registerCheckCommand(program, ctx);
+  registerBookmarkExportCommand(program, ctx);
+  registerBookmarkAnalysisCommand(program, ctx);
 
   return program;
 }

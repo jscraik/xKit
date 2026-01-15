@@ -60,9 +60,57 @@ export type CliContext = {
   loadMedia: (opts: { media: string[]; alts: string[] }) => MediaSpec[];
   printTweets: (tweets: TweetData[], opts?: { json?: boolean; emptyMessage?: string; showSeparator?: boolean }) => void;
   extractTweetId: (tweetIdOrUrl: string) => string;
+  parseIntegerOption: typeof parseIntegerOption;
 };
 
 const COOKIE_SOURCES: CookieSource[] = ['safari', 'chrome', 'firefox'];
+
+const INTEGER_REGEX = /^[+-]?\d+$/;
+
+export type IntegerOptionParseResult = { ok: true; value: number } | { ok: false; error: string };
+
+export function parseIntegerOption(
+  raw: string | number | undefined | null,
+  opts: { name: string; min?: number; max?: number },
+): IntegerOptionParseResult {
+  const valueString = typeof raw === 'number' ? String(raw) : String(raw ?? '');
+  const trimmed = valueString.trim();
+
+  const min = typeof opts.min === 'number' && Number.isFinite(opts.min) ? opts.min : undefined;
+  const max = typeof opts.max === 'number' && Number.isFinite(opts.max) ? opts.max : undefined;
+
+  const expectedRange = (() => {
+    if (min !== undefined && max !== undefined) {
+      return `Expected an integer between ${min} and ${max}.`;
+    }
+    if (min !== undefined) {
+      return `Expected an integer >= ${min}.`;
+    }
+    if (max !== undefined) {
+      return `Expected an integer <= ${max}.`;
+    }
+    return 'Expected an integer.';
+  })();
+
+  if (!trimmed || !INTEGER_REGEX.test(trimmed)) {
+    return { ok: false, error: `Invalid ${opts.name}. ${expectedRange}` };
+  }
+
+  const parsed = Number.parseInt(trimmed, 10);
+  if (!Number.isSafeInteger(parsed)) {
+    return { ok: false, error: `Invalid ${opts.name}. ${expectedRange}` };
+  }
+
+  if (min !== undefined && parsed < min) {
+    return { ok: false, error: `Invalid ${opts.name}. ${expectedRange}` };
+  }
+
+  if (max !== undefined && parsed > max) {
+    return { ok: false, error: `Invalid ${opts.name}. ${expectedRange}` };
+  }
+
+  return { ok: true, value: parsed };
+}
 
 function parseCookieSource(value: string): CookieSource {
   const normalized = value.trim().toLowerCase();
@@ -368,5 +416,6 @@ export function createCliContext(normalizedArgs: string[], env: NodeJS.ProcessEn
     loadMedia,
     printTweets,
     extractTweetId,
+    parseIntegerOption,
   };
 }

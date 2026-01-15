@@ -1,0 +1,106 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Bookmark Export Schema",
+    "description": "Schema for validating exported bookmark data",
+    "type": "object",
+    "required": [
+        "metadata",
+        "bookmarks"
+    ],
+    "properties": {
+        "metadata": {
+            "type": "object",
+            "required": [
+                "exportTimestamp",
+                "totalCount",
+                "exporterVersion",
+                "userId",
+                "username"
+            ],
+            "properties": {
+                "exportTimestamp": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "ISO 8601 timestamp of when the export was created"
+                },
+                "totalCount": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Total number of bookmarks exported"
+                },
+                "exporterVersion": {
+                    "type": "string",
+                    "description": "Version of the exporter tool"
+                },
+                "userId": {
+                    "type": "string",
+                    "description": "X user ID"
+                },
+                "username": {
+                    "type": "string",
+                    "description": "X username"
+                }
+            }
+        },
+        "bookmarks": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "url",
+                    "text",
+                    "authorUsername",
+                    "authorName",
+                    "createdAt",
+                    "likeCount",
+                    "retweetCount",
+                    "replyCount"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Unique tweet ID"
+                    },
+                    "url": {
+                        "type": "string",
+                        "format": "uri",
+                        "description": "URL to the tweet"
+                    },
+                    "text": {
+                        "type": "string",
+                        "description": "Tweet text content"
+                    },
+                    "authorUsername": {
+                        "type": "string",
+                        "description": "Tweet author's username"
+                    },
+                    "authorName": {
+                        "type": "string",
+                        "description": "Tweet author's display name"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "ISO 8601 timestamp of tweet creation"
+                    },
+                    "likeCount": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Number of likes"
+                    },
+                    "retweetCount": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Number of retweets"
+                    },
+                    "replyCount": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Number of replies"
+                    }
+                }
+            }
+        }
+    }
+}

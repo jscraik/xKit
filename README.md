@@ -98,6 +98,11 @@ xkit unbookmark https://x.com/user/status/1234567890123456789
 # Likes
 xkit likes -n 5
 
+# News & Trending
+xkit news -n 10
+xkit news --tabs news,sports -n 5
+xkit news --tabs trending --no-ai-only -n 20
+
 # Following (who you follow)
 xkit following -n 20
 xkit following --user 12345678 -n 10  # by user ID
@@ -119,7 +124,18 @@ import { TwitterClient, resolveCredentials } from '@brainwav/xkit';
 
 const { cookies } = await resolveCredentials({ cookieSource: 'safari' });
 const client = new TwitterClient({ cookies });
-const result = await client.search('from:username', 50);
+
+// Search for tweets
+const searchResult = await client.search('from:username', 50);
+
+// Fetch news and trending topics
+const newsResult = await client.getNews(10, { aiOnly: true });
+
+// Fetch from specific tabs
+const sportsNews = await client.getNews(10, {
+  aiOnly: true,
+  tabs: ['sports', 'entertainment']
+});
 ```
 
 ## Commands
@@ -128,21 +144,55 @@ const result = await client.search('from:username', 50);
 - `xkit reply <tweet-id-or-url> "<text>"` — reply to a tweet using its ID or URL.
 - `xkit help [command]` — show help (or help for a subcommand).
 - `xkit query-ids [--fresh] [--json]` — inspect or refresh cached GraphQL query IDs.
-- `xkit read <tweet-id-or-url> [--json]` — fetch tweet content as text or JSON.
-- `xkit <tweet-id-or-url> [--json]` — shorthand for `read` when you pass only a URL or ID.
-- `xkit replies <tweet-id-or-url> [--json]` — list replies to a tweet.
-- `xkit thread <tweet-id-or-url> [--json]` — show the full conversation thread.
-- `xkit search "<query>" [-n count] [--json]` — search for tweets matching a query.
-- `xkit mentions [-n count] [--user @handle] [--json]` — find tweets mentioning a user (defaults to the
+- `xkit read <tweet-id-or-url> [--json] [--json-full]` — fetch tweet content as text or JSON.
+- `xkit <tweet-id-or-url> [--json] [--json-full]` — shorthand for `read` when you pass only a URL or ID.
+- `xkit replies <tweet-id-or-url> [--json] [--json-full]` — list replies to a tweet.
+- `xkit thread <tweet-id-or-url> [--json] [--json-full]` — show the full conversation thread.
+- `xkit search "<query>" [-n count] [--json] [--json-full]` — search for tweets matching a query.
+- `xkit mentions [-n count] [--user @handle] [--json] [--json-full]` — find tweets mentioning a user (defaults to the
   authenticated user).
-- `xkit bookmarks [-n count] [--folder-id id] [--all] [--max-pages n] [--json]` — list your bookmarked tweets (or a
+- `xkit news [-n count] [--tabs <tabs>] [--ai-only] [--json] [--json-full]` — fetch AI-curated news
+  and trending topics from X's Explore page tabs.
+- `xkit bookmarks [-n count] [--folder-id id] [--all] [--max-pages n] [--json] [--json-full]` — list your bookmarked tweets (or a
   specific bookmark folder); `--max-pages` requires `--all`.
 - `xkit unbookmark <tweet-id-or-url...>` — remove one or more bookmarks by tweet ID or URL.
-- `xkit likes [-n count] [--json]` — list your liked tweets.
+- `xkit likes [-n count] [--json] [--json-full]` — list your liked tweets.
 - `xkit following [--user <userId>] [-n count] [--json]` — list users that you (or another user) follow.
 - `xkit followers [--user <userId>] [-n count] [--json]` — list users that follow you (or another user).
+- `xkit lists [--member-of] [-n count] [--json]` — list your owned lists or lists you're a member of.
+- `xkit list-timeline <list-id-or-url> [-n count] [--json] [--json-full]` — get tweets from a list timeline.
 - `xkit whoami` — print which Twitter account your cookies belong to.
 - `xkit check` — show available credentials and their source.
+
+### News & Trending
+
+Fetch AI-curated news and trending topics from X's Explore page tabs:
+
+```bash
+# Fetch from default tabs (For You, News, Sports, Entertainment)
+xkit news -n 10
+
+# Fetch from specific tabs
+xkit news --tabs news,sports -n 5
+xkit news --tabs trending -n 20
+
+# Include non-AI-curated content
+xkit news --no-ai-only -n 20
+
+# JSON output with full raw API response
+xkit news --json-full -n 10
+```
+
+**Tab options** (can be combined with `--tabs`):
+
+- `for_you` — Personalized news and trends
+- `trending` — Currently trending topics
+- `news` — News headlines
+- `sports` — Sports news and events
+- `entertainment` — Entertainment news
+
+By default, the command fetches from `for_you`, `news`, `sports`, and `entertainment` tabs (trending excluded to
+reduce noise). Headlines are automatically deduplicated across tabs.
 
 Global options:
 
@@ -213,7 +263,8 @@ Environment shortcuts:
 
 ## Output
 
-- `--json` prints raw tweet objects for read/replies/thread/search/mentions/bookmarks/likes.
+- `--json` prints raw tweet objects for read/replies/thread/search/mentions/bookmarks/likes/list-timeline.
+- `--json-full` includes the raw GraphQL API response in a `_raw` field (available for tweet and news commands).
 - `read` returns full text for Notes and Articles when present.
 <!-- vale off -->
 - Use `--plain` for stable, script-friendly output (no emoji, no ANSI styling).
@@ -254,6 +305,20 @@ When using `--json` with `following`/`followers`, user objects include:
 | `createdAt` | string? | Account creation timestamp |
 
 <!-- vale on -->
+
+When using `--json` with `news`, news objects include:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `id` | string | Unique identifier for the news item |
+| `headline` | string | News headline or trend title |
+| `category` | string? | Category (e.g., "AI · Technology", "Trending", "News") |
+| `timeAgo` | string? | Relative time (e.g., "2h ago") |
+| `postCount` | number? | Number of posts |
+| `description` | string? | Item description |
+| `url` | string? | URL to the trend or news article |
+| `tab` | string? | Source tab (for_you, trending, news, sports, entertainment) |
+| `_raw` | object? | Raw API response (only when `--json-full` is used) |
 
 ## Troubleshooting
 

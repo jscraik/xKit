@@ -32,8 +32,33 @@ export function registerBookmarksCommand(program: Command, ctx: CliContext): voi
       }) => {
         const opts = program.opts();
         const timeoutMs = ctx.resolveTimeoutFromOptions(opts);
-        const count = Number.parseInt(cmdOpts.count || '20', 10);
-        const maxPages = cmdOpts.maxPages ? Number.parseInt(cmdOpts.maxPages, 10) : undefined;
+
+        const usePagination = cmdOpts.all || cmdOpts.cursor;
+
+        if (cmdOpts.maxPages !== undefined && !usePagination) {
+          console.error(`${ctx.p('err')}--max-pages requires --all or --cursor.`);
+          process.exit(2);
+        }
+
+        let count = 20;
+        if (!usePagination) {
+          const countResult = ctx.parseIntegerOption(cmdOpts.count, { name: '--count', min: 1 });
+          if (!countResult.ok) {
+            console.error(`${ctx.p('err')}${countResult.error}`);
+            process.exit(2);
+          }
+          count = countResult.value;
+        }
+
+        let maxPages: number | undefined;
+        if (cmdOpts.maxPages !== undefined) {
+          const maxPagesResult = ctx.parseIntegerOption(cmdOpts.maxPages, { name: '--max-pages', min: 1 });
+          if (!maxPagesResult.ok) {
+            console.error(`${ctx.p('err')}${maxPagesResult.error}`);
+            process.exit(2);
+          }
+          maxPages = maxPagesResult.value;
+        }
 
         const { cookies, warnings } = await ctx.resolveCredentialsFromOptions(opts);
 
@@ -46,25 +71,11 @@ export function registerBookmarksCommand(program: Command, ctx: CliContext): voi
           process.exit(1);
         }
 
-        const usePagination = cmdOpts.all || cmdOpts.cursor;
-        if (maxPages !== undefined && !usePagination) {
-          console.error(`${ctx.p('err')}--max-pages requires --all or --cursor.`);
-          process.exit(1);
-        }
-        if (!usePagination && (!Number.isFinite(count) || count <= 0)) {
-          console.error(`${ctx.p('err')}Invalid --count. Expected a positive integer.`);
-          process.exit(1);
-        }
-        if (maxPages !== undefined && (!Number.isFinite(maxPages) || maxPages <= 0)) {
-          console.error(`${ctx.p('err')}Invalid --max-pages. Expected a positive integer.`);
-          process.exit(1);
-        }
-
         const client = new TwitterClient({ cookies, timeoutMs });
         const folderId = cmdOpts.folderId ? extractBookmarkFolderId(cmdOpts.folderId) : null;
         if (cmdOpts.folderId && !folderId) {
           console.error(`${ctx.p('err')}Invalid --folder-id. Expected numeric ID or https://x.com/i/bookmarks/<id>.`);
-          process.exit(1);
+          process.exit(2);
         }
         const includeRaw = cmdOpts.jsonFull ?? false;
         const timelineOptions = { includeRaw };

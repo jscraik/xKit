@@ -6,7 +6,8 @@ export type CliInvocation = {
   showHelp: boolean;
 };
 
-const TWEET_URL_REGEX = /^(?:https?:\/\/)?(?:www\.)?(?:twitter\.com|x\.com)\/[^/]+\/status\/\d+/i;
+const TWEET_URL_REGEX =
+  /^(?:https?:\/\/)?(?:www\.)?(?:twitter\.com|x\.com)\/(?:[^/]+\/status|i\/web\/status|i\/status)\/\d+/i;
 const TWEET_ID_REGEX = /^\d{8,}$/;
 
 /**

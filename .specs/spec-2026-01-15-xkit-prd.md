@@ -265,3 +265,77 @@ stateDiagram-v2
 * [ ] Scope includes explicit OUT
 * [ ] Dependencies and risks exist
 * [ ] No implementation details
+
+## Tasks
+- [ ] Enumerate CLI commands and default flags for read/search/thread/mentions/news/bookmarks/lists
+  - Acceptance: Each command lists its default flags and required inputs.
+  - Tests: N/A (spec-only).
+- [ ] Define stable JSON output keys per command (minimum fields + `_schemaVersion`)
+  - Acceptance: Each command’s JSON output lists required keys and example shapes.
+  - Tests: N/A (spec-only).
+- [ ] Specify deterministic archive file naming and storage layout
+  - Acceptance: Archive paths and filenames are documented with examples.
+  - Tests: N/A (spec-only).
+- [ ] Define required archive frontmatter fields and their types
+  - Acceptance: Required fields (URL, author, timestamp, category, source) are listed with types.
+  - Tests: N/A (spec-only).
+- [ ] Document archive degraded mode output when enrichment fails
+  - Acceptance: Minimal output fields and `enrichment_status` behavior are specified.
+  - Tests: N/A (spec-only).
+- [ ] Define default category mapping and folder rules
+  - Acceptance: Default categories, match rules, and destinations are listed.
+  - Tests: N/A (spec-only).
+- [ ] Document categorization overrides and opt-out behavior
+  - Acceptance: How users override categories or disable categorization is documented.
+  - Tests: N/A (spec-only).
+- [ ] Specify query ID cache location and refresh lifecycle
+  - Acceptance: Cache file location and refresh triggers are documented.
+  - Tests: N/A (spec-only).
+- [ ] Define `xkit query-ids --fresh` success and error UX
+  - Acceptance: Output messages and retry guidance are documented.
+  - Tests: N/A (spec-only).
+- [ ] Define `--plain` output rules for all commands
+  - Acceptance: Plain output rules cover ANSI removal, emoji removal, and stable phrasing.
+  - Tests: N/A (spec-only).
+- [ ] Define `xkit setup` required inputs and happy-path flow
+  - Acceptance: Steps list required inputs and final success message.
+  - Tests: N/A (spec-only).
+- [ ] Define `xkit setup` error guidance for missing cookies and permissions
+  - Acceptance: Each setup error shows a specific fix.
+  - Tests: N/A (spec-only).
+- [ ] Document error UX patterns for auth errors
+  - Acceptance: Auth errors include next-step commands and help text.
+  - Tests: N/A (spec-only).
+- [ ] Document error UX patterns for rate limits and API changes
+  - Acceptance: Rate-limit and API-change errors include cooldown/retry guidance.
+  - Tests: N/A (spec-only).
+- [ ] Document error UX patterns for missing output paths
+  - Acceptance: Output-path errors include path creation guidance.
+  - Tests: N/A (spec-only).
+- [ ] Define observability metrics and local-only storage format
+  - Acceptance: Metrics list and storage path/format are documented.
+  - Tests: N/A (spec-only).
+- [ ] Define opt-in telemetry decision and user controls
+  - Acceptance: Opt-in toggle and privacy constraints are documented.
+  - Tests: N/A (spec-only).
+- [ ] Draft runbook outline for query ID breakage
+  - Acceptance: Steps include detection, refresh, and rollback guidance.
+  - Tests: N/A (spec-only).
+- [ ] Draft runbook outline for cookie auth recovery
+  - Acceptance: Steps include verification and alternative cookie sources.
+  - Tests: N/A (spec-only).
+- [ ] Specify unit test scope for CLI command parsing and output shaping
+  - Acceptance: Unit test targets and minimum assertions are listed.
+  - Tests: N/A (spec-only).
+- [ ] Specify integration test scope for archive outputs and categorization
+  - Acceptance: Integration test targets and required fixtures are listed.
+  - Tests: N/A (spec-only).
+- [ ] Specify live test scope and required environment variables
+  - Acceptance: Live test scope and required env vars are documented.
+  - Tests: N/A (spec-only).
+- [ ] Define performance measurement approach for startup and command latency
+  - Acceptance: Measurement method and thresholds are documented.
+  - Tests: N/A (spec-only).
+- [ ] Finalize evidence plan tracking fields (owner, date, success signal)
+  - Acceptance: Evidence plan fields are defined and consistent across tasks.
+  - Tests: N/A (spec-only).

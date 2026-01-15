@@ -3,7 +3,8 @@
  * Re-exports Logger class from bookmark-export with analysis-specific instance
  */
 
-export { Logger, type LogContext, type LoggerOptions, type LogLevel } from '../bookmark-export/logger.js';
+export { type LogContext, Logger, type LoggerOptions, type LogLevel } from '../bookmark-export/logger.js';
+
 import { Logger } from '../bookmark-export/logger.js';
 
 /**

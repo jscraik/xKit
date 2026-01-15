@@ -4,7 +4,7 @@
 
 import Ajv, { type ErrorObject } from 'ajv';
 import addFormats from 'ajv-formats';
-import analysisSchema from './schemas/analysis-schema.json' with { type: 'json' };
+import analysisSchema from './schemas/analysis-schema.js' with { type: 'json' };
 import type { AnalysisExport } from './types.js';
 
 const ajv = new Ajv.default({ allErrors: true });

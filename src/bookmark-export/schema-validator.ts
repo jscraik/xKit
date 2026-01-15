@@ -4,7 +4,7 @@
 
 import Ajv, { type ErrorObject } from 'ajv';
 import addFormats from 'ajv-formats';
-import exportSchema from './schemas/export-schema.json' with { type: 'json' };
+import exportSchema from './schemas/export-schema.js' with { type: 'json' };
 import type { BookmarkExport } from './types.js';
 
 const ajv = new Ajv.default({ allErrors: true });

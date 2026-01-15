@@ -1,0 +1,15 @@
+erDiagram
+  ARCHIVE_ENTRY {
+    string id
+    string url
+    string author
+    string created_at
+    string category
+    string source
+  }
+  ARCHIVE_ENTRY }o--|| CATEGORY : classified_as
+  CATEGORY {
+    string name
+    string action
+    string folder
+  }

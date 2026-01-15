@@ -231,9 +231,7 @@ describe('XAPIClient Authentication', () => {
                 reply_count: 5,
               },
               entities: {
-                urls: [
-                  { expanded_url: 'https://example.com/article' },
-                ],
+                urls: [{ expanded_url: 'https://example.com/article' }],
               },
             },
           ],
@@ -625,10 +623,10 @@ describe('XAPIClient Authentication', () => {
                   fc.record({
                     expanded_url: fc.webUrl(),
                   }),
-                  { minLength: 1, maxLength: 3 }
+                  { minLength: 1, maxLength: 3 },
                 ),
               }),
-              { nil: undefined }
+              { nil: undefined },
             ),
           }),
           async (author, tweetData) => {
@@ -705,9 +703,9 @@ describe('XAPIClient Authentication', () => {
             expect(bookmark.likeCount).toBeGreaterThanOrEqual(0);
             expect(bookmark.retweetCount).toBeGreaterThanOrEqual(0);
             expect(bookmark.replyCount).toBeGreaterThanOrEqual(0);
-          }
+          },
         ),
-        { numRuns: 100 }
+        { numRuns: 100 },
       );
     });
   });

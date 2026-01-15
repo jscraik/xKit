@@ -1,5 +1,75 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- **Bookmark Archiving System** - Comprehensive bookmark archiving inspired by Smaug
+  - `xkit archive` command for unified bookmark archiving workflow
+  - `xkit setup` interactive configuration wizard
+  - Automatic URL expansion and t.co link resolution
+  - Content extraction from linked pages (GitHub repos, articles, videos)
+  - Smart categorization system with customizable rules
+  - Markdown output with frontmatter and rich metadata
+  - Knowledge base organization (tools/, articles/, videos/, podcasts/)
+  - Incremental processing with state management
+  - GitHub repository metadata extraction (README, stars, language, topics)
+  - Article metadata extraction (title, author, reading time, excerpt)
+  - Video metadata extraction (title, duration, description)
+  - Date-based grouping in archive file
+  - Duplicate detection and filtering
+  - Force re-processing option
+  - Custom output directories and timezone support
+  - Library exports for programmatic usage
+
+- **Webhook Notifications** - Real-time notifications for archive operations
+  - Discord webhook support with rich embeds
+  - Slack webhook support with attachments
+  - Generic webhook support for custom integrations
+  - Event types: start, success, error, rate_limit
+  - Color-coded messages with detailed statistics
+  - Configurable notification preferences
+
+- **Folder Support** - Twitter bookmark folder integration
+  - Map bookmark folder IDs to tag names
+  - Preserve folder organization as tags
+  - Fetch from specific folders with `--folder-id`
+  - Automatic folder tag addition
+  - Support for multiple folder configurations
+
+- **Media Attachment Support** - Extract and display tweet media
+  - Extract photos, videos, and GIFs from tweets
+  - Media metadata (type, URL, dimensions, duration)
+  - Format media for markdown output
+  - Media summary generation
+  - Configurable media inclusion with `--include-media`
+
+- **Progress & Stats Reporting** - Detailed processing insights
+  - Real-time progress tracking with progress bars
+  - Processing time breakdown (enrichment, categorization, writing)
+  - Archive growth statistics (daily/weekly/monthly)
+  - Detailed performance metrics
+  - Error tracking and reporting
+  - Display with `--stats` flag
+
+- **Daemon/Watch Mode** - Continuous background archiving
+  - `xkit daemon start` - Start continuous archiving
+  - `xkit daemon stop` - Stop the daemon
+  - `xkit daemon status` - Show daemon status
+  - Configurable intervals (30s, 5m, 1h, etc.)
+  - Run on start option with `--run-now`
+  - Automatic retry with exponential backoff
+  - Graceful shutdown handling
+  - Event system for monitoring
+
+### Changed
+
+- Enhanced bookmark commands to support new archiving features
+- Updated package description and keywords
+- Added comprehensive documentation in `docs/bookmark-archiving.md`
+- Archive command now supports 13 options for full customization
+- Library exports expanded to include all new modules
+
 ## 0.7.0
 
 ### Minor Changes

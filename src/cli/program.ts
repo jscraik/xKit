@@ -2,7 +2,9 @@ import { Command } from 'commander';
 import { registerBookmarkAnalysisCommand } from '../commands/bookmark-analysis.js';
 import { registerBookmarkExportCommand } from '../commands/bookmark-export.js';
 import { registerBookmarksCommand } from '../commands/bookmarks.js';
+import { registerBookmarksArchiveCommand } from '../commands/bookmarks-archive.js';
 import { registerCheckCommand } from '../commands/check.js';
+import { registerDaemonCommands } from '../commands/daemon.js';
 import { registerHelpCommand } from '../commands/help.js';
 import { registerListsCommand } from '../commands/lists.js';
 import { registerNewsCommands } from '../commands/news.js';
@@ -10,6 +12,7 @@ import { registerPostCommands } from '../commands/post.js';
 import { registerQueryIdsCommand } from '../commands/query-ids.js';
 import { registerReadCommands } from '../commands/read.js';
 import { registerSearchCommands } from '../commands/search.js';
+import { registerSetupCommand } from '../commands/setup.js';
 import { registerUnbookmarkCommand } from '../commands/unbookmark.js';
 import { registerUserCommands } from '../commands/users.js';
 import { getCliVersion } from '../lib/version.js';
@@ -28,6 +31,8 @@ export const KNOWN_COMMANDS = new Set([
   'search',
   'mentions',
   'bookmarks',
+  'bookmarks-archive',
+  'archive',
   'unbookmark',
   'following',
   'followers',
@@ -38,6 +43,8 @@ export const KNOWN_COMMANDS = new Set([
   'help',
   'whoami',
   'check',
+  'setup',
+  'daemon',
   'export-bookmarks',
   'analyze-bookmarks',
 ]);
@@ -149,12 +156,15 @@ export function createProgram(ctx: CliContext): Command {
   });
 
   registerHelpCommand(program, ctx);
+  registerSetupCommand(program, ctx);
   registerQueryIdsCommand(program, ctx);
   registerPostCommands(program, ctx);
   registerReadCommands(program, ctx);
   registerSearchCommands(program, ctx);
   registerNewsCommands(program, ctx);
   registerBookmarksCommand(program, ctx);
+  registerBookmarksArchiveCommand(program, ctx);
+  registerDaemonCommands(program, ctx);
   registerUnbookmarkCommand(program, ctx);
   registerListsCommand(program, ctx);
   registerUserCommands(program, ctx);

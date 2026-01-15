@@ -1,0 +1,9 @@
+sequenceDiagram
+  participant U as User
+  participant C as CLI
+  participant X as X GraphQL
+  U->>C: xkit archive
+  C->>X: Fetch bookmarks
+  X-->>C: Bookmark data
+  C->>C: Enrich + categorize
+  C-->>U: Write archive + summary

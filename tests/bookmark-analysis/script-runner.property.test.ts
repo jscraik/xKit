@@ -3,9 +3,9 @@
  * Feature: bookmark-export-analysis
  */
 
-import * as fc from 'fast-check';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
+import * as fc from 'fast-check';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ScriptRunner } from '../../src/bookmark-analysis/script-runner.js';
 import type { BookmarkRecord } from '../../src/bookmark-export/types.js';
@@ -17,8 +17,7 @@ const arbitraryISODateTime = (): fc.Arbitrary<string> => {
   // Generate timestamps between 2000-01-01 and 2030-12-31
   const minTimestamp = new Date('2000-01-01').getTime();
   const maxTimestamp = new Date('2030-12-31').getTime();
-  return fc.integer({ min: minTimestamp, max: maxTimestamp })
-    .map(timestamp => new Date(timestamp).toISOString());
+  return fc.integer({ min: minTimestamp, max: maxTimestamp }).map((timestamp) => new Date(timestamp).toISOString());
 };
 
 const arbitraryBookmarkRecord = (): fc.Arbitrary<BookmarkRecord> => {
@@ -100,36 +99,43 @@ process.stdin.on('end', () => {
    */
   it('Property 14: should execute script with complete bookmark record as input', async () => {
     await fc.assert(
-      fc.asyncProperty(
-        arbitraryBookmarkRecord(),
-        async (bookmark) => {
-          const runner = new ScriptRunner();
-          await runner.loadScript(echoScriptPath);
-          const result = await runner.execute(bookmark);
+      fc.asyncProperty(arbitraryBookmarkRecord(), async (bookmark) => {
+        const runner = new ScriptRunner();
+        await runner.loadScript(echoScriptPath);
+        const result = await runner.execute(bookmark);
 
-          // Verify the script received the complete bookmark record
-          expect(result).toHaveProperty('receivedInput');
-          const receivedInput = result.receivedInput as BookmarkRecord;
+        // Verify the script received the complete bookmark record
+        expect(result).toHaveProperty('receivedInput');
+        const receivedInput = result.receivedInput as BookmarkRecord;
 
-          // All required fields should be present and match
-          expect(receivedInput.id).toBe(bookmark.id);
-          expect(receivedInput.url).toBe(bookmark.url);
-          expect(receivedInput.text).toBe(bookmark.text);
-          expect(receivedInput.authorUsername).toBe(bookmark.authorUsername);
-          expect(receivedInput.authorName).toBe(bookmark.authorName);
-          expect(receivedInput.createdAt).toBe(bookmark.createdAt);
-          expect(receivedInput.likeCount).toBe(bookmark.likeCount);
-          expect(receivedInput.retweetCount).toBe(bookmark.retweetCount);
-          expect(receivedInput.replyCount).toBe(bookmark.replyCount);
+        // All required fields should be present and match
+        expect(receivedInput.id).toBe(bookmark.id);
+        expect(receivedInput.url).toBe(bookmark.url);
+        expect(receivedInput.text).toBe(bookmark.text);
+        expect(receivedInput.authorUsername).toBe(bookmark.authorUsername);
+        expect(receivedInput.authorName).toBe(bookmark.authorName);
+        expect(receivedInput.createdAt).toBe(bookmark.createdAt);
+        expect(receivedInput.likeCount).toBe(bookmark.likeCount);
+        expect(receivedInput.retweetCount).toBe(bookmark.retweetCount);
+        expect(receivedInput.replyCount).toBe(bookmark.replyCount);
 
-          // The input should be a complete JSON object (no missing fields)
-          const expectedKeys = ['id', 'url', 'text', 'authorUsername', 'authorName', 'createdAt', 'likeCount', 'retweetCount', 'replyCount'];
-          for (const key of expectedKeys) {
-            expect(receivedInput).toHaveProperty(key);
-          }
+        // The input should be a complete JSON object (no missing fields)
+        const expectedKeys = [
+          'id',
+          'url',
+          'text',
+          'authorUsername',
+          'authorName',
+          'createdAt',
+          'likeCount',
+          'retweetCount',
+          'replyCount',
+        ];
+        for (const key of expectedKeys) {
+          expect(receivedInput).toHaveProperty(key);
         }
-      ),
-      { numRuns: 100 }
+      }),
+      { numRuns: 100 },
     );
   }, 30000); // 30 second timeout for property-based test
 
@@ -139,19 +145,16 @@ process.stdin.on('end', () => {
    */
   it('should provide valid JSON input to scripts', async () => {
     await fc.assert(
-      fc.asyncProperty(
-        arbitraryBookmarkRecord(),
-        async (bookmark) => {
-          const runner = new ScriptRunner();
-          await runner.loadScript(jsonValidatorScriptPath);
-          const result = await runner.execute(bookmark);
+      fc.asyncProperty(arbitraryBookmarkRecord(), async (bookmark) => {
+        const runner = new ScriptRunner();
+        await runner.loadScript(jsonValidatorScriptPath);
+        const result = await runner.execute(bookmark);
 
-          // Script should have successfully parsed the JSON
-          expect(result.jsonValid).toBe(true);
-          expect(result.inputType).toBe('object');
-        }
-      ),
-      { numRuns: 100 }
+        // Script should have successfully parsed the JSON
+        expect(result.jsonValid).toBe(true);
+        expect(result.inputType).toBe('object');
+      }),
+      { numRuns: 100 },
     );
   }, 30000);
 
@@ -205,9 +208,9 @@ process.stdin.on('end', () => {
 
           // Clean up
           await fs.unlink(validScriptPath);
-        }
+        },
       ),
-      { numRuns: 50 }
+      { numRuns: 50 },
     );
 
     // Test with invalid outputs

@@ -1,0 +1,12 @@
+flowchart LR
+  CLI[CLI Entrypoint] --> Router[Command Router]
+  Router --> Creds[Credential Resolver]
+  Router --> XAPI[X GraphQL Client]
+  XAPI --> X[X/Twitter GraphQL]
+  Router --> Archive[Archive Pipeline]
+  Archive --> Enrich[Enrichment]
+  Archive --> Categorize[Categorization]
+  Archive --> Writer[Markdown Writer]
+  Writer --> FS[(Local Files)]
+  Router --> QueryIds[Query ID Cache]
+  QueryIds --> FS

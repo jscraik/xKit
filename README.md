@@ -20,8 +20,10 @@ Last updated: 2026-01-09
 
 - [Disclaimer](#disclaimer)
 - [Risks and assumptions](#risks-and-assumptions)
+- [Product specs](#product-specs)
 - [Install](#install)
 - [Quickstart](#quickstart)
+- [Bookmark Archiving](#bookmark-archiving) ⭐ NEW
 - [Library](#library)
 - [Commands](#commands)
 - [Authentication (GraphQL)](#authentication-graphql)
@@ -45,6 +47,11 @@ and anti-bot behavior at any time — **expect this to break without notice**.
 - Log in to X/Twitter in a supported browser (or provide cookies manually).
 - X can rate-limit, challenge, or change GraphQL/REST behavior without notice.
 - Cookie extraction reads local browser stores; follow least-privilege practices and avoid sharing cookie values.
+
+## Product specs
+
+- PRD: [.specs/spec-2026-01-15-xkit-prd.md](.specs/spec-2026-01-15-xkit-prd.md)
+- Tech spec: [.specs/tech-spec-2026-01-15-xkit.md](.specs/tech-spec-2026-01-15-xkit.md)
 
 ## Install
 
@@ -115,6 +122,48 @@ xkit followers --user 12345678 -n 10  # by user ID
 xkit query-ids --fresh
 ```
 
+## Bookmark Archiving
+
+⭐ **NEW**: xKit now includes comprehensive bookmark archiving with automatic enrichment, categorization, and knowledge base organization!
+
+```bash
+# Interactive setup wizard
+xkit setup
+
+# Archive bookmarks to markdown
+xkit archive
+
+# Archive all bookmarks with enrichment
+xkit archive --all
+
+# Include media attachments
+xkit archive --include-media
+
+# Send notifications to Discord
+xkit archive --webhook-url "https://discord.com/..." --webhook-type discord
+
+# Show detailed statistics
+xkit archive --stats
+
+# Continuous archiving (daemon mode)
+xkit daemon start --interval 30m
+```
+
+**Features:**
+
+- 🔗 Automatic URL expansion and content extraction
+- 🏷️ Smart categorization (GitHub repos, articles, videos, etc.)
+- 📄 Beautiful markdown output with frontmatter
+- 💾 Incremental processing (only new bookmarks)
+- 📁 Organized knowledge base structure
+- 📢 Webhook notifications (Discord, Slack, custom)
+- 📂 Folder support with tag preservation
+- 📷 Media attachment handling
+- 📊 Detailed statistics and progress tracking
+- 🤖 Daemon mode for continuous archiving
+
+**See the complete guide:** [docs/bookmark-archiving.md](docs/bookmark-archiving.md)
+
 ## Library
 
 Use `xkit` as a library (same GraphQL client as the CLI):
@@ -159,7 +208,7 @@ const sportsNews = await client.getNews(10, {
 - `xkit likes [-n count] [--json] [--json-full]` — list your liked tweets.
 - `xkit following [--user <userId>] [-n count] [--json]` — list users that you (or another user) follow.
 - `xkit followers [--user <userId>] [-n count] [--json]` — list users that follow you (or another user).
-- `xkit lists [--member-of] [-n count] [--json]` — list your owned lists or lists you're a member of.
+- `xkit lists [--member-of] [-n count] [--json]` — list your owned lists or lists you belong to.
 - `xkit list-timeline <list-id-or-url> [-n count] [--json] [--json-full]` — get tweets from a list timeline.
 - `xkit whoami` — print which Twitter account your cookies belong to.
 - `xkit check` — show available credentials and their source.
@@ -183,7 +232,7 @@ xkit news --no-ai-only -n 20
 xkit news --json-full -n 10
 ```
 
-**Tab options** (can be combined with `--tabs`):
+**Tab options** (combine with `--tabs`):
 
 - `for_you` — Personalized news and trends
 - `trending` — Currently trending topics
@@ -192,7 +241,7 @@ xkit news --json-full -n 10
 - `entertainment` — Entertainment news
 
 By default, the command fetches from `for_you`, `news`, `sports`, and `entertainment` tabs (trending excluded to
-reduce noise). Headlines are automatically deduplicated across tabs.
+reduce noise). The system automatically deduplicates headlines across tabs.
 
 Global options:
 
@@ -318,7 +367,7 @@ When using `--json` with `news`, news objects include:
 | `description` | string? | Item description |
 | `url` | string? | URL to the trend or news article |
 | `tab` | string? | Source tab (for_you, trending, news, sports, entertainment) |
-| `_raw` | object? | Raw API response (only when `--json-full` is used) |
+| `_raw` | object? | Raw API response (only with `--json-full`) |
 
 ## Troubleshooting
 

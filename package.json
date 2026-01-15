@@ -1,7 +1,7 @@
 {
   "name": "@brainwav/xkit",
   "version": "0.7.0",
-  "description": "CLI tool for tweeting and replying via Twitter/X GraphQL API",
+  "description": "CLI tool for tweeting, replying, reading, and archiving bookmarks via Twitter/X GraphQL API",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -74,7 +74,11 @@
     "tweet",
     "post",
     "graphql",
-    "api"
+    "api",
+    "bookmarks",
+    "archive",
+    "markdown",
+    "knowledge-base"
   ],
   "author": "Jamie Craik",
   "license": "MIT",

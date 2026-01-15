@@ -9,8 +9,8 @@ import {
   AuthenticationError,
   DEFAULT_RETRY_CONFIG,
   NetworkError,
-  retryWithBackoff,
   type RetryConfig,
+  retryWithBackoff,
 } from './errors.js';
 import { logger } from './logger.js';
 import type { BookmarkRecord, Credentials, RateLimitInfo } from './types.js';
@@ -80,32 +80,16 @@ export class XAPIClient {
 
       // Authentication errors
       if (statusCode === 401 || statusCode === 403) {
-        return new AuthenticationError(
-          `Authentication failed: ${error.message || 'Unauthorized'}`,
-          operation,
-          error
-        );
+        return new AuthenticationError(`Authentication failed: ${error.message || 'Unauthorized'}`, operation, error);
       }
 
       // API errors with status codes
-      return new APIError(
-        error.message || `API error: ${statusCode}`,
-        operation,
-        statusCode,
-        error
-      );
+      return new APIError(error.message || `API error: ${statusCode}`, operation, statusCode, error);
     }
 
     // Network errors
     const message = error?.message || String(error);
-    const networkErrorPatterns = [
-      'network',
-      'timeout',
-      'econnreset',
-      'econnrefused',
-      'etimedout',
-      'socket hang up',
-    ];
+    const networkErrorPatterns = ['network', 'timeout', 'econnreset', 'econnrefused', 'etimedout', 'socket hang up'];
 
     if (networkErrorPatterns.some((pattern) => message.toLowerCase().includes(pattern))) {
       return new NetworkError(message, operation, error);
@@ -166,7 +150,7 @@ export class XAPIClient {
             operation,
             error: error.message,
           });
-        }
+        },
       );
 
       logger.info('Authentication successful', {
@@ -219,7 +203,7 @@ export class XAPIClient {
             operation,
             error: error.message,
           });
-        }
+        },
       );
 
       return {
@@ -275,7 +259,7 @@ export class XAPIClient {
             cursor,
             error: error.message,
           });
-        }
+        },
       );
 
       // Extract rate limit information from response

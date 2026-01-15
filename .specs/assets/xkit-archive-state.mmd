@@ -1,0 +1,11 @@
+stateDiagram-v2
+  [*] --> IDLE
+  IDLE --> FETCHING: archive command
+  FETCHING --> ENRICHING: bookmarks received
+  FETCHING --> ERROR: fetch failed
+  ENRICHING --> WRITING: enrichment done
+  ENRICHING --> ERROR: enrichment failed
+  WRITING --> SUCCESS: files written
+  WRITING --> ERROR: write failed
+  ERROR --> IDLE: user retries
+  SUCCESS --> IDLE

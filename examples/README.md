@@ -1,6 +1,51 @@
-# Custom Analysis Scripts
+# Examples
 
-This directory contains example custom analysis scripts that can be used with the bookmark analysis engine.
+This directory contains example scripts demonstrating xKit's features.
+
+## Bookmark Archiving
+
+### bookmark-archiving.js
+
+Complete example of programmatic bookmark archiving using xKit's library exports.
+
+**Features demonstrated:**
+
+- Credential resolution from browser cookies
+- Fetching bookmarks from Twitter
+- URL expansion and content extraction
+- Smart categorization
+- Markdown generation
+- State management for incremental processing
+- Folder support and tagging
+- Media attachment handling
+- Webhook notifications
+- Statistics tracking
+
+**Usage:**
+
+```bash
+node examples/bookmark-archiving.js
+```
+
+**Key components:**
+
+```javascript
+import {
+  TwitterClient,
+  BookmarkEnricher,
+  BookmarkCategorizer,
+  MarkdownWriter,
+  StateManager,
+  WebhookNotifier,
+  FolderManager,
+  MediaHandler,
+  StatsTracker,
+} from '@brainwav/xkit';
+```
+
+## Custom Analysis Scripts
+
+This directory also contains example custom analysis scripts that can be used with the bookmark analysis engine.
 
 ## Script Format
 

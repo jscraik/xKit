@@ -71,4 +71,7 @@ export interface EnrichmentConfig {
   maxRedirects: number;
   timeout: number;
   userAgent: string;
+  enableFullContent?: boolean;
+  enableSummarization?: boolean;
+  ollamaModel?: string;
 }

@@ -31,6 +31,9 @@ interface ArchiveOptions {
   webhookUrl?: string;
   webhookType?: 'discord' | 'slack' | 'generic';
   stats?: boolean;
+  summarize?: boolean;
+  ollamaModel?: string;
+  noFullContent?: boolean;
 }
 
 /**
@@ -84,6 +87,9 @@ async function archiveBookmarks(options: ArchiveOptions, program: Command, ctx: 
     const enricher = new BookmarkEnricher({
       expandUrls: !options.skipEnrichment,
       extractContent: !options.skipEnrichment,
+      enableFullContent: !options.noFullContent,
+      enableSummarization: options.summarize || false,
+      ollamaModel: options.ollamaModel,
     });
     const categorizer = new BookmarkCategorizer();
     const writer = new MarkdownWriter({
@@ -174,6 +180,9 @@ async function archiveBookmarks(options: ArchiveOptions, program: Command, ctx: 
     // Step 6: Enrich bookmarks
     if (!options.skipEnrichment) {
       console.log('🔗 Enriching content...');
+      if (options.summarize) {
+        console.log('🤖 AI summarization enabled (using Ollama)');
+      }
       const enrichStart = Date.now();
 
       const enrichedBookmarks = await enricher.enrichBatch(bookmarksToProcess, {
@@ -303,6 +312,9 @@ export function registerBookmarksArchiveCommand(program: Command, ctx: CliContex
     .option('--webhook-url <url>', 'Webhook URL for notifications (Discord, Slack, etc.)')
     .option('--webhook-type <type>', 'Webhook type: discord, slack, or generic', 'generic')
     .option('--stats', 'Show detailed processing statistics')
+    .option('--summarize', 'Generate AI summaries using local Ollama')
+    .option('--ollama-model <name>', 'Ollama model to use (default: qwen2.5:7b)')
+    .option('--no-full-content', 'Disable full article content extraction')
     .action(async (options: ArchiveOptions) => {
       try {
         await archiveBookmarks(options, program, ctx);

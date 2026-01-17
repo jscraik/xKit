@@ -1,0 +1,15 @@
+{
+  // Project-level xKit configuration
+  
+  // Use Safari as the default browser for cookie extraction
+  cookieSource: "safari",
+  
+  // Default timeout for API requests (10 seconds)
+  timeoutMs: 10000,
+  
+  // Cookie extraction timeout (5 seconds)
+  cookieTimeoutMs: 5000,
+  
+  // Maximum depth for quoted tweets (1 level deep)
+  quoteDepth: 1
+}

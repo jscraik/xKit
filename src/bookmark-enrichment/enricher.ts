@@ -20,6 +20,9 @@ export class BookmarkEnricher {
       maxRedirects: config.maxRedirects ?? 10,
       timeout: config.timeout ?? 10000,
       userAgent: config.userAgent ?? 'xKit/1.0 (Bookmark Enrichment)',
+      enableFullContent: config.enableFullContent ?? true,
+      enableSummarization: config.enableSummarization ?? false,
+      ollamaModel: config.ollamaModel,
     };
 
     this.urlExpander = new UrlExpander({
@@ -31,8 +34,9 @@ export class BookmarkEnricher {
     this.contentExtractor = new ContentExtractor({
       timeout: this.config.timeout,
       userAgent: this.config.userAgent,
-      enableFullContent: true,
-      enableSummarization: false, // Can be enabled via CLI flag
+      enableFullContent: this.config.enableFullContent,
+      enableSummarization: this.config.enableSummarization,
+      ollamaModel: this.config.ollamaModel,
     });
   }
 

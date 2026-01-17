@@ -20,6 +20,7 @@ export class ContentExtractor {
       userAgent?: string;
       enableFullContent?: boolean;
       enableSummarization?: boolean;
+      ollamaModel?: string;
     } = {},
   ) {
     this.timeout = options.timeout ?? 10000;
@@ -33,7 +34,11 @@ export class ContentExtractor {
     });
 
     // Initialize Ollama client if summarization is enabled
-    this.ollamaClient = this.enableSummarization ? new OllamaClient() : null;
+    this.ollamaClient = this.enableSummarization
+      ? new OllamaClient({
+        model: options.ollamaModel,
+      })
+      : null;
   }
 
   /**

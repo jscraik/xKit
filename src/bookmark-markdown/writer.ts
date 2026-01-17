@@ -132,7 +132,7 @@ export class MarkdownWriter {
   }
 
   /**
-   * Get month path for organizing files (e.g., "2026/jan")
+   * Get month path for organizing files (e.g., "jan_2026")
    */
   private getMonthPath(isoDate: string): string {
     const date = new Date(isoDate);
@@ -142,7 +142,7 @@ export class MarkdownWriter {
       timeZone: this.config.timezone
     }).toLowerCase();
 
-    return `${year}/${month}`;
+    return `${month}_${year}`;
   }
 
   /**

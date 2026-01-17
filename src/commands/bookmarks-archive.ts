@@ -299,7 +299,7 @@ export function registerBookmarksArchiveCommand(program: Command, ctx: CliContex
     .option('--output-dir <path>', 'Knowledge base directory', './knowledge')
     .option('--archive-file <path>', 'Archive markdown file', './bookmarks.md')
     .option('--timezone <tz>', 'Timezone for date formatting', 'America/New_York')
-    .option('--organize-by-month', 'Organize knowledge files by year/month (e.g., 2026/jan/)')
+    .option('--organize-by-month', 'Organize knowledge files by month_year (e.g., jan_2026/)')
     .option('--webhook-url <url>', 'Webhook URL for notifications (Discord, Slack, etc.)')
     .option('--webhook-type <type>', 'Webhook type: discord, slack, or generic', 'generic')
     .option('--stats', 'Show detailed processing statistics')

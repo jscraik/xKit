@@ -10,17 +10,14 @@ When enabled, knowledge files (articles, videos, GitHub repos, tools) are organi
 
 ```
 knowledge/
-├── 2026/
-│   └── jan/
-│       ├── tools/
-│       ├── articles/
-│       └── videos/
-├── 2025/
-│   ├── dec/
-│   ├── nov/
-│   └── sep/
-│       └── tools/
-└── bookmarks.md (main archive)
+├── jan_2026/
+│   ├── tools/
+│   ├── articles/
+│   └── videos/
+├── dec_2025/
+├── nov_2025/
+└── sep_2025/
+    └── tools/
 ```
 
 ## Usage
@@ -57,7 +54,7 @@ pnpm run dev bookmarks-archive --all --organize-by-month --include-media --stats
 ### Path Generation Logic
 
 ```typescript
-// Example: "2026-01-17T10:30:00Z" -> "2026/jan"
+// Example: "2026-01-17T10:30:00Z" -> "jan_2026"
 private getMonthPath(isoDate: string): string {
   const date = new Date(isoDate);
   const year = date.getFullYear();
@@ -66,7 +63,7 @@ private getMonthPath(isoDate: string): string {
     timeZone: this.config.timezone 
   }).toLowerCase();
   
-  return `${year}/${month}`;
+  return `${month}_${year}`;
 }
 ```
 
@@ -74,8 +71,8 @@ private getMonthPath(isoDate: string): string {
 
 When `--organize-by-month` is enabled:
 
-- Path: `{outputDir}/{year}/{month}/{category}/{filename}.md`
-- Example: `knowledge/2026/jan/tools/my-tool.md`
+- Path: `{outputDir}/{month}_{year}/{category}/{filename}.md`
+- Example: `knowledge/jan_2026/tools/my-tool.md`
 
 When disabled (default):
 
@@ -104,13 +101,12 @@ Tested with 50 bookmarks:
 
 ```
 knowledge/
-├── 2026/
-│   └── jan/
-│       └── tools/
-│           ├── chriswiles-claude-code-showcase.md
-│           ├── paulsolt-docsetquery.md
-│           ├── waynesutton-convexskills.md
-│           └── [4 more files]
+├── jan_2026/
+│   └── tools/
+│       ├── chriswiles-claude-code-showcase.md
+│       ├── paulsolt-docsetquery.md
+│       ├── waynesutton-convexskills.md
+│       └── [4 more files]
 └── bookmarks.md
 ```
 
@@ -129,7 +125,7 @@ Potential improvements:
 Updated help text:
 
 ```
---organize-by-month    Organize knowledge files by year/month (e.g., 2026/jan/)
+--organize-by-month    Organize knowledge files by month_year (e.g., jan_2026/)
 ```
 
 ## Backward Compatibility

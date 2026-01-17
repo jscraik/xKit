@@ -11,6 +11,7 @@
 ---
 
 ## 0) One-screen summary
+
 - **One-liner:** A fast, developer-first X/Twitter CLI with a best-in-class bookmark archiving workflow for knowledge-base creation.
 - **Why now:** The project sits in WIP state and the fastest path to learning + profile growth uses a focused, reliable CLI wedge shared in Codex and Swift communities.
 - **Expected outcome:** A usable CLI with a stable bookmark-archiving workflow and measurable early adoption.
@@ -18,12 +19,14 @@
 ---
 
 ## Executive Summary
+
 xKit provides a solo-dev CLI that makes X workflows scriptable while building a durable bookmark archive. The primary wedge comes from a reliable archive pipeline with deterministic markdown output and stable JSON for scripting. The project avoids official API dependencies and focuses on a learn-by-shipping approach.
 
-We measure success by early adoption signals from Codex and Swift communities (downloads, stars, and testimonials) and by operational reliability (low error rate, stable outputs). The plan includes explicit pause criteria to prevent long-term drift if volatility or lack of adoption persists.
+We measure success by early adoption signals from Codex and Swift communities (downloads, stars, and testimonials) and by operational reliability (low error rate, stable outputs). The plan includes explicit pause criteria to prevent long-term drift if volatility or lack of adoption persists
 ---
 
 ## 1) Problem / Opportunity (with evidence)
+
 - **Problem:** Scriptable access to X workflows proves fragile or blocked behind official API friction; bookmark retention stays poor without automation.
 - **Who feels it most:** Solo developers who want to learn, build credibility, and automate X workflows from the terminal.
 - **Current workaround:** Manual web UI use, ad-hoc scripts, or manual bookmark export.
@@ -33,17 +36,20 @@ We measure success by early adoption signals from Codex and Swift communities (d
   - Track GitHub stars and release downloads to measure profile growth.
   - Post release notes in Codex and Swift feeds and log click-throughs manually.
   - Evidence plan (2-week sprint):
+
     | Action | Channel | Owner | Date | Success signal |
     |---|---|---|---|---|
     | Post release note + demo clip | Codex feed | Jamie | 2026-01-18 | >= 5 replies or 3 stars |
     | Post release note + demo clip | Swift feed | Jamie | 2026-01-20 | >= 5 replies or 3 stars |
     | Ask for 3 testers | GitHub Discussions | Jamie | 2026-01-22 | >= 3 testers |
     | Collect testimonials | GitHub issues/discussions | Jamie | 2026-01-25 | >= 3 quotes |
+
 - **If we do nothing:** The project stays unfocused and adoption stays unclear.
 
 ---
 
 ## 2) Target Users / Personas
+
 | Persona | Role | Context | Goals | Pain points |
 |---|---|---|---|---|
 | “Solo Dev” | Builder/Learner | Personal projects, terminal-first workflow | Learn by shipping, grow profile, automate X | Low visibility, brittle scripts, no API key |
@@ -55,6 +61,7 @@ We measure success by early adoption signals from Codex and Swift communities (d
 ---
 
 ## 3) User Stories (MVP)
+>
 > Format: **As a [persona], I want [action] so that [benefit].**
 
 1) **Story [STORY-001]:** As a Solo Dev, I want to read a tweet/thread by ID or URL so that I can quickly capture context for scripts.
@@ -96,6 +103,7 @@ We measure success by early adoption signals from Codex and Swift communities (d
 ---
 
 ## 4) Functional Requirements (testable)
+
 - FR-1: CLI supports read/search/thread/mentions/news/bookmarks/lists with JSON output option (Must).
 - FR-2: Archive command writes deterministic markdown with stable frontmatter fields (Must).
 - FR-3: Query ID refresh command works without rebuild (Should).
@@ -103,6 +111,7 @@ We measure success by early adoption signals from Codex and Swift communities (d
 - FR-5: Error messages always include a next-step command or checklist (Must).
 
 ### Edge cases & error UX (required)
+
 - If cookies go missing or look not valid, then the user sees a clear auth error and next-step guidance.
 - If query ID refresh fails, then the user sees an error message with a retry suggestion.
 - If the archive output directory does not exist, then the CLI creates it or exits with a clear, actionable error.
@@ -111,6 +120,7 @@ We measure success by early adoption signals from Codex and Swift communities (d
 ---
 
 ## 5) Non-Functional Requirements (high level only)
+
 - **Performance:** Common read/search commands return within 2 seconds for typical requests.
 - **Reliability:** CLI handles API volatility with clear errors and retry guidance for all error types.
 - **Security & privacy:** Treat cookie values as secrets; avoid logging them.
@@ -121,6 +131,7 @@ We measure success by early adoption signals from Codex and Swift communities (d
 ---
 
 ## 6) Success Metrics / KPIs
+
 | Metric | Target | Measurement method | Source |
 |---|---:|---|---|
 | Weekly active users | 25 | npm downloads + manual feedback | npm stats + GitHub discussions |
@@ -131,10 +142,12 @@ We measure success by early adoption signals from Codex and Swift communities (d
 **Measurement window:** 30 days post-release  
 
 ### Guardrails (required)
+
 - CLI startup time must not exceed 2 seconds on a cold start.
 - Bookmark archive output must remain backward compatible for existing users.
 
 ### Pause criteria (required)
+
 - If after 30 days WAU < 10 and fewer than 3 user testimonials, pause and reassess.
 - If query-ID breakage causes >30% command error for 7 consecutive days, pause until resolved.
 - If cookie-based login gets blocked with no workaround for 14 consecutive days, pause the project.
@@ -143,25 +156,30 @@ We measure success by early adoption signals from Codex and Swift communities (d
 ---
 
 ## 7) Scope
+
 ### In scope
+
 - CLI read/search/thread/mentions/news/bookmarks/lists
 - Bookmark archiving + enrichment + categorization
 - Query ID refresh tooling
 - Cookie-based login (current approach)
 
 ### Out of scope (required)
+
 - Official API support
 - Advanced LLM integrations
 - Parallel processing
 - Token tracking
 
 ### Non-goals (recommended)
+
 - Full analytics dashboards
 - Web UI
 
 ---
 
 ## 8) Dependencies
+
 - **Internal:** N/A (solo dev)
 - **External:** X/Twitter GraphQL endpoints (undocumented)
 - **Assumptions (required):**
@@ -173,6 +191,7 @@ We measure success by early adoption signals from Codex and Swift communities (d
 ---
 
 ## 9) Risks and Mitigations
+
 - Risk: X GraphQL changes break commands.  
   - Likelihood: High  
   - Impact: High  
@@ -196,6 +215,7 @@ We measure success by early adoption signals from Codex and Swift communities (d
 ---
 
 ## 10) Timeline / Milestones (optional)
+
 - Milestone: PRD + Tech Spec complete — 2026-01-22
 - Milestone: Query ID refresh runbook — 2026-01-26
 - Milestone: First release with archive workflow — 2026-02-01
@@ -203,7 +223,9 @@ We measure success by early adoption signals from Codex and Swift communities (d
 ---
 
 ## 11) Diagrams (recommended)
+
 ### User journey flow (Mermaid)
+
 ```mermaid
 flowchart TD
   A[User runs xkit archive] --> B{Cookies valid?}
@@ -217,6 +239,7 @@ flowchart TD
 ```
 
 ### User lifecycle state model (Mermaid)
+
 ```mermaid
 stateDiagram-v2
   [*] --> IDLE
@@ -237,36 +260,37 @@ stateDiagram-v2
 
 ### Assumptions
 
-* A-1: Cookie-based login stays the supported auth model.
-* A-2: Measure early adoption via lightweight, manual signals.
-* A-3: Codex and Swift feeds can reach the primary audience.
+- A-1: Cookie-based login stays the supported auth model.
+- A-2: Measure early adoption via lightweight, manual signals.
+- A-3: Codex and Swift feeds can reach the primary audience.
 
 ### Open questions
 
-* Q-1: Do we want telemetry opt-in only, or fully turned off? (Owner: Jamie, Due: 2026-01-20)
-* Q-2: Which pause criteria should trigger a pivot? (Owner: Jamie, Due: 2026-01-25)
+- Q-1: Do we want telemetry opt-in only, or fully turned off? (Owner: Jamie, Due: 2026-01-20)
+- Q-2: Which pause criteria should trigger a pivot? (Owner: Jamie, Due: 2026-01-25)
 
 ---
 
 ## 13) PRD Integrity Rule (required)
 
-* This PRD defines **WHAT / WHY / WHO**.
-* No technical implementation details (databases, frameworks, service topology).
-* Reference the Tech Spec for HOW.
+- This PRD defines **WHAT / WHY / WHO**.
+- No technical implementation details (databases, frameworks, service topology).
+- Reference the Tech Spec for HOW.
 
 ---
 
 ## 14) PRD Quality Gate (required)
 
-* [ ] Problem has evidence
-* [ ] Personas feel specific
-* [ ] Stories follow correct format + acceptance criteria exist
-* [ ] Metrics have numeric targets + measurement method
-* [ ] Scope includes explicit OUT
-* [ ] Dependencies and risks exist
-* [ ] No implementation details
+- [ ] Problem has evidence
+- [ ] Personas feel specific
+- [ ] Stories follow correct format + acceptance criteria exist
+- [ ] Metrics have numeric targets + measurement method
+- [ ] Scope includes explicit OUT
+- [ ] Dependencies and risks exist
+- [ ] No implementation details
 
 ## Tasks
+
 - [ ] Enumerate CLI commands and default flags for read/search/thread/mentions/news/bookmarks/lists
   - Acceptance: Each command lists its default flags and required inputs.
   - Tests: N/A (spec-only).

@@ -108,7 +108,10 @@ export class MarkdownWriter {
         const categoryName = bookmark.categoryFolder
           ? bookmark.categoryFolder.split('/').pop() || bookmark.category || 'general'
           : bookmark.category || 'general';
-        folder = join(this.config.outputDir, monthPath, categoryName);
+
+        // Add author handle as subfolder (e.g., @username)
+        const authorHandle = bookmark.authorUsername ? `@${bookmark.authorUsername}` : 'unknown';
+        folder = join(this.config.outputDir, monthPath, categoryName, authorHandle);
       } else {
         folder = bookmark.categoryFolder || this.config.outputDir;
       }

@@ -34,10 +34,20 @@ export interface LinkedContent {
   excerpt?: string;
   wordCount?: number;
   readingTime?: number;
+  fullContent?: string;
+  textContent?: string;
+  contentLength?: number;
+  siteName?: string;
 
   // Video/Podcast-specific
   duration?: number;
   transcript?: string;
+
+  // AI-generated content
+  summary?: string;
+  keyPoints?: string[];
+  aiGenerated?: boolean;
+  aiModel?: string;
 }
 
 /**

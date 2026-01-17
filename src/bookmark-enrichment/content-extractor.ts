@@ -2,20 +2,38 @@
  * Content extraction from linked pages
  */
 
+import { ArticleExtractor } from './article-extractor.js';
+import { OllamaClient } from './ollama-client.js';
 import type { LinkedContent } from './types.js';
 
 export class ContentExtractor {
   private timeout: number;
   private userAgent: string;
+  private articleExtractor: ArticleExtractor;
+  private ollamaClient: OllamaClient | null;
+  private enableFullContent: boolean;
+  private enableSummarization: boolean;
 
   constructor(
     options: {
       timeout?: number;
       userAgent?: string;
+      enableFullContent?: boolean;
+      enableSummarization?: boolean;
     } = {},
   ) {
     this.timeout = options.timeout ?? 10000;
     this.userAgent = options.userAgent ?? 'xKit/1.0 (Bookmark Enrichment)';
+    this.enableFullContent = options.enableFullContent ?? (process.env.XKIT_EXTRACT_FULL_CONTENT !== 'false');
+    this.enableSummarization = options.enableSummarization ?? false;
+
+    this.articleExtractor = new ArticleExtractor({
+      timeout: this.timeout,
+      userAgent: this.userAgent,
+    });
+
+    // Initialize Ollama client if summarization is enabled
+    this.ollamaClient = this.enableSummarization ? new OllamaClient() : null;
   }
 
   /**
@@ -134,6 +152,53 @@ export class ContentExtractor {
    */
   private async extractArticle(url: string): Promise<LinkedContent> {
     try {
+      // Try full content extraction if enabled
+      if (this.enableFullContent) {
+        const article = await this.articleExtractor.extract(url);
+
+        if (article) {
+          const result: LinkedContent = {
+            type: 'article',
+            title: article.title,
+            author: article.byline,
+            description: article.excerpt,
+            publishedDate: article.publishedTime,
+            excerpt: article.excerpt,
+            wordCount: ArticleExtractor.getWordCount(article.textContent),
+            readingTime: ArticleExtractor.estimateReadingTime(article.textContent),
+            fullContent: article.content,
+            textContent: article.textContent,
+            contentLength: article.length,
+            siteName: article.siteName,
+          };
+
+          // Add AI summarization if enabled
+          if (this.enableSummarization && this.ollamaClient) {
+            try {
+              const ollamaAvailable = await this.ollamaClient.isAvailable();
+
+              if (ollamaAvailable) {
+                const summaryResult = await this.ollamaClient.summarizeArticle(
+                  article.textContent.slice(0, 8000),
+                  article.title,
+                );
+
+                result.summary = summaryResult.summary;
+                result.keyPoints = summaryResult.keyPoints;
+                result.aiGenerated = true;
+                result.aiModel = summaryResult.model;
+              }
+            } catch (error) {
+              console.error('Failed to generate AI summary:', error);
+              // Continue without summary
+            }
+          }
+
+          return result;
+        }
+      }
+
+      // Fallback to basic metadata extraction
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 

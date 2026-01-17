@@ -31,6 +31,8 @@ export class BookmarkEnricher {
     this.contentExtractor = new ContentExtractor({
       timeout: this.config.timeout,
       userAgent: this.config.userAgent,
+      enableFullContent: true,
+      enableSummarization: false, // Can be enabled via CLI flag
     });
   }
 

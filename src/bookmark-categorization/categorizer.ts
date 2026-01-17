@@ -52,6 +52,12 @@ export class BookmarkCategorizer {
       }
     }
 
+    // Try to match based on tweet text content (for prompt tweets, etc.)
+    const textCategory = this.matchTextContent(bookmark.text);
+    if (textCategory) {
+      return this.applyCategory(bookmark, textCategory);
+    }
+
     // Fall back to default category
     const defaultCat = this.config.categories[this.config.defaultCategory!];
     return this.applyCategory(bookmark, defaultCat, this.config.defaultCategory!);
@@ -97,6 +103,39 @@ export class BookmarkCategorizer {
       }
     } catch {
       // Invalid URL, skip
+    }
+
+    return null;
+  }
+
+  /**
+   * Match text content to category (for tweets about prompts, etc.)
+   */
+  private matchTextContent(text: string): Category | null {
+    const textLower = text.toLowerCase();
+
+    // Check each category's match patterns against text content
+    // Skip 'tweet' category to avoid matching x.com/twitter.com in text
+    for (const [name, category] of Object.entries(this.config.categories)) {
+      if (name === 'tweet') {
+        continue; // Skip tweet category for text matching
+      }
+
+      for (const pattern of category.match) {
+        const patternLower = pattern.toLowerCase();
+
+        // Skip URL patterns (contain dots or slashes)
+        if (patternLower.includes('.') || patternLower.includes('/')) {
+          continue;
+        }
+
+        // Check if keyword appears in text
+        // Use word boundaries or hashtag prefix to avoid partial matches
+        const regex = new RegExp(`(\\b|#)${patternLower}\\b`, 'i');
+        if (regex.test(textLower)) {
+          return category;
+        }
+      }
     }
 
     return null;

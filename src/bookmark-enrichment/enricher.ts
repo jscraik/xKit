@@ -3,6 +3,7 @@
  */
 
 import type { BookmarkRecord } from '../bookmark-export/types.js';
+import type { TwitterClient } from '../lib/twitter-client.js';
 import { ContentExtractor } from './content-extractor.js';
 import type { EnrichedBookmark, EnrichmentConfig } from './types.js';
 import { UrlExpander } from './url-expander.js';
@@ -11,8 +12,9 @@ export class BookmarkEnricher {
   private urlExpander: UrlExpander;
   private contentExtractor: ContentExtractor;
   private config: EnrichmentConfig;
+  private client?: TwitterClient;
 
-  constructor(config: Partial<EnrichmentConfig> = {}) {
+  constructor(config: Partial<EnrichmentConfig> = {}, client?: TwitterClient) {
     this.config = {
       expandUrls: config.expandUrls ?? true,
       extractContent: config.extractContent ?? true,
@@ -23,7 +25,10 @@ export class BookmarkEnricher {
       enableFullContent: config.enableFullContent ?? true,
       enableSummarization: config.enableSummarization ?? false,
       ollamaModel: config.ollamaModel,
+      fetchThreads: config.fetchThreads ?? false,
     };
+
+    this.client = client;
 
     this.urlExpander = new UrlExpander({
       maxRedirects: this.config.maxRedirects,
@@ -48,6 +53,26 @@ export class BookmarkEnricher {
       ...bookmark,
       extractedAt: new Date().toISOString(),
     };
+
+    // Fetch thread if enabled and client is available
+    if (this.config.fetchThreads && this.client) {
+      try {
+        const threadResult = await this.client.getThread(bookmark.id);
+        if (threadResult.success && threadResult.tweets && threadResult.tweets.length > 1) {
+          // Map thread tweets to simplified format
+          enriched.threadTweets = threadResult.tweets.map((tweet) => ({
+            id: tweet.id,
+            text: tweet.text,
+            authorUsername: tweet.author.username,
+            authorName: tweet.author.name,
+            createdAt: tweet.createdAt,
+            url: `https://x.com/${tweet.author.username}/status/${tweet.id}`,
+          }));
+        }
+      } catch (error) {
+        // Silently fail thread fetching - not critical
+      }
+    }
 
     // Extract URLs from tweet text
     const urls = this.urlExpander.extractUrls(bookmark.text);

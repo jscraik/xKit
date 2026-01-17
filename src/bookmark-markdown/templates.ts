@@ -93,12 +93,26 @@ export class MarkdownTemplates {
     parts.push(`- [Original Tweet](${bookmark.url})`);
     parts.push('');
 
-    // Original tweet
-    parts.push('## Original Tweet');
-    parts.push('');
-    parts.push(`> ${bookmark.text}`);
-    parts.push('');
-    parts.push(`— @${bookmark.authorUsername} (${bookmark.authorName})`);
+    // Original tweet or thread
+    if (bookmark.threadTweets && bookmark.threadTweets.length > 1) {
+      parts.push('## Discovered Via (Thread)');
+      parts.push('');
+      for (let i = 0; i < bookmark.threadTweets.length; i++) {
+        const tweet = bookmark.threadTweets[i];
+        parts.push(`### ${i + 1}/${bookmark.threadTweets.length}`);
+        parts.push('');
+        parts.push(`> ${tweet.text}`);
+        parts.push('');
+        parts.push(`— @${tweet.authorUsername} (${tweet.authorName})`);
+        parts.push('');
+      }
+    } else {
+      parts.push('## Original Tweet');
+      parts.push('');
+      parts.push(`> ${bookmark.text}`);
+      parts.push('');
+      parts.push(`— @${bookmark.authorUsername} (${bookmark.authorName})`);
+    }
 
     return parts.join('\n');
   }
@@ -195,12 +209,26 @@ export class MarkdownTemplates {
     parts.push(`- [Original Tweet](${bookmark.url})`);
     parts.push('');
 
-    // Original tweet
-    parts.push('## Discovered Via');
-    parts.push('');
-    parts.push(`> ${bookmark.text}`);
-    parts.push('');
-    parts.push(`— @${bookmark.authorUsername} (${bookmark.authorName})`);
+    // Original tweet or thread
+    if (bookmark.threadTweets && bookmark.threadTweets.length > 1) {
+      parts.push('## Discovered Via (Thread)');
+      parts.push('');
+      for (let i = 0; i < bookmark.threadTweets.length; i++) {
+        const tweet = bookmark.threadTweets[i];
+        parts.push(`### ${i + 1}/${bookmark.threadTweets.length}`);
+        parts.push('');
+        parts.push(`> ${tweet.text}`);
+        parts.push('');
+        parts.push(`— @${tweet.authorUsername} (${tweet.authorName})`);
+        parts.push('');
+      }
+    } else {
+      parts.push('## Discovered Via');
+      parts.push('');
+      parts.push(`> ${bookmark.text}`);
+      parts.push('');
+      parts.push(`— @${bookmark.authorUsername} (${bookmark.authorName})`);
+    }
 
     return parts.join('\n');
   }
@@ -267,12 +295,26 @@ export class MarkdownTemplates {
     parts.push(`- [Original Tweet](${bookmark.url})`);
     parts.push('');
 
-    // Original tweet
-    parts.push('## Discovered Via');
-    parts.push('');
-    parts.push(`> ${bookmark.text}`);
-    parts.push('');
-    parts.push(`— @${bookmark.authorUsername} (${bookmark.authorName})`);
+    // Original tweet or thread
+    if (bookmark.threadTweets && bookmark.threadTweets.length > 1) {
+      parts.push('## Discovered Via (Thread)');
+      parts.push('');
+      for (let i = 0; i < bookmark.threadTweets.length; i++) {
+        const tweet = bookmark.threadTweets[i];
+        parts.push(`### ${i + 1}/${bookmark.threadTweets.length}`);
+        parts.push('');
+        parts.push(`> ${tweet.text}`);
+        parts.push('');
+        parts.push(`— @${tweet.authorUsername} (${tweet.authorName})`);
+        parts.push('');
+      }
+    } else {
+      parts.push('## Discovered Via');
+      parts.push('');
+      parts.push(`> ${bookmark.text}`);
+      parts.push('');
+      parts.push(`— @${bookmark.authorUsername} (${bookmark.authorName})`);
+    }
 
     return parts.join('\n');
   }
@@ -286,9 +328,39 @@ export class MarkdownTemplates {
     // Header with author
     parts.push(`## @${bookmark.authorUsername} - ${this.extractTitle(bookmark)}`);
 
-    // Quote
-    parts.push(`> ${bookmark.text}`);
-    parts.push('');
+    // Check if this is a thread
+    if (bookmark.threadTweets && bookmark.threadTweets.length > 1) {
+      parts.push('');
+      parts.push('**Thread:**');
+      parts.push('');
+
+      // Display each tweet in the thread
+      for (let i = 0; i < bookmark.threadTweets.length; i++) {
+        const tweet = bookmark.threadTweets[i];
+        parts.push(`### ${i + 1}/${bookmark.threadTweets.length}`);
+        parts.push('');
+        parts.push(`> ${tweet.text}`);
+        parts.push('');
+        parts.push(`— @${tweet.authorUsername} (${tweet.authorName})`);
+        if (tweet.createdAt) {
+          const date = new Date(tweet.createdAt).toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+          });
+          parts.push(`*${date}*`);
+        }
+        parts.push('');
+      }
+    } else {
+      // Single tweet
+      parts.push(`> ${bookmark.text}`);
+      parts.push('');
+      parts.push(`— @${bookmark.authorUsername} (${bookmark.authorName})`);
+      parts.push('');
+    }
 
     // Metadata
     const metadata: string[] = [];

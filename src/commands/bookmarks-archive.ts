@@ -34,6 +34,7 @@ interface ArchiveOptions {
   summarize?: boolean;
   ollamaModel?: string;
   noFullContent?: boolean;
+  fetchThreads?: boolean;
 }
 
 /**
@@ -84,13 +85,17 @@ async function archiveBookmarks(options: ArchiveOptions, program: Command, ctx: 
     // Step 2: Initialize components
     const client = new TwitterClient({ cookies, timeoutMs });
     const stateManager = new StateManager();
-    const enricher = new BookmarkEnricher({
-      expandUrls: !options.skipEnrichment,
-      extractContent: !options.skipEnrichment,
-      enableFullContent: !options.noFullContent,
-      enableSummarization: options.summarize || false,
-      ollamaModel: options.ollamaModel,
-    });
+    const enricher = new BookmarkEnricher(
+      {
+        expandUrls: !options.skipEnrichment,
+        extractContent: !options.skipEnrichment,
+        enableFullContent: !options.noFullContent,
+        enableSummarization: options.summarize || false,
+        ollamaModel: options.ollamaModel,
+        fetchThreads: options.fetchThreads || false,
+      },
+      client,
+    );
     const categorizer = new BookmarkCategorizer();
     const writer = new MarkdownWriter({
       outputDir: options.outputDir || './knowledge',
@@ -182,6 +187,9 @@ async function archiveBookmarks(options: ArchiveOptions, program: Command, ctx: 
       console.log('🔗 Enriching content...');
       if (options.summarize) {
         console.log('🤖 AI summarization enabled (using Ollama)');
+      }
+      if (options.fetchThreads) {
+        console.log('🧵 Thread fetching enabled');
       }
       const enrichStart = Date.now();
 
@@ -315,6 +323,7 @@ export function registerBookmarksArchiveCommand(program: Command, ctx: CliContex
     .option('--summarize', 'Generate AI summaries using local Ollama')
     .option('--ollama-model <name>', 'Ollama model to use (default: qwen2.5:7b)')
     .option('--no-full-content', 'Disable full article content extraction')
+    .option('--fetch-threads', 'Fetch full Twitter threads for bookmarked tweets')
     .action(async (options: ArchiveOptions) => {
       try {
         await archiveBookmarks(options, program, ctx);

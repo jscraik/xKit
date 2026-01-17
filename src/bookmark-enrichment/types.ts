@@ -59,6 +59,14 @@ export interface EnrichedBookmark extends BookmarkRecord {
   extractedAt?: string;
   folder?: string;
   tags?: string[];
+  threadTweets?: Array<{
+    id: string;
+    text: string;
+    authorUsername: string;
+    authorName: string;
+    createdAt?: string;
+    url: string;
+  }>;
 }
 
 /**
@@ -74,4 +82,5 @@ export interface EnrichmentConfig {
   enableFullContent?: boolean;
   enableSummarization?: boolean;
   ollamaModel?: string;
+  fetchThreads?: boolean;
 }

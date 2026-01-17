@@ -135,17 +135,18 @@ export class MarkdownWriter {
   }
 
   /**
-   * Get month path for organizing files (e.g., "jan_2026")
+   * Get month path for organizing files (e.g., "2026/01-jan")
    */
   private getMonthPath(isoDate: string): string {
     const date = new Date(isoDate);
     const year = date.getFullYear();
-    const month = date.toLocaleDateString('en-US', {
+    const monthNum = String(date.getMonth() + 1).padStart(2, '0');
+    const monthName = date.toLocaleDateString('en-US', {
       month: 'short',
       timeZone: this.config.timezone
     }).toLowerCase();
 
-    return `${month}_${year}`;
+    return `${year}/${monthNum}-${monthName}`;
   }
 
   /**

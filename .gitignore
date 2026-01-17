@@ -16,6 +16,9 @@ coverage/
 twitter-cli.bin
 xkit
 .env
+.env.local
+.env.*.local
+.env.template
 .*.bun-build
 *.zip
 *.tar

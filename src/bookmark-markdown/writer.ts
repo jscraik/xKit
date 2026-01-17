@@ -209,18 +209,10 @@ export class MarkdownWriter {
    * Ensure all necessary directories exist
    */
   private ensureDirectories(): void {
-    const dirs = [
-      this.config.outputDir,
-      join(this.config.outputDir, 'tools'),
-      join(this.config.outputDir, 'articles'),
-      join(this.config.outputDir, 'videos'),
-      join(this.config.outputDir, 'podcasts'),
-    ];
-
-    for (const dir of dirs) {
-      if (!existsSync(dir)) {
-        mkdirSync(dir, { recursive: true });
-      }
+    // Only ensure base output directory exists
+    // Category directories will be created on-demand when files are written
+    if (!existsSync(this.config.outputDir)) {
+      mkdirSync(this.config.outputDir, { recursive: true });
     }
   }
 

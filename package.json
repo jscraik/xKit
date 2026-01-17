@@ -39,6 +39,7 @@
     "prepublishOnly": "pnpm run build:dist"
   },
   "dependencies": {
+    "@mozilla/readability": "^0.6.0",
     "@steipete/sweet-cookie": "0.1.0",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
@@ -47,6 +48,9 @@
     "fast-check": "^4.5.3",
     "json5": "^2.2.3",
     "kleur": "^4.1.5",
+    "linkedom": "^0.18.12",
+    "ollama": "^0.6.3",
+    "turndown": "^7.2.2",
     "twitter-api-v2": "^1.29.0"
   },
   "devDependencies": {

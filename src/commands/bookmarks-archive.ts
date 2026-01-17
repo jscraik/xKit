@@ -27,6 +27,7 @@ interface ArchiveOptions {
   outputDir?: string;
   archiveFile?: string;
   timezone?: string;
+  organizeByMonth?: boolean;
   webhookUrl?: string;
   webhookType?: 'discord' | 'slack' | 'generic';
   stats?: boolean;
@@ -89,6 +90,7 @@ async function archiveBookmarks(options: ArchiveOptions, program: Command, ctx: 
       outputDir: options.outputDir || './knowledge',
       archiveFile: options.archiveFile || './bookmarks.md',
       timezone: options.timezone || 'America/New_York',
+      organizeByMonth: options.organizeByMonth || false,
     });
     const mediaHandler = new MediaHandler({
       includeMedia: options.includeMedia || false,
@@ -297,6 +299,7 @@ export function registerBookmarksArchiveCommand(program: Command, ctx: CliContex
     .option('--output-dir <path>', 'Knowledge base directory', './knowledge')
     .option('--archive-file <path>', 'Archive markdown file', './bookmarks.md')
     .option('--timezone <tz>', 'Timezone for date formatting', 'America/New_York')
+    .option('--organize-by-month', 'Organize knowledge files by year/month (e.g., 2026/jan/)')
     .option('--webhook-url <url>', 'Webhook URL for notifications (Discord, Slack, etc.)')
     .option('--webhook-type <type>', 'Webhook type: discord, slack, or generic', 'generic')
     .option('--stats', 'Show detailed processing statistics')

@@ -28,6 +28,7 @@ bookmarks.json
 bookmarks.md
 test-archive/
 .tmp/
+knowledge/
 
 # Runtime state
 .xkit/

@@ -20,6 +20,7 @@ export class MarkdownWriter {
       includeMetadata: config.includeMetadata ?? true,
       includeFrontmatter: config.includeFrontmatter ?? true,
       groupByDate: config.groupByDate ?? true,
+      organizeByMonth: config.organizeByMonth ?? false,
     };
 
     this.templates = new MarkdownTemplates();
@@ -97,7 +98,21 @@ export class MarkdownWriter {
 
       // Generate filename
       const filename = this.templates.generateFilename(bookmark);
-      const folder = bookmark.categoryFolder || this.config.outputDir;
+
+      // Determine folder path
+      let folder: string;
+      if (this.config.organizeByMonth) {
+        // Organize by year/month
+        const monthPath = this.getMonthPath(bookmark.createdAt);
+        // Extract just the category name from the full path (e.g., "knowledge/tools" -> "tools")
+        const categoryName = bookmark.categoryFolder
+          ? bookmark.categoryFolder.split('/').pop() || bookmark.category || 'general'
+          : bookmark.category || 'general';
+        folder = join(this.config.outputDir, monthPath, categoryName);
+      } else {
+        folder = bookmark.categoryFolder || this.config.outputDir;
+      }
+
       const filePath = join(folder, filename);
 
       // Ensure directory exists
@@ -114,6 +129,20 @@ export class MarkdownWriter {
       console.error(`Failed to write knowledge file for bookmark ${bookmark.id}:`, error);
       return null;
     }
+  }
+
+  /**
+   * Get month path for organizing files (e.g., "2026/jan")
+   */
+  private getMonthPath(isoDate: string): string {
+    const date = new Date(isoDate);
+    const year = date.getFullYear();
+    const month = date.toLocaleDateString('en-US', {
+      month: 'short',
+      timeZone: this.config.timezone
+    }).toLowerCase();
+
+    return `${year}/${month}`;
   }
 
   /**

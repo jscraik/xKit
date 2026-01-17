@@ -14,6 +14,7 @@ export interface MarkdownConfig {
   includeMetadata: boolean;
   includeFrontmatter: boolean;
   groupByDate: boolean;
+  organizeByMonth: boolean;
 }
 
 /**

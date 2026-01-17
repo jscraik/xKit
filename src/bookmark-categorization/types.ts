@@ -80,6 +80,23 @@ export const DEFAULT_CATEGORIES: Record<string, Category> = {
     template: 'podcast',
     description: 'Podcast episodes',
   },
+  prompts: {
+    match: [
+      'anthropic.com/prompts',
+      'promptbase.com',
+      'prompthero.com',
+      'flowgpt.com',
+      'prompt',
+      'chatgpt',
+      'claude',
+      'gpt',
+      'llm',
+    ],
+    action: 'file',
+    folder: './knowledge/prompts',
+    template: 'article',
+    description: 'AI prompts, prompt engineering, and LLM resources',
+  },
   tweet: {
     match: ['x.com', 'twitter.com'],
     action: 'capture',

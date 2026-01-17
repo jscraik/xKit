@@ -2,7 +2,7 @@
  * Markdown file writer
  */
 
-import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { appendFileSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import type { CategorizedBookmark } from '../bookmark-categorization/types.js';
 import { MarkdownTemplates } from './templates.js';
@@ -226,7 +226,7 @@ export class MarkdownWriter {
     const content = readFileSync(this.config.archiveFile, 'utf-8');
     const entries = content.match(/^## @/gm) || [];
 
-    const stats = require('node:fs').statSync(this.config.archiveFile);
+    const stats = statSync(this.config.archiveFile);
 
     return {
       totalEntries: entries.length,

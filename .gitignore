@@ -21,3 +21,19 @@ xkit
 *.tar
 *.tar.gz
 *.tgz
+
+# Test artifacts
+test-results.json
+bookmarks.json
+bookmarks.md
+test-archive/
+.tmp/
+
+# Runtime state
+.xkit/
+
+# Temporary test directories
+analysis-engine-test-*/
+analysis-engine-error-test-*/
+script-runner-test-*/
+script-runner-property-test-*/

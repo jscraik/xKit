@@ -4,8 +4,15 @@
 
 import Ajv, { type ErrorObject } from 'ajv';
 import addFormats from 'ajv-formats';
-import analysisSchema from './schemas/analysis-schema.js' with { type: 'json' };
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import type { AnalysisExport } from './types.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const schemaPath = join(__dirname, 'schemas', 'analysis-schema.json');
+const analysisSchema = JSON.parse(readFileSync(schemaPath, 'utf-8'));
 
 const ajv = new Ajv.default({ allErrors: true });
 addFormats.default(ajv);

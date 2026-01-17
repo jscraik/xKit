@@ -18,7 +18,7 @@
     "build": "pnpm run build:dist && pnpm run build:binary",
     "build:dist": "tsc && node scripts/copy-dist-assets.js",
     "build:binary": "XKIT_VERSION=$(node -p \"require('./package.json').version\") XKIT_GIT_SHA=$(git rev-parse --short=8 HEAD 2>/dev/null || true) bun build --compile --minify --env=XKIT_* src/cli.ts --outfile xkit",
-    "dev": "tsx src/index.ts",
+    "dev": "tsx src/cli.ts",
     "xkit": "pnpm run build:dist && node dist/cli.js",
     "test": "vitest run",
     "test:watch": "vitest",

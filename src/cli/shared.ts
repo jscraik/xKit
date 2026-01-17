@@ -1,9 +1,9 @@
-import { existsSync, readFileSync } from 'node:fs';
-import { homedir } from 'node:os';
-import { join } from 'node:path';
 import type { Command } from 'commander';
 import JSON5 from 'json5';
 import kleur from 'kleur';
+import { existsSync, readFileSync } from 'node:fs';
+import { homedir } from 'node:os';
+import { join } from 'node:path';
 import { type CookieSource, resolveCredentials } from '../lib/cookies.js';
 import { extractTweetId } from '../lib/extract-tweet-id.js';
 import {
@@ -19,6 +19,8 @@ import type { TweetData } from '../lib/twitter-client.js';
  * JSON5-backed CLI configuration stored in ~/.config/xkit/config.json5 or ./.xkitrc.json5.
  */
 export type XKitConfig = {
+  authToken?: string;
+  ct0?: string;
   chromeProfile?: string;
   firefoxProfile?: string;
   cookieSource?: CookieSource | CookieSource[];
@@ -246,8 +248,8 @@ export function createCliContext(normalizedArgs: string[], env: NodeJS.ProcessEn
 
   const wrap =
     (styler: (text: string) => string): ((text: string) => string) =>
-    (text: string): string =>
-      isTty ? styler(text) : text;
+      (text: string): string =>
+        isTty ? styler(text) : text;
 
   const colors = {
     banner: wrap((t) => kleur.bold().blue(t)),
@@ -341,8 +343,8 @@ export function createCliContext(normalizedArgs: string[], env: NodeJS.ProcessEn
       ? opts.cookieSource
       : (resolveCookieSourceOrder(config.cookieSource) ?? COOKIE_SOURCES);
     return resolveCredentials({
-      authToken: opts.authToken,
-      ct0: opts.ct0,
+      authToken: opts.authToken || config.authToken,
+      ct0: opts.ct0 || config.ct0,
       cookieSource,
       chromeProfile: opts.chromeProfile || config.chromeProfile,
       firefoxProfile: opts.firefoxProfile || config.firefoxProfile,

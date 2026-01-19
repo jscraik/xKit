@@ -375,6 +375,20 @@ When using `--json` with `news`, news objects include:
 - `automated request` / error 226: retry later or expect fallback to legacy `statuses/update.json` for writes.
 - `404` on GraphQL operations: run `xkit query-ids --fresh` and retry.
 
+**For detailed troubleshooting, see [docs/troubleshooting.md](docs/troubleshooting.md).**
+
+## Known Limitations
+
+**Current limitations of xKit:**
+
+- Cookie extraction only works on macOS (Safari, Chrome, Firefox); Linux/Windows users must provide auth tokens manually
+- Uses undocumented X/Twitter GraphQL API that may change without notice
+- AI summarization requires Ollama to be installed and running locally
+- Archive processing is sequential (not parallel) for large bookmark collections
+- No multi-account support (single account per installation)
+
+**For complete details and planned improvements, see [LIMITATIONS.md](LIMITATIONS.md).**
+
 ## Query IDs (GraphQL)
 
 X rotates GraphQL “query IDs” frequently. Each GraphQL operation uses:

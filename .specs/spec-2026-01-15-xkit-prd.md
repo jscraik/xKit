@@ -1,10 +1,12 @@
 # PRD (Mini): xKit CLI + Bookmark Archiving
 
-**Owner:** Jamie Craik  
-**Status:** In Review  
-**Last updated:** 2026-01-15  
-**Stakeholders:** Solo dev (primary), future OSS contributors (secondary)  
+**Owner:** Jamie Craik
+**Status:** Phase 1 Implementation Complete - Awaiting User Validation
+**Last updated:** 2026-01-19
+**Stakeholders:** Solo dev (primary), future OSS contributors (secondary)
 **Links:** Repo: /Users/jamiecraik/dev/xKit | Docs: README.md | Testing: docs/testing.md
+**Phase 1 Implementation Complete:** 2026-01-17 (Enhanced Article Extraction + Local AI)
+**Note:** Phase 1 acceptance criteria met, but user validation (evidence plan) is required before Phase 2
 
 > Rule: If a section does not apply, write `N/A` and explain why in 1–2 lines.
 
@@ -22,7 +24,9 @@
 
 xKit provides a solo-dev CLI that makes X workflows scriptable while building a durable bookmark archive. The primary wedge comes from a reliable archive pipeline with deterministic markdown output and stable JSON for scripting. The project avoids official API dependencies and focuses on a learn-by-shipping approach.
 
-We measure success by early adoption signals from Codex and Swift communities (downloads, stars, and testimonials) and by operational reliability (low error rate, stable outputs). The plan includes explicit pause criteria to prevent long-term drift if volatility or lack of adoption persists
+**Success will be measured** by early adoption signals from Codex and Swift communities (downloads, stars, and testimonials) and by operational reliability (low error rate, stable outputs). The plan includes explicit pause criteria to prevent long-term drift if volatility or lack of adoption persists.
+
+**⚠️ Current Status:** Success metrics are not yet being measured (see Section 6). Evidence collection plan is overdue.
 ---
 
 ## 1) Problem / Opportunity (with evidence)
@@ -99,6 +103,58 @@ We measure success by early adoption signals from Codex and Swift communities (d
    - [ ] `xkit setup` completes with a success message and next-step command.
    - [ ] Setup errors include a specific fix (e.g., missing cookies, permissions).
    **Priority:** Should
+   **Status:** ✅ Complete
+
+---
+
+## 3b) User Stories (Phase 1 - Completed 2026-01-17)
+>
+> ⚠️ **CRITICAL:** These stories were implemented WITHOUT prior user validation. This represents a scope expansion that must be validated by evidence before further expansion.
+
+7) **Story [STORY-007]:** As a Researcher/Writer, I want full article content extracted so that I have durable access even if the original article disappears.
+   **Acceptance criteria:**
+   - [x] Articles are detected by domain matching (blog platforms, news sites)
+   - [x] Full content is extracted using Mozilla Readability
+   - [x] HTML is converted to clean Markdown
+   - [x] Reading time and word count are calculated
+   **Priority:** Should (Phase 1)
+   **Status:** ✅ Complete
+   **Evidence Required:** User feedback on content extraction quality
+
+8) **Story [STORY-008]:** As a Researcher/Writer, I want AI-generated summaries of articles so that I can quickly assess content relevance.
+   **Acceptance criteria:**
+   - [x] Local AI (Ollama) generates 2-3 sentence summaries
+   - [x] Key points are extracted as bullet list
+   - [x] Graceful fallback when Ollama is unavailable
+   - [x] Model attribution included in output
+   **Priority:** Should (Phase 1)
+   **Status:** ✅ Complete
+   **Evidence Required:** Usage metrics on `--summarize` flag; quality feedback
+
+9) **Story [STORY-009]:** As a Researcher/Writer, I want month-based organization so that I can track content discovery over time.
+   **Acceptance criteria:**
+   - [x] `--organize-by-month` flag creates `jan_2026/` style directories
+   - [x] Existing archives can be reorganized via script
+   - [x] Empty directories are not created
+   **Priority:** Should (Phase 1)
+   **Status:** ✅ Complete
+   **Evidence Required:** Usage metrics on month organization
+
+10) **Story [STORY-010]:** As a Researcher/Writer, I want author-based organization so that I can curate content by trusted sources.
+   **Acceptance criteria:**
+   - [x] Bookmarks are organized by author handle
+   - [x] Reorganization script exists for existing archives
+   **Priority:** Should (Phase 1)
+   **Status:** ✅ Complete
+   **Evidence Required:** Usage metrics on author organization
+
+11) **Story [STORY-011]:** As a Solo Dev, I want enhanced thread fetching so that I can get complete conversation context.
+   **Acceptance criteria:**
+   - [x] `xkit thread` retrieves full conversation
+   - [x] Reply chains are properly reconstructed
+   **Priority:** Should (Phase 1)
+   **Status:** ✅ Complete
+   **Evidence Required:** Usage metrics on thread command
 
 ---
 
@@ -139,12 +195,27 @@ We measure success by early adoption signals from Codex and Swift communities (d
 | Command error rate | <3% | error counts per command | opt-in telemetry |
 | Profile signal (stars) | +50 | GitHub stars change | GitHub repository |
 
-**Measurement window:** 30 days post-release  
+**Measurement window:** 30 days post-public-release
+
+**⚠️ MEASUREMENT STATUS (2026-01-19):**
+- Public release scheduled for 2026-02-01
+- Measurement window has NOT started yet
+- Success metrics cannot be evaluated until after public release
+- Pause criteria requiring "30 days WAU" are not currently actionableres until after 2026-02-01 + 30 days = 2026-03-03
+
+**CRITICAL GAPS IDENTIFIED (2026-01-19 Adversarial Review):**
+- ❌ No actual measurements exist - all metrics are unverified
+- ❌ Evidence plan (Section 1) was never executed (target was 2026-01-18)
+- ❌ Cannot claim "exceeds targets" without measurement
+- ⚠️ **LOGICAL CONSTRAINT:** Pause criteria cannot be evaluated until after public release + 30 days
+- ⚠️ **IMMEDIATE ACTION REQUIRED:** Execute evidence plan to validate demand hypothesis  
 
 ### Guardrails (required)
 
 - CLI startup time must not exceed 2 seconds on a cold start.
+  - Status: ⚠️ **UNVERIFIED** - No performance measurements collected
 - Bookmark archive output must remain backward compatible for existing users.
+  - Status: ✅ **MAINTAINED** - No breaking changes in Phase 1
 
 ### Pause criteria (required)
 
@@ -167,9 +238,39 @@ We measure success by early adoption signals from Codex and Swift communities (d
 ### Out of scope (required)
 
 - Official API support
-- Advanced LLM integrations
+- Advanced cloud LLM integrations (OpenAI, Anthropic, etc.)
 - Parallel processing
 - Token tracking
+- Video transcript extraction (Phase 2)
+- Media download and storage (Phase 3)
+
+### Scope Decision Log (required)
+
+This section tracks all features added beyond the original MVP scope and their justification.
+
+**NOTE:** Entries are grouped by phase for clarity. Chronological order: SCOPE-001 through SCOPE-005 occurred before Phase 1; SCOPE-009 occurred during Phase 1 preparation.
+
+| Decision ID | Date | Feature Added | Displaced | Justification | Status |
+|---|---|---|---|---|---|
+| **SCOPE-001** | 2025-12-20 | Webhook notifications (Discord/Slack) | None (net new) | Integration need for automated workflows | ✅ Implemented |
+| **SCOPE-002** | 2026-01-05 | Daemon mode for continuous operation | None (net new) | Hands-off bookmark monitoring | ✅ Implemented |
+| **SCOPE-003** | 2026-01-10 | Month-based organization (`jan_2026/`) | None (optional enhancement) | Better chronological organization | ✅ Implemented |
+| **SCOPE-004** | 2026-01-12 | Author-based organization | None (optional enhancement) | Curate by trusted sources | ✅ Implemented |
+| **SCOPE-005** | 2026-01-15 | Enhanced thread fetching | None (feature completion) | Better conversation context | ✅ Implemented |
+| **SCOPE-009** | 2026-01-15 | Statistics tracking and reporting | None (observability) | Users need to understand archive health | ✅ Implemented |
+| **SCOPE-006** | 2026-01-17 | Full article content extraction (Mozilla Readability) | Basic bookmark archiving (URLs only) | Users want full content, not just links | ✅ Implemented (Phase 1) |
+| **SCOPE-007** | 2026-01-17 | Local AI summarization (Ollama) | Basic bookmark archiving (no AI) | Local-only AI provides summaries without privacy concerns | ✅ Implemented (Phase 1) |
+| **SCOPE-008** | 2026-01-17 | Reading time and word count | Basic bookmark archiving (no metadata) | Better content assessment | ✅ Implemented (Phase 1) |
+
+**Scope Impact Summary:**
+- Original MVP stories: 6
+- Pre-Phase 1 additional features: 6 (SCOPE-001 through SCOPE-005, SCOPE-009)
+- Phase 1 additional features: 3 (SCOPE-006, SCOPE-007, SCOPE-008)
+- Total feature expansion: ~150% beyond original scope (cumulative)
+- Phase 1 specific expansion: 50% (3 of 6 original stories)
+- **Risk Assessment:** Feature creep is being managed through phased approach, but scope discipline needs reinforcement via evidence validation
+
+**Critical Note:** All Phase 1 additions (SCOPE-006 through SCOPE-009) were implemented WITHOUT user validation. This violates the evidence-first principle. The evidence plan must be executed before Phase 2 to prevent building features without validated demand.
 
 ### Non-goals (recommended)
 
@@ -216,9 +317,20 @@ We measure success by early adoption signals from Codex and Swift communities (d
 
 ## 10) Timeline / Milestones (optional)
 
-- Milestone: PRD + Tech Spec complete — 2026-01-22
+### Completed
+- ✅ Milestone: MVP CLI commands — 2025-12-15
+- ✅ Milestone: Basic bookmark archiving — 2025-12-20
+- ✅ Milestone: **Phase 1: Enhanced Article Extraction + Local AI** — 2026-01-17
+
+### In Progress
+- ⏳ Milestone: Evidence collection and demand validation — **OVERDUE** (was 2026-01-18, now 2026-01-19)
+  - **Recovery Plan:** Execute evidence plan immediately. Target dates shifted: Codex/Swiss posts by 2026-01-21, GitHub discussions by 2026-01-23.
+- ⏳ Milestone: PRD + Tech Spec final review — 2026-01-22 (in progress - third-pass review ongoing)
+
+### Planned (Blocked on Evidence Validation)
 - Milestone: Query ID refresh runbook — 2026-01-26
-- Milestone: First release with archive workflow — 2026-02-01
+- Milestone: First public release with archive workflow — 2026-02-01
+- ⏸️ Milestone: Phase 2 (Video Transcript Extraction) — **BLOCKED** until evidence validates demand
 
 ---
 
@@ -279,15 +391,67 @@ stateDiagram-v2
 
 ---
 
+## 13b) Governance Framework (required)
+
+**⚠️ CRITICAL:** This project follows an evidence-first governance framework established after a three-pass adversarial review (2026-01-19).
+
+### Governance Evolution
+
+**Phase 0-1 (Completed):** Build-first approach
+- Features were implemented based on personal judgment
+- 9 features added beyond MVP without user validation
+- This violated the evidence-first principle
+
+**Phase 2 (Future):** Evidence-first approach
+- NO features without validated demand
+- Evidence plan must execute BEFORE any implementation
+- All pause criteria are binding
+
+### Current Policy
+
+- **Evidence First:** No features without validated demand
+- **Pause Criteria Binding:** All pause criteria in Section 6 are binding
+- **Scope Discipline:** All scope changes require 48-hour consideration and explicit displacement
+
+### Decision-Making Framework
+
+Decisions fall into three categories:
+
+| Type | Description | Evidence Required | Wait Period |
+|------|-------------|-------------------|-------------|
+| **Type A: Technical** | Implementation choices, no user impact | No | None |
+| **Type B: Product** | User-facing behavior changes | Yes | 48 hours |
+| **Type C: Strategic** | Project direction, major changes | Yes | 1 week |
+
+**Scope Decision Process:**
+1. Feature idea proposed
+2. Wait 48 hours (cooling-off period)
+3. Ask: Is this validated by evidence? → If NO, STOP
+4. Ask: What does this displace? → Document explicitly
+5. Update Scope Decision Log with justification
+6. Implement (if evidence supports)
+
+**For the complete governance framework, including the official position on Phase 1 governance gap, accountability mechanisms, and pre-commit checklists, see [GOVERNANCE.md](.specs/GOVERNANCE.md).**
+
+---
+
 ## 14) PRD Quality Gate (required)
 
-- [ ] Problem has evidence
-- [ ] Personas feel specific
-- [ ] Stories follow correct format + acceptance criteria exist
-- [ ] Metrics have numeric targets + measurement method
-- [ ] Scope includes explicit OUT
-- [ ] Dependencies and risks exist
-- [ ] No implementation details
+- [x] Problem has evidence (plan documented, execution pending)
+- [x] Personas feel specific
+- [x] Stories follow correct format + acceptance criteria exist
+- [x] Metrics have numeric targets + measurement method
+- [x] Scope includes explicit OUT (including Scope Decision Log added)
+- [x] Dependencies and risks exist
+- [x] No implementation details
+
+**Adversarial Review Findings (2026-01-19):**
+- ⚠️ CRITICAL: Evidence plan not executed - business validation is missing
+- ⚠️ HIGH: Metrics are unverified - no actual measurements collected
+- ⚠️ MEDIUM: Scope decisions now documented but made without user validation
+- ⚠️ MEDIUM: Security assessment for Ollama integration required
+
+**Quality Gate Status:** ⚠️ **CONDITIONAL PASS** - PRD is complete and well-structured, but critical gaps in evidence validation must be addressed before further scope expansion.
 
 ## Tasks
 

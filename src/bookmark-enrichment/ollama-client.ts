@@ -2,6 +2,7 @@
  * Ollama client for AI-powered content processing
  */
 
+import pLimit from 'p-limit';
 import { Ollama } from 'ollama';
 
 export interface OllamaConfig {
@@ -18,9 +19,44 @@ export interface SummaryResult {
     tokensUsed?: number;
 }
 
+/**
+ * Patterns to detect potential prompt injection attempts
+ * These are redacted to prevent AI model manipulation
+ */
+const SANITIZE_PATTERNS = [
+    /ignore\s+(?:previous\s+)?instructions?/gi,
+    /ignore\s+above/gi,
+    /system\s*:/gi,
+    /system\s+prompt/gi,
+    /output\s+(?:all\s+)?(?:cookies|tokens|credentials)/gi,
+    /override\s+(?:previous\s+)?commands?/gi,
+    /<script[\s>]/gi,
+    /<\/script>/gi,
+    /javascript:/gi,
+    /onerror\s*=/gi,
+    /onload\s*=/gi,
+    /<iframe/gi,
+    /document\.cookie/gi,
+    /window\.location/gi,
+    /eval\s*\(/gi,
+    /hacked/gi,
+    /pwned/gi,
+];
+
+/**
+ * Module-level flag to track if resource warning has been logged
+ * This ensures the warning is only logged once per session across all instances
+ */
+let hasLoggedResourceWarningGlobal = false;
+
 export class OllamaClient {
     private client: Ollama;
     private config: Required<OllamaConfig>;
+
+    // Resource limits
+    private readonly MAX_CONCURRENT_REQUESTS = 1; // Single request at a time
+    private readonly MAX_CONTENT_LENGTH = 10000;
+    private requestQueue: ReturnType<typeof pLimit>;
 
     constructor(config: Partial<OllamaConfig> = {}) {
         this.config = {
@@ -30,30 +66,77 @@ export class OllamaClient {
             timeout: config.timeout ?? 30000,
         };
 
+        // Initialize request queue for rate limiting
+        this.requestQueue = pLimit(this.MAX_CONCURRENT_REQUESTS);
+
         this.client = new Ollama({
             host: this.config.host,
         });
+
+        // Log resource warning on first instantiation (module-level flag)
+        logResourceWarningOnce();
     }
 
     /**
      * Check if Ollama is available
      */
     async isAvailable(): Promise<boolean> {
-        try {
-            await this.client.list();
-            return true;
-        } catch {
-            return false;
+        return this.requestQueue(async () => {
+            try {
+                await this.client.list();
+                return true;
+            } catch {
+                return false;
+            }
+        });
+    }
+
+    /**
+     * Sanitize content before sending to AI to prevent prompt injection
+     * @param content - Raw content to sanitize
+     * @returns Sanitized content with length limit
+     */
+    private sanitizeForAI(content: string): string {
+        let sanitized = content;
+
+        // Remove obvious prompt injection patterns
+        for (const pattern of SANITIZE_PATTERNS) {
+            sanitized = sanitized.replace(pattern, '[REDACTED]');
         }
+
+        // Apply length limit (prevent token overflow)
+        return sanitized.substring(0, this.MAX_CONTENT_LENGTH);
+    }
+
+    /**
+     * Wrap AI requests with queue and timeout for resource management
+     */
+    private async executeWithLimits<T>(
+        fn: () => Promise<T>,
+        operation: string
+    ): Promise<T> {
+        return this.requestQueue(async () => {
+            const startTime = Date.now();
+            try {
+                const result = await fn();
+                const duration = Date.now() - startTime;
+                console.debug(`AI ${operation} completed in ${duration}ms`);
+                return result;
+            } catch (error) {
+                const duration = Date.now() - startTime;
+                console.error(`AI ${operation} failed after ${duration}ms:`, error);
+                throw error;
+            }
+        });
     }
 
     /**
      * Summarize article content
      */
     async summarizeArticle(content: string, title?: string): Promise<SummaryResult> {
-        const prompt = this.buildSummaryPrompt(content, title);
+        return this.executeWithLimits(async () => {
+            const prompt = this.buildSummaryPrompt(content, title);
 
-        try {
             const response = await this.client.generate({
                 model: this.config.model,
                 prompt,
@@ -65,18 +148,16 @@ export class OllamaClient {
             });
 
             return this.parseSummaryResponse(response.response, this.config.model);
-        } catch (error) {
-            throw new Error(`Ollama summarization failed: ${error instanceof Error ? error.message : String(error)}`);
-        }
+        }, 'summarizeArticle');
     }
 
     /**
      * Extract key points from content
      */
     async extractKeyPoints(content: string, maxPoints: number = 5): Promise<string[]> {
-        const prompt = this.buildKeyPointsPrompt(content, maxPoints);
+        return this.executeWithLimits(async () => {
+            const prompt = this.buildKeyPointsPrompt(content, maxPoints);
 
-        try {
             const response = await this.client.generate({
                 model: this.config.model,
                 prompt,
@@ -88,19 +169,16 @@ export class OllamaClient {
             });
 
             return this.parseKeyPoints(response.response);
-        } catch (error) {
-            console.error('Failed to extract key points:', error);
-            return [];
-        }
+        }, 'extractKeyPoints');
     }
 
     /**
      * Generate a better title from content
      */
     async generateTitle(content: string): Promise<string | null> {
-        const prompt = this.buildTitlePrompt(content);
+        return this.executeWithLimits(async () => {
+            const prompt = this.buildTitlePrompt(content);
 
-        try {
             const response = await this.client.generate({
                 model: this.config.model,
                 prompt,
@@ -112,23 +190,21 @@ export class OllamaClient {
             });
 
             return response.response.trim().replace(/^["']|["']$/g, '');
-        } catch (error) {
-            console.error('Failed to generate title:', error);
-            return null;
-        }
+        }, 'generateTitle');
     }
 
     /**
      * Build summary prompt
      */
     private buildSummaryPrompt(content: string, title?: string): string {
+        const sanitizedContent = this.sanitizeForAI(content);
         const titleContext = title ? `\nTitle: ${title}\n` : '';
 
         return `You are a helpful assistant that creates concise summaries of articles.
 
 ${titleContext}
 Article Content:
-${content.slice(0, 8000)}
+${sanitizedContent}
 
 Instructions:
 1. Write a 2-3 sentence summary that captures the main points
@@ -143,10 +219,12 @@ Summary:`;
      * Build key points prompt
      */
     private buildKeyPointsPrompt(content: string, maxPoints: number): string {
+        const sanitizedContent = this.sanitizeForAI(content);
+
         return `You are a helpful assistant that extracts key points from articles.
 
 Article Content:
-${content.slice(0, 8000)}
+${sanitizedContent}
 
 Instructions:
 1. Extract the ${maxPoints} most important points from this article
@@ -162,10 +240,12 @@ Key Points:`;
      * Build title generation prompt
      */
     private buildTitlePrompt(content: string): string {
+        const sanitizedContent = this.sanitizeForAI(content);
+
         return `You are a helpful assistant that generates clear, descriptive titles.
 
 Article Content:
-${content.slice(0, 2000)}
+${sanitizedContent}
 
 Instructions:
 1. Generate a clear, descriptive title for this article
@@ -239,12 +319,14 @@ Title:`;
      * Get available models
      */
     async listModels(): Promise<string[]> {
-        try {
-            const response = await this.client.list();
-            return response.models.map((m) => m.name);
-        } catch {
-            return [];
-        }
+        return this.executeWithLimits(async () => {
+            try {
+                const response = await this.client.list();
+                return response.models.map((m) => m.name);
+            } catch {
+                return [];
+            }
+        }, 'listModels');
     }
 
     /**
@@ -259,5 +341,20 @@ Title:`;
      */
     setModel(model: string): void {
         this.config.model = model;
+    }
+}
+
+/**
+ * Log resource requirements warning (once per session)
+ * Uses module-level flag to ensure warning is only logged once
+ */
+function logResourceWarningOnce(): void {
+    if (!hasLoggedResourceWarningGlobal) {
+        console.warn('⚠️  AI Processing Requirements:');
+        console.warn('   - Ollama models require 2-4GB RAM');
+        console.warn('   - Processing time: 10-30 seconds per article');
+        console.warn('   - Only one request processed at a time');
+        console.warn('   - Content is sanitized for security');
+        hasLoggedResourceWarningGlobal = true;
     }
 }

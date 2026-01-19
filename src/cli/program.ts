@@ -7,6 +7,7 @@ import { registerCheckCommand } from '../commands/check.js';
 import { registerDaemonCommands } from '../commands/daemon.js';
 import { registerHelpCommand } from '../commands/help.js';
 import { registerListsCommand } from '../commands/lists.js';
+import { registerMetricsCommand } from '../commands/metrics.js';
 import { registerNewsCommands } from '../commands/news.js';
 import { registerPostCommands } from '../commands/post.js';
 import { registerQueryIdsCommand } from '../commands/query-ids.js';
@@ -17,6 +18,7 @@ import { registerUnbookmarkCommand } from '../commands/unbookmark.js';
 import { registerUserCommands } from '../commands/users.js';
 import { getCliVersion } from '../lib/version.js';
 import { type CliContext, collectCookieSource } from './shared.js';
+import { metrics } from '../metrics/metrics-collector.js';
 
 /**
  * Known CLI commands used to detect shorthand invocations.
@@ -47,6 +49,7 @@ export const KNOWN_COMMANDS = new Set([
   'daemon',
   'export-bookmarks',
   'analyze-bookmarks',
+  'metrics',
 ]);
 
 /**
@@ -155,6 +158,31 @@ export function createProgram(ctx: CliContext): Command {
     ctx.applyOutputFromCommand(actionCommand);
   });
 
+  // Metrics collection hooks
+  if (metrics) {
+    program.hook('preAction', (_thisCommand, actionCommand) => {
+      const commandName = actionCommand.name();
+      // Store start time on the command object for post-action retrieval
+      (actionCommand as any)._metricsStartTime = Date.now();
+      (actionCommand as any)._metricsCommandName = commandName;
+    });
+
+    program.hook('postAction', async (_thisCommand, actionCommand) => {
+      const startTime = (actionCommand as any)._metricsStartTime;
+      const commandName = (actionCommand as any)._metricsCommandName;
+
+      if (startTime && commandName && metrics) {
+        const duration = Date.now() - startTime;
+        metrics.record({
+          command: commandName,
+          timestamp: startTime,
+          duration,
+          success: true,
+        });
+      }
+    });
+  }
+
   registerHelpCommand(program, ctx);
   registerSetupCommand(program, ctx);
   registerQueryIdsCommand(program, ctx);
@@ -171,6 +199,7 @@ export function createProgram(ctx: CliContext): Command {
   registerCheckCommand(program, ctx);
   registerBookmarkExportCommand(program, ctx);
   registerBookmarkAnalysisCommand(program, ctx);
+  registerMetricsCommand(program, ctx);
 
   return program;
 }

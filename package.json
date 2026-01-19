@@ -36,7 +36,9 @@
     "changeset": "changeset",
     "version": "changeset version && pnpm install --lockfile-only",
     "release": "pnpm run build:dist && changeset publish",
-    "prepublishOnly": "pnpm run build:dist"
+    "prepublishOnly": "pnpm run build:dist",
+    "audit": "pnpm audit",
+    "audit:fix": "pnpm audit fix"
   },
   "dependencies": {
     "@mozilla/readability": "^0.6.0",
@@ -50,6 +52,7 @@
     "kleur": "^4.1.5",
     "linkedom": "^0.18.12",
     "ollama": "^0.6.3",
+    "p-limit": "^6.2.0",
     "turndown": "^7.2.2",
     "twitter-api-v2": "^1.29.0"
   },
@@ -59,6 +62,7 @@
     "@types/node": "^25.0.3",
     "@types/turndown": "^5.0.6",
     "@vitest/coverage-v8": "4.0.16",
+    "execa": "^9.6.1",
     "oxlint": "^1.36.0",
     "oxlint-tsgolint": "^0.10.0",
     "tsx": "^4.21.0",

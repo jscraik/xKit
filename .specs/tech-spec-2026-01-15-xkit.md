@@ -1,13 +1,14 @@
 schema_version: 1
 # Technical Specification: xKit CLI + Bookmark Archiving
 
-**Owner:** Jamie Craik  
-**Status:** Draft  
-**Last updated:** 2026-01-15  
-**Related PRD:** .specs/spec-2026-01-15-xkit-prd.md  
-**Repo / Tracking:** /Users/jamiecraik/dev/xKit  
-**Reviewers:** N/A (solo dev)  
-**Release target:** 2026-02-01  
+**Owner:** Jamie Craik
+**Status:** Phase 1 Complete - Pre-Release Checklist In Progress
+**Last updated:** 2026-01-19
+**Related PRD:** .specs/spec-2026-01-15-xkit-prd.md
+**Repo / Tracking:** /Users/jamiecraik/dev/xKit
+**Reviewers:** N/A (solo dev)
+**Release target:** 2026-02-01 (BLOCKED on evidence validation)
+**Phase 1 Complete:** 2026-01-17  
 
 ---
 
@@ -43,12 +44,18 @@ xKit provides a Node/TypeScript CLI that accesses X/Twitter via cookie-based Gra
 
 ### Non-Goals (required; RNIA — if N/A, say why)
 - NG1: Official API support (out of scope for the project).
-- NG2: Advanced LLM integration, parallel processing, or token tracking (explicitly skipped).
+- NG2: Advanced cloud LLM integrations (OpenAI, Anthropic, etc.) - local AI (Ollama) implemented in Phase 1, but cloud integrations remain out of scope.
+- NG3: Parallel processing or token tracking (explicitly skipped).
 
 ### Success criteria (engineering)
 - p95 CLI command completion <= 2s for typical read/search operations.
+  - Status: ⚠️ **UNVERIFIED** - No performance measurements collected
 - CLI error rate < 3% (30-day window, opt-in telemetry or manual tracking).
+  - Status: ⚠️ **UNVERIFIED** - Telemetry not implemented
 - JSON output schema stays backward compatible for one major version.
+  - Status: ✅ **MAINTAINED** - No breaking changes
+
+**CRITICAL:** Engineering success criteria cannot be claimed as met without actual measurement. This represents a significant gap in operational readiness.
 
 ---
 
@@ -71,11 +78,15 @@ flowchart LR
   XAPI --> X[X/Twitter GraphQL]
   Router --> Archive[Archive Pipeline]
   Archive --> Enrich[Enrichment]
+  Enrich --> Content[ContentExtractor]
+  Content --> Article[ArticleExtractor]
+  Content --> Ollama[OllamaClient]
   Archive --> Categorize[Categorization]
   Archive --> Writer[Markdown Writer]
   Writer --> FS[(Local Files)]
   Router --> QueryIds[Query ID Cache]
   QueryIds --> FS
+  Ollama -.->|optional| OllamaSvc[(Ollama Service)]
 ```
 
 ### Architectural decisions (with rationale)
@@ -101,17 +112,23 @@ flowchart LR
 
 ### Component inventory
 
-| Component | Type | Status |
-| --- | --- | --- |
-| CLI Entrypoint | service | current |
-| Command Router | service | current |
-| Credential Resolver | service | current |
-| X GraphQL Client | service | current |
-| Archive Pipeline | job | current |
-| Query ID Cache | job | current |
-| Markdown Writer | lib | current |
-| Enrichment | lib | current |
-| Categorization | lib | current |
+| Component | Type | Status | Phase |
+| --- | --- | --- | --- |
+| CLI Entrypoint | service | current | MVP |
+| Command Router | service | current | MVP |
+| Credential Resolver | service | current | MVP |
+| X GraphQL Client | service | current | MVP |
+| Archive Pipeline | job | current | MVP |
+| Query ID Cache | job | current | MVP |
+| Markdown Writer | lib | current | MVP |
+| Enrichment | lib | current | MVP |
+| Categorization | lib | current | MVP |
+| ArticleExtractor | lib | **current** | **Phase 1** |
+| OllamaClient | lib | **current** | **Phase 1** |
+| ContentExtractor | lib | **current** | **Phase 1** |
+| Setup Wizard | service | current | MVP |
+| Webhook Notifications | service | current | MVP |
+| Daemon Mode | service | current | MVP |
 
 ### Component: Archive Pipeline
 
@@ -200,6 +217,133 @@ State machine: N/A (stateless client requests per call).
   * Handling: suggest `xkit query-ids --fresh`
   * User impact: command fails
   * Data impact: none
+
+---
+
+### Component: ArticleExtractor (Phase 1)
+
+**Status:** current (added 2026-01-17)
+
+**Responsibilities**
+* Extract full article content from web pages
+* Convert HTML to clean Markdown using Turndown
+* Calculate reading time and word count
+* Extract article metadata (title, author, site name)
+
+**Inputs**
+* URL from bookmark enrichment pipeline
+* HTML content (fetched via curl/https)
+
+**Outputs**
+* Extracted content object with fields:
+  - `title`: string
+  - `content`: string (Markdown)
+  - `textContent`: string (plain text)
+  - `author`: string?
+  - `siteName`: string?
+  - `readingTime`: number (minutes)
+  - `wordCount`: number
+
+**Owned data**
+* None (stateless processor)
+
+**Dependencies**
+* @mozilla/readability - content extraction
+* linkedom - DOM implementation
+* turndown - HTML to Markdown conversion
+
+#### State machine
+State machine: N/A (stateless processor per URL).
+
+#### Error modes & recovery
+* Error: URL not accessible
+  * Detection: HTTP error or timeout
+  * Handling: degrade to basic bookmark entry
+  * User impact: reduced content richness
+  * Data impact: partial enrichment only
+
+* Error: Content extraction fails
+  * Detection: Readability returns empty
+  * Handling: fallback to basic metadata
+  * User impact: no full content
+  * Data impact: degraded archive entry
+
+---
+
+### Component: OllamaClient (Phase 1)
+
+**Status:** current (added 2026-01-17)
+
+**Responsibilities**
+* Detect Ollama availability
+* Generate article summaries (2-3 sentences)
+* Extract key points (3-5 bullet points)
+* Handle model selection and timeouts
+
+**Inputs**
+* Article content (title + text)
+* Model name (default: qwen2.5:7b)
+
+**Outputs**
+* AI-generated content:
+  - `summary`: string (2-3 sentences)
+  - `keyPoints`: string[] (3-5 bullets)
+  - `aiGenerated`: boolean
+  - `aiModel`: string
+
+**Owned data**
+* None (stateless client)
+
+**Dependencies**
+* ollama npm package
+* Ollama server (localhost:11434)
+
+#### State machine
+```mermaid
+stateDiagram-v2
+  [*] --> CHECKING: summarize request
+  CHECKING --> AVAILABLE: Ollama running
+  CHECKING --> UNAVAILABLE: Ollama not responding
+  AVAILABLE --> SUMMARIZING: content received
+  SUMMARIZING --> SUCCESS: summary generated
+  SUMMARIZING --> ERROR: timeout or model error
+  ERROR --> UNAVAILABLE: fallback
+  UNAVAILABLE --> [*]
+  SUCCESS --> [*]
+```
+
+#### Error modes & recovery
+* Error: Ollama not available
+  * Detection: Connection refused to localhost:11434
+  * Handling: graceful degradation, no AI features
+  * User impact: no summaries
+  * Data impact: basic archive only
+
+* Error: Model timeout
+  * Detection: Request exceeds 30s timeout
+  * Handling: fail gracefully, continue without AI
+  * User impact: partial AI processing
+  * Data impact: some entries enriched, some not
+
+* Error: Model overload
+  * Detection: Ollama returns 503
+  * Handling: retry once, then fallback
+  * User impact: delayed processing
+  * Data impact: may skip AI for some entries
+
+#### Security considerations (CRITICAL)
+* ⚠️ **Local network exposure:** Connects to localhost:11434 without authentication
+* ⚠️ **Prompt injection risk:** Bookmark content could include malicious prompts
+* ⚠️ **Resource exhaustion:** Models require 4GB+ RAM; could impact system performance
+* ⚠️ **No content sanitization:** Raw bookmark content sent to AI model
+
+**Mitigation status:**
+- ✅ Graceful fallback when unavailable
+- ❌ No prompt injection sanitization
+- ❌ No resource limit warnings
+- ❌ No content redaction before AI processing
+
+**Required security review:** HIGH PRIORITY
 
 ---
 
@@ -326,14 +470,75 @@ erDiagram
 ## 8) Security Considerations (Required)
 
 * Authentication: cookie-based auth_token + ct0
-* Authorization: N/A (user’s own account)
+* Authorization: N/A (user's own account)
 * Encryption: in transit (HTTPS); no at-rest encryption required for public bookmark data
 * Input validation: schema validation for config and CLI args
 * Secrets management: never log cookies; document safe handling
-* Threats & mitigations:
-  * T1: Cookie exfiltration → never log cookies; redaction in error messages
-  * T2: Prompt injection via content → treat content as untrusted; no code run
-  * T3: API misuse/rate limits → backoff + user guidance
+
+### Threats & mitigations
+
+**Original Threats (MVP):**
+* T1: Cookie exfiltration → never log cookies; redaction in error messages
+* T2: API misuse/rate limits → backoff + user guidance
+
+**NEW Threats (Phase 1 - Ollama Integration):**
+* ⚠️ **T3: Prompt injection via bookmark content** → NO MITIGATION IMPLEMENTED
+  * Attack vector: Malicious bookmark content includes prompt injection attempts
+  * Impact: AI model could be influenced to generate unexpected/harmful content
+  * Required mitigation: Content sanitization before AI processing
+  * Status: ⚠️ **OPEN** - Security review required
+
+* ⚠️ **T4: Local network exposure (Ollama)** → PARTIAL MITIGATION
+  * Attack vector: Ollama endpoint (localhost:11434) has no authentication
+  * Impact: Local network access could interfere with AI processing
+  * Mitigation: Graceful fallback when unavailable
+  * Status: ✅ Degradation works, but no access control
+
+* ⚠️ **T5: Resource exhaustion (AI models)** → NO MITIGATION IMPLEMENTED
+  * Attack vector: Processing many bookmarks could exhaust RAM (4GB+ per model)
+  * Impact: System performance degradation, crashes
+  * Required mitigation: Resource limits, batch size controls, user warnings
+  * Status: ⚠️ **OPEN** - No resource management
+
+* ⚠️ **T6: Unvalidated AI output in archives** → NO MITIGATION IMPLEMENTED
+  * Attack vector: AI-generated summaries/keypoints stored without validation
+  * Impact: Archives could contain misleading or harmful AI-generated content
+  * Required mitigation: Output sanitization, AI attribution labels
+  * Status: ✅ Attribution implemented, no sanitization
+
+**Security Audit Status:** ❌ **REQUIRED** - Phase 1 introduced new attack vectors that have not been professionally assessed.
+
+---
+
+### Security Assessment (2026-01-19)
+
+**⚠️ IMPORTANT:** A comprehensive security assessment was conducted for Phase 1 (Ollama integration). This assessment identified MEDIUM-HIGH risk issues that must be addressed before production use.
+
+**Key Findings:**
+- **Risk Level:** ⚠️ MEDIUM-HIGH
+- **Critical Issues:**
+  - No prompt injection sanitization
+  - No resource limits for AI processing
+  - Dependency audit not performed
+- **Recommendation:** Professional security review recommended
+
+**For complete threat analysis, testing requirements, and mitigation recommendations, see [SECURITY_ASSESSMENT-2026-01-19.md](.specs/SECURITY_ASSESSMENT-2026-01-19.md).**
+
+**Required Actions (from Security Assessment):**
+
+1. **Immediate (Before Production Use):**
+   - Implement content sanitization (Section 4.1)
+   - Add resource limits (Section 4.1)
+   - Run dependency audit (`npm audit`)
+
+2. **Short-term (Next Release):**
+   - Add security test cases (Section 6.1)
+   - Update security documentation (Section 4.2)
+
+3. **Before Phase 2:**
+   - Complete all security testing
+   - Address all HIGH priority issues
+   - Document security assumptions
 
 ---
 
@@ -450,13 +655,21 @@ N/A (no persistent service migration).
 
 ## 17) Tech Spec Quality Gate (Required)
 
-* [ ] Architecture reads clear and diagrammed
-* [ ] Every stateful component has a state machine (or N/A + reason)
-* [ ] APIs have complete schemas + errors
-* [ ] Data model includes constraints and indexes
-* [ ] List security threats and mitigations
-* [ ] Error handling covers timeouts, retries, idempotency, degraded modes
-* [ ] Performance targets use numeric values and measurable targets
-* [ ] Observability includes logs, metrics, dashboards, alerts
-* [ ] Deployment stays repeatable and rollbackable
-* [ ] No ambiguity left for implementers
+* [x] Architecture reads clear and diagrammed
+* [x] Every stateful component has a state machine (or N/A + reason)
+* [x] APIs have complete schemas + errors
+* [x] Data model includes constraints and indexes
+* [x] List security threats and mitigations
+* [x] Error handling covers timeouts, retries, idempotency, degraded modes
+* [x] Performance targets use numeric values and measurable targets
+* [x] Observability includes logs, metrics, dashboards, alerts
+* [x] Deployment stays repeatable and rollbackable
+* [x] No ambiguity left for implementers
+
+**Adversarial Review Findings (2026-01-19):**
+- ⚠️ CRITICAL: New security threats from Ollama integration not professionally assessed
+- ⚠️ HIGH: Performance targets unverified - no actual measurements collected
+- ⚠️ MEDIUM: Resource limits for AI processing not defined
+- ⚠️ MEDIUM: Content sanitization before AI processing not implemented
+
+**Quality Gate Status:** ⚠️ **CONDITIONAL PASS** - Tech Spec is complete and well-structured, but Phase 1 introduced security and operational concerns that must be addressed before production use.

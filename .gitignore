@@ -41,3 +41,8 @@ analysis-engine-test-*/
 analysis-engine-error-test-*/
 script-runner-test-*/
 script-runner-property-test-*/
+
+# AI artifacts - transient only
+/ai/tmp/
+/ai/cache/
+/ai/raw/

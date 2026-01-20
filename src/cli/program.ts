@@ -3,6 +3,7 @@ import { registerBookmarkAnalysisCommand } from '../commands/bookmark-analysis.j
 import { registerBookmarkExportCommand } from '../commands/bookmark-export.js';
 import { registerBookmarksCommand } from '../commands/bookmarks.js';
 import { registerBookmarksArchiveCommand } from '../commands/bookmarks-archive.js';
+import { registerCacheCommand } from '../commands/cache.js';
 import { registerCheckCommand } from '../commands/check.js';
 import { registerDaemonCommands } from '../commands/daemon.js';
 import { registerHelpCommand } from '../commands/help.js';
@@ -35,6 +36,7 @@ export const KNOWN_COMMANDS = new Set([
   'bookmarks',
   'bookmarks-archive',
   'archive',
+  'cache',
   'unbookmark',
   'following',
   'followers',
@@ -199,6 +201,7 @@ export function createProgram(ctx: CliContext): Command {
   registerCheckCommand(program, ctx);
   registerBookmarkExportCommand(program, ctx);
   registerBookmarkAnalysisCommand(program, ctx);
+  registerCacheCommand(program, ctx);
   registerMetricsCommand(program, ctx);
 
   return program;

@@ -18,6 +18,8 @@ import { registerSetupCommand } from '../commands/setup.js';
 import { registerUnbookmarkCommand } from '../commands/unbookmark.js';
 import { registerUserCommands } from '../commands/users.js';
 import { registerGenerateSkillsCommand } from '../commands/generate-skills.js';
+import { registerLearnCommand } from '../commands/learn.js';
+import { registerRecapCommand } from '../commands/recap.js';
 import { getCliVersion } from '../lib/version.js';
 import { type CliContext, collectCookieSource } from './shared.js';
 import { metrics } from '../metrics/metrics-collector.js';
@@ -54,6 +56,8 @@ export const KNOWN_COMMANDS = new Set([
   'analyze-bookmarks',
   'metrics',
   'generate-skills',
+  'learn',
+  'recap',
 ]);
 
 /**
@@ -206,6 +210,8 @@ export function createProgram(ctx: CliContext): Command {
   registerCacheCommand(program, ctx);
   registerMetricsCommand(program, ctx);
   registerGenerateSkillsCommand(program, ctx);
+  registerLearnCommand(program, ctx);
+  registerRecapCommand(program, ctx);
 
   return program;
 }

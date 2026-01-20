@@ -20,7 +20,7 @@ export class MarkdownWriter {
       includeMetadata: config.includeMetadata ?? true,
       includeFrontmatter: config.includeFrontmatter ?? true,
       groupByDate: config.groupByDate ?? true,
-      organizeByMonth: config.organizeByMonth ?? false,
+      organizeByMonth: config.organizeByMonth ?? true,
     };
 
     this.templates = new MarkdownTemplates();

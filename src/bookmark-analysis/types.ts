@@ -58,7 +58,7 @@ export interface AnalysisResult {
  * LLM configuration for categorization and scoring
  */
 export interface LLMConfig {
-  provider: 'openai' | 'anthropic' | 'custom';
+  provider: 'openai' | 'anthropic' | 'ollama' | 'custom';
   model: string;
   apiKey: string;
   prompt: string;

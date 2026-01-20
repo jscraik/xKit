@@ -16,13 +16,17 @@ import type { LLMConfig, ScoringConfig } from '../bookmark-analysis/types.js';
 import { UsefulnessScorer } from '../bookmark-analysis/usefulness-scorer.js';
 import { logger } from '../bookmark-export/logger.js';
 import type { CliContext } from '../cli/shared.js';
+import { DEFAULT_MODEL_TIERS, PREDEFINED_STRATEGIES } from '../bookmark-analysis/model-config.js';
+import type { RouterConfig } from '../bookmark-analysis/model-router.js';
+import { BookmarkEmbedder } from '../bookmark-analysis/bookmark-embedder.js';
+import { VectorStore } from '../bookmark-analysis/vector-store.js';
 
 /**
  * Configuration structure for bookmark analysis
  */
 interface AnalysisConfig {
   llm?: {
-    provider: 'openai' | 'anthropic';
+    provider: 'openai' | 'anthropic' | 'ollama';
     apiKey: string;
     model?: string;
     maxTokens?: number;
@@ -92,6 +96,132 @@ function loadConfig(configPath: string): AnalysisConfig {
 }
 
 /**
+ * Handle embedding operations (--embed and --similar)
+ */
+async function handleEmbeddingOperations(
+  options: {
+    embed?: boolean;
+    similar?: string;
+    embeddingModel?: string;
+    ollamaHost?: string;
+  },
+  exportData: { bookmarks: Array<{ id: string; text: string; authorUsername?: string }> }
+): Promise<void> {
+  const { mkdirSync, writeFileSync, existsSync } = await import('node:fs');
+  const { join } = await import('node:path');
+
+  // Ollama host configuration - user's custom path
+  const ollamaHost = options.ollamaHost || process.env.OLLAMA_HOST || 'http://localhost:11434';
+  console.log(`\n📊 Ollama Embeddings (${ollamaHost})`);
+
+  const embedder = new BookmarkEmbedder({
+    model: options.embeddingModel || process.env.OLLAMA_EMBEDDING_MODEL || 'nomic-embed-text',
+    host: ollamaHost,
+  });
+
+  // Check if Ollama is available
+  const available = await embedder.isAvailable();
+  if (!available) {
+    console.error(`❌ Ollama not available at ${ollamaHost}`);
+    console.error('   Make sure Ollama is running:');
+    console.error('   - Start Ollama: ollama serve');
+    console.error('   - Pull embedding model: ollama pull nomic-embed-text');
+    console.error('   - Available models:', 'mxbai-embed-large, snowflake-arctic-embed2, qwen3-embedding, nomic-embed-text');
+    process.exit(1);
+  }
+
+  console.log(`✅ Ollama connected`);
+
+  const vectorStore = new VectorStore();
+  const embeddingsDir = join('.', 'embeddings');
+
+  // Try to load existing embeddings
+  const embeddingsFile = join(embeddingsDir, 'embeddings.json');
+  if (existsSync(embeddingsFile)) {
+    console.log(`📂 Loading existing embeddings from ${embeddingsFile}...`);
+    const { embeddings } = JSON.parse(readFileSync(embeddingsFile, 'utf-8'));
+    vectorStore.addBatch(embeddings);
+    console.log(`   Loaded ${embeddings.length} embeddings`);
+  }
+
+  // Generate embeddings if requested
+  if (options.embed) {
+    console.log('\n🔄 Generating embeddings...');
+    const bookmarks = exportData.bookmarks;
+
+    const startTime = Date.now();
+    const results = await embedder.embedBatch(bookmarks, (current, total) => {
+      const progress = Math.round((current / total) * 100);
+      process.stdout.write(`\r  Progress: ${current}/${total} (${progress}%)`);
+    });
+
+    console.log(`\r  ✓ Generated ${results.successCount} embeddings${' '.repeat(30)}`);
+
+    // Add successful embeddings to vector store
+    vectorStore.addBatch(results.successful);
+
+    // Save embeddings to disk using VectorStore's save method
+    mkdirSync(embeddingsDir, { recursive: true });
+    vectorStore.save(embeddingsFile);
+    console.log(`💾 Saved embeddings to ${embeddingsFile}`);
+
+    // Show failure summary if any
+    if (results.failureCount > 0) {
+      console.log(`\n⚠️  ${results.failureCount} bookmarks failed to embed (see warnings above)`);
+    }
+
+    const stats = embedder.getStats();
+    console.log(`\n⏱️  Average time per embedding: ${Math.round(stats.averageTime)}ms`);
+    const totalTime = ((Date.now() - startTime) / 1000).toFixed(1);
+    console.log(`⏱️  Total time: ${totalTime}s`);
+  }
+
+  // Find similar bookmarks if requested
+  if (options.similar) {
+    const targetId = options.similar;
+
+    if (!vectorStore.has(targetId)) {
+      console.error(`\n❌ Bookmark '${targetId}' not found in embeddings`);
+      console.error('   Run with --embed first to generate embeddings');
+      process.exit(1);
+    }
+
+    console.log(`\n🔍 Finding bookmarks similar to '${targetId}'...`);
+
+    const similar = vectorStore.findSimilar(targetId, {
+      limit: 10,
+      minSimilarity: 0.6,
+    });
+
+    if (similar.length === 0) {
+      console.log('   No similar bookmarks found');
+    } else {
+      console.log(`\n   Top ${similar.length} similar bookmarks:\n`);
+      for (const result of similar) {
+        const bookmark = exportData.bookmarks.find(b => b.id === result.bookmarkId);
+        if (bookmark) {
+          const score = (result.similarity * 100).toFixed(1);
+          const preview = bookmark.text.substring(0, 80).replace(/\n/g, ' ');
+          console.log(`   ${score}%  [${result.bookmarkId}]`);
+          console.log(`       ${preview}${bookmark.text.length > 80 ? '...' : ''}`);
+          if (bookmark.authorUsername) {
+            console.log(`       by @${bookmark.authorUsername}`);
+          }
+          console.log('');
+        }
+      }
+    }
+  }
+
+  // Show vector store stats
+  const storeStats = vectorStore.getStats();
+  console.log(`\n📊 Vector Store:`);
+  console.log(`   Total embeddings: ${storeStats.totalEmbeddings}`);
+  console.log(`   Dimensions: ${storeStats.dimensions}`);
+  console.log(`   Memory: ~${(storeStats.memoryBytes / 1024 / 1024).toFixed(2)} MB`);
+}
+
+/**
  * Analyze bookmarks command handler
  */
 async function analyzeBookmarks(options: {
@@ -100,6 +230,11 @@ async function analyzeBookmarks(options: {
   method?: 'llm' | 'heuristic' | 'hybrid';
   scripts?: string;
   config?: string;
+  modelStrategy?: 'fast' | 'balanced' | 'quality' | 'optimized';
+  embed?: boolean;
+  similar?: string;
+  embeddingModel?: string;
+  ollamaHost?: string;
 }): Promise<void> {
   const configPath = options.config || '.bookmark-analysis.config.json';
 
@@ -144,7 +279,18 @@ async function analyzeBookmarks(options: {
         prompt: 'Categorize this bookmark into relevant categories',
         maxCategories: 5,
       };
-      const categorizer = new LLMCategorizer(llmConfig);
+
+      // Configure model router if strategy specified
+      let routerConfig: RouterConfig | undefined;
+      if (options.modelStrategy) {
+        console.log(`Using model strategy: ${options.modelStrategy}`);
+        routerConfig = {
+          tiers: DEFAULT_MODEL_TIERS,
+          strategy: PREDEFINED_STRATEGIES[options.modelStrategy],
+        };
+      }
+
+      const categorizer = new LLMCategorizer(llmConfig, routerConfig);
       analyzers.push(categorizer);
     } else {
       console.log('Skipping LLM categorization (no API key configured)');
@@ -231,6 +377,11 @@ async function analyzeBookmarks(options: {
       failedAnalyses: errorSummary.totalErrors,
       outputPath,
     });
+
+    // Embeddings functionality
+    if (options.embed || options.similar) {
+      await handleEmbeddingOperations(options, exportData);
+    }
   } catch (error) {
     logger.error('Analysis failed', {
       error: error instanceof Error ? error.message : String(error),
@@ -256,6 +407,11 @@ export function registerBookmarkAnalysisCommand(program: Command, ctx: CliContex
     )
     .option('--scripts <paths>', 'Comma-separated list of custom analysis script paths')
     .option('--config <path>', 'Path to configuration file (default: .bookmark-analysis.config.json)')
+    .option('--model-strategy <strategy>', 'Model cost optimization strategy: fast, balanced, quality, or optimized (default: balanced)', /^(fast|balanced|quality|optimized)$/)
+    .option('--embed', 'Generate semantic embeddings using local Ollama (requires Ollama running)')
+    .option('--similar <id>', 'Find bookmarks similar to the given bookmark ID (requires embeddings)')
+    .option('--embedding-model <name>', 'Ollama embedding model (default: nomic-embed-text). Available: mxbai-embed-large, snowflake-arctic-embed2, qwen3-embedding, nomic-embed-text', 'nomic-embed-text')
+    .option('--ollama-host <url>', 'Ollama host URL (default: http://localhost:11434)', 'http://localhost:11434')
     .action(async (options) => {
       await analyzeBookmarks(options);
     });

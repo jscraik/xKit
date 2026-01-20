@@ -4,8 +4,9 @@
 
 import { appendFileSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { logger } from '../observability/logger.js';
 import type { CategorizedBookmark } from '../bookmark-categorization/types.js';
+import { logger } from '../observability/logger.js';
+import { generateEnhancedFilename } from './filename.js';
 import { MarkdownTemplates } from './templates.js';
 import type { MarkdownConfig } from './types.js';
 
@@ -97,8 +98,8 @@ export class MarkdownWriter {
           return null;
       }
 
-      // Generate filename
-      const filename = this.templates.generateFilename(bookmark);
+      // Generate filename with enhanced format
+      const filename = generateEnhancedFilename(bookmark);
 
       // Determine folder path
       let folder: string;
@@ -131,12 +132,15 @@ export class MarkdownWriter {
       return filePath;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error({
-        event: 'markdown_write_failed',
-        bookmarkId: bookmark.id,
-        filePath,
-        error: errorMessage,
-      }, 'Failed to write knowledge file');
+      logger.error(
+        {
+          event: 'markdown_write_failed',
+          bookmarkId: bookmark.id,
+          filePath,
+          error: errorMessage,
+        },
+        'Failed to write knowledge file',
+      );
       return null;
     }
   }
@@ -148,10 +152,12 @@ export class MarkdownWriter {
     const date = new Date(isoDate);
     const year = date.getFullYear();
     const monthNum = String(date.getMonth() + 1).padStart(2, '0');
-    const monthName = date.toLocaleDateString('en-US', {
-      month: 'short',
-      timeZone: this.config.timezone
-    }).toLowerCase();
+    const monthName = date
+      .toLocaleDateString('en-US', {
+        month: 'short',
+        timeZone: this.config.timezone,
+      })
+      .toLowerCase();
 
     return `${year}/${monthNum}-${monthName}`;
   }

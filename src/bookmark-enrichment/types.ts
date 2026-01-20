@@ -83,4 +83,6 @@ export interface EnrichmentConfig {
   enableSummarization?: boolean;
   ollamaModel?: string;
   fetchThreads?: boolean;
+  summaryPersona?: string;
+  summaryLength?: string;
 }

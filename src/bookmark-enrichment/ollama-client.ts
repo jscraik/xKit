@@ -4,6 +4,8 @@
 
 import pLimit from 'p-limit';
 import { Ollama } from 'ollama';
+import { buildEnhancedPrompt, type Persona, type SummaryLength, type ContentType } from '../bookmark-prompts/index.js';
+import { escapeXmlTags } from '../security/sanitizer.js';
 
 export interface OllamaConfig {
     host?: string;
@@ -17,6 +19,14 @@ export interface SummaryResult {
     keyPoints: string[];
     model: string;
     tokensUsed?: number;
+}
+
+export interface EnhancedSummaryOptions {
+    persona?: Persona;
+    length?: SummaryLength;
+    contentType?: ContentType;
+    language?: string;
+    customInstructions?: string;
 }
 
 /**
@@ -149,6 +159,63 @@ export class OllamaClient {
 
             return this.parseSummaryResponse(response.response, this.config.model);
         }, 'summarizeArticle');
+    }
+
+    /**
+     * Summarize article content with enhanced options (persona, length, content type)
+     *
+     * Uses the new tagged prompt structure (ADR-001) with persona and length customization.
+     *
+     * @param content - Article content to summarize
+     * @param options - Enhanced summary options
+     * @returns Summary with key points
+     *
+     * @example
+     * const result = await client.summarizeWithPersona(articleContent, {
+     *   url: 'https://example.com/article',
+     *   title: 'Understanding TypeScript',
+     *   persona: 'curious-learner',
+     *   length: 'medium',
+     *   contentType: 'article',
+     * });
+     */
+    async summarizeWithPersona(
+        content: string,
+        options: {
+            url: string;
+            title: string;
+            siteName?: string;
+        } & EnhancedSummaryOptions
+    ): Promise<SummaryResult> {
+        return this.executeWithLimits(async () => {
+            const { url, title, siteName, persona, length, contentType, language, customInstructions } = options;
+
+            // Use enhanced prompt builder with security (escapeXmlTags)
+            const safeContent = escapeXmlTags(content);
+            const prompt = buildEnhancedPrompt({
+                content: safeContent,
+                url,
+                title,
+                siteName,
+                persona,
+                length,
+                contentType,
+                language,
+                customInstructions,
+            });
+
+            const response = await this.client.generate({
+                model: this.config.model,
+                prompt,
+                stream: false,
+                options: {
+                    temperature: 0.3,
+                    top_p: 0.9,
+                },
+            });
+
+            return this.parseSummaryResponse(response.response, this.config.model);
+        }, 'summarizeWithPersona');
     }
 
     /**

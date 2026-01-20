@@ -26,6 +26,8 @@ export class BookmarkEnricher {
       enableSummarization: config.enableSummarization ?? false,
       ollamaModel: config.ollamaModel,
       fetchThreads: config.fetchThreads ?? false,
+      summaryPersona: config.summaryPersona,
+      summaryLength: config.summaryLength,
     };
 
     this.client = client;
@@ -42,6 +44,8 @@ export class BookmarkEnricher {
       enableFullContent: this.config.enableFullContent,
       enableSummarization: this.config.enableSummarization,
       ollamaModel: this.config.ollamaModel,
+      summaryPersona: this.config.summaryPersona,
+      summaryLength: this.config.summaryLength,
     });
   }
 

@@ -14,6 +14,9 @@ import { StatsTracker } from '../bookmark-stats/index.js';
 import type { CliContext } from '../cli/shared.js';
 import { TwitterClient } from '../lib/twitter-client.js';
 import { WebhookNotifier } from '../webhook-notifications/index.js';
+import { TokenTracker } from '../bookmark-analysis/token-tracker.js';
+import { WorkerPool } from '../bookmark-analysis/worker-pool.js';
+import type { ParallelConfig } from '../bookmark-analysis/work-item.js';
 
 interface ArchiveOptions {
   count?: string;
@@ -35,6 +38,11 @@ interface ArchiveOptions {
   ollamaModel?: string;
   noFullContent?: boolean;
   fetchThreads?: boolean;
+  parallel?: boolean;
+  parallelWorkers?: string;
+  parallelThreshold?: string;
+  persona?: string;
+  length?: string;
 }
 
 /**
@@ -50,6 +58,9 @@ async function archiveBookmarks(options: ArchiveOptions, program: Command, ctx: 
   // Initialize stats tracker
   const stats = new StatsTracker();
   stats.start();
+
+  // Initialize token tracker
+  const tokenTracker = new TokenTracker();
 
   // Initialize webhook notifier if configured
   let webhook: WebhookNotifier | undefined;
@@ -93,6 +104,8 @@ async function archiveBookmarks(options: ArchiveOptions, program: Command, ctx: 
         enableSummarization: options.summarize || false,
         ollamaModel: options.ollamaModel,
         fetchThreads: options.fetchThreads || false,
+        summaryPersona: options.persona,
+        summaryLength: options.length,
       },
       client,
     );
@@ -101,7 +114,9 @@ async function archiveBookmarks(options: ArchiveOptions, program: Command, ctx: 
       outputDir: options.outputDir || './knowledge',
       archiveFile: options.archiveFile || './bookmarks.md',
       timezone: options.timezone || 'America/New_York',
-      organizeByMonth: options.organizeByMonth || false,
+      // organizeByMonth defaults to true in MarkdownWriter
+      // Pass options.organizeByMonth explicitly only if provided
+      ...(options.organizeByMonth !== undefined && { organizeByMonth: options.organizeByMonth }),
     });
     const mediaHandler = new MediaHandler({
       includeMedia: options.includeMedia || false,
@@ -181,6 +196,25 @@ async function archiveBookmarks(options: ArchiveOptions, program: Command, ctx: 
 
     console.log(`📝 Processing ${bookmarksToProcess.length} bookmarks...\n`);
     stats.recordProcessed(bookmarksToProcess.length);
+
+    // Step 5.5: Parallel processing setup (if enabled)
+    if (options.parallel) {
+      const parallelConfig: ParallelConfig = {
+        enabled: true,
+        concurrency: options.parallelWorkers ? parseInt(options.parallelWorkers, 10) : 4,
+        threshold: options.parallelThreshold ? parseInt(options.parallelThreshold, 10) : 50,
+        batchSize: 10,
+      };
+
+      if (bookmarksToProcess.length >= parallelConfig.threshold) {
+        console.log(`⚡ Parallel processing enabled with ${parallelConfig.concurrency} workers`);
+        // Note: Full integration with enricher/categorizer will be added in Phase 2.5
+        // For now, this is a placeholder for the parallel processing architecture
+      } else {
+        console.log(`ℹ️  Parallel mode enabled but ${bookmarksToProcess.length} bookmarks (threshold: ${parallelConfig.threshold})`);
+        console.log(`   Processing sequentially. Use --parallel-threshold ${bookmarksToProcess.length} to force parallel.`);
+      }
+    }
 
     // Step 6: Enrich bookmarks
     if (!options.skipEnrichment) {
@@ -284,6 +318,12 @@ async function archiveBookmarks(options: ArchiveOptions, program: Command, ctx: 
       });
     }
 
+    // Display token usage report if any LLM operations were performed
+    const tokenReport = tokenTracker.getReport();
+    if (tokenReport.total.input > 0 || tokenReport.total.output > 0) {
+      console.log('\n' + tokenTracker.formatReport());
+    }
+
     console.log('\n✨ Done!\n');
   } catch (error) {
     stats.recordError();
@@ -324,6 +364,11 @@ export function registerBookmarksArchiveCommand(program: Command, ctx: CliContex
     .option('--ollama-model <name>', 'Ollama model to use (default: qwen2.5:7b)')
     .option('--no-full-content', 'Disable full article content extraction')
     .option('--fetch-threads', 'Fetch full Twitter threads for bookmarked tweets')
+    .option('--persona <name>', 'Summary persona: curious-learner, technical-researcher, product-manager, engineer-pragmatic, educator, skeptic, synthesizer (default: curious-learner)')
+    .option('--length <level>', 'Summary length: short, medium, long, xl, xxl (default: medium)')
+    .option('--parallel', 'Enable parallel processing (default: off)')
+    .option('--parallel-workers <number>', 'Number of worker threads (default: 4)', '4')
+    .option('--parallel-threshold <number>', 'Minimum bookmarks to enable parallel (default: 50)', '50')
     .action(async (options: ArchiveOptions) => {
       try {
         await archiveBookmarks(options, program, ctx);

@@ -13,6 +13,8 @@ export class ContentExtractor {
   private ollamaClient: OllamaClient | null;
   private enableFullContent: boolean;
   private enableSummarization: boolean;
+  private summaryPersona?: string;
+  private summaryLength?: string;
 
   constructor(
     options: {
@@ -21,12 +23,16 @@ export class ContentExtractor {
       enableFullContent?: boolean;
       enableSummarization?: boolean;
       ollamaModel?: string;
+      summaryPersona?: string;
+      summaryLength?: string;
     } = {},
   ) {
     this.timeout = options.timeout ?? 10000;
     this.userAgent = options.userAgent ?? 'xKit/1.0 (Bookmark Enrichment)';
     this.enableFullContent = options.enableFullContent ?? (process.env.XKIT_EXTRACT_FULL_CONTENT !== 'false');
     this.enableSummarization = options.enableSummarization ?? false;
+    this.summaryPersona = options.summaryPersona;
+    this.summaryLength = options.summaryLength;
 
     this.articleExtractor = new ArticleExtractor({
       timeout: this.timeout,
@@ -183,15 +189,35 @@ export class ContentExtractor {
               const ollamaAvailable = await this.ollamaClient.isAvailable();
 
               if (ollamaAvailable) {
-                const summaryResult = await this.ollamaClient.summarizeArticle(
-                  article.textContent.slice(0, 8000),
-                  article.title,
-                );
+                // Use enhanced summarization if persona or length is specified
+                if (this.summaryPersona || this.summaryLength) {
+                  const summaryResult = await this.ollamaClient.summarizeWithPersona(
+                    article.textContent.slice(0, 8000),
+                    {
+                      url,
+                      title: article.title,
+                      siteName: article.siteName,
+                      persona: this.summaryPersona as any,
+                      length: this.summaryLength as any,
+                    }
+                  );
 
-                result.summary = summaryResult.summary;
-                result.keyPoints = summaryResult.keyPoints;
-                result.aiGenerated = true;
-                result.aiModel = summaryResult.model;
+                  result.summary = summaryResult.summary;
+                  result.keyPoints = summaryResult.keyPoints;
+                  result.aiGenerated = true;
+                  result.aiModel = summaryResult.model;
+                } else {
+                  // Fall back to basic summarization
+                  const summaryResult = await this.ollamaClient.summarizeArticle(
+                    article.textContent.slice(0, 8000),
+                    article.title,
+                  );
+
+                  result.summary = summaryResult.summary;
+                  result.keyPoints = summaryResult.keyPoints;
+                  result.aiGenerated = true;
+                  result.aiModel = summaryResult.model;
+                }
               }
             } catch (error) {
               console.error('Failed to generate AI summary:', error);

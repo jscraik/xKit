@@ -15,6 +15,9 @@ export class ContentExtractor {
   private enableSummarization: boolean;
   private summaryPersona?: string;
   private summaryLength?: string;
+  // Custom template support (Phase 4)
+  private summaryTemplate?: string;
+  private summaryTemplateVars?: Record<string, string>;
 
   constructor(
     options: {
@@ -25,6 +28,9 @@ export class ContentExtractor {
       ollamaModel?: string;
       summaryPersona?: string;
       summaryLength?: string;
+      // Custom template support (Phase 4)
+      summaryTemplate?: string;
+      summaryTemplateVars?: Record<string, string>;
     } = {},
   ) {
     this.timeout = options.timeout ?? 10000;
@@ -33,6 +39,8 @@ export class ContentExtractor {
     this.enableSummarization = options.enableSummarization ?? false;
     this.summaryPersona = options.summaryPersona;
     this.summaryLength = options.summaryLength;
+    this.summaryTemplate = options.summaryTemplate;
+    this.summaryTemplateVars = options.summaryTemplateVars;
 
     this.articleExtractor = new ArticleExtractor({
       timeout: this.timeout,
@@ -190,7 +198,7 @@ export class ContentExtractor {
 
               if (ollamaAvailable) {
                 // Use enhanced summarization if persona or length is specified
-                if (this.summaryPersona || this.summaryLength) {
+                if (this.summaryPersona || this.summaryLength || this.summaryTemplate) {
                   const summaryResult = await this.ollamaClient.summarizeWithPersona(
                     article.textContent.slice(0, 8000),
                     {
@@ -199,6 +207,9 @@ export class ContentExtractor {
                       siteName: article.siteName,
                       persona: this.summaryPersona as any,
                       length: this.summaryLength as any,
+                      // Custom template support (Phase 4)
+                      template: this.summaryTemplate,
+                      templateVars: this.summaryTemplateVars,
                     }
                   );
 

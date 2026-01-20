@@ -43,6 +43,9 @@ interface ArchiveOptions {
   parallelThreshold?: string;
   persona?: string;
   length?: string;
+  // Custom template support (Phase 4)
+  template?: string;
+  var?: string[];
 }
 
 /**
@@ -106,6 +109,9 @@ async function archiveBookmarks(options: ArchiveOptions, program: Command, ctx: 
         fetchThreads: options.fetchThreads || false,
         summaryPersona: options.persona,
         summaryLength: options.length,
+        // Custom template support (Phase 4)
+        summaryTemplate: options.template,
+        summaryTemplateVars: options.var ? ctx.parseVarFlags(options.var) : undefined,
       },
       client,
     );
@@ -369,6 +375,12 @@ export function registerBookmarksArchiveCommand(program: Command, ctx: CliContex
     .option('--parallel', 'Enable parallel processing (default: off)')
     .option('--parallel-workers <number>', 'Number of worker threads (default: 4)', '4')
     .option('--parallel-threshold <number>', 'Minimum bookmarks to enable parallel (default: 50)', '50')
+    // Custom template support (Phase 4)
+    .option('--template <name>', 'Use custom template from ~/.xkit/templates/')
+    .option('--var <key=value>', 'Template variable (can be used multiple times)', (value: string, previous: string[] = []) => {
+      previous.push(value);
+      return previous;
+    }, [])
     .action(async (options: ArchiveOptions) => {
       try {
         await archiveBookmarks(options, program, ctx);

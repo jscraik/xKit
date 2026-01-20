@@ -28,6 +28,9 @@ export class BookmarkEnricher {
       fetchThreads: config.fetchThreads ?? false,
       summaryPersona: config.summaryPersona,
       summaryLength: config.summaryLength,
+      // Custom template support (Phase 4)
+      summaryTemplate: config.summaryTemplate,
+      summaryTemplateVars: config.summaryTemplateVars,
     };
 
     this.client = client;
@@ -46,6 +49,9 @@ export class BookmarkEnricher {
       ollamaModel: this.config.ollamaModel,
       summaryPersona: this.config.summaryPersona,
       summaryLength: this.config.summaryLength,
+      // Custom template support (Phase 4)
+      summaryTemplate: this.config.summaryTemplate,
+      summaryTemplateVars: this.config.summaryTemplateVars,
     });
   }
 

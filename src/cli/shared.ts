@@ -27,6 +27,8 @@ export type XKitConfig = {
   cookieTimeoutMs?: number;
   timeoutMs?: number;
   quoteDepth?: number;
+  // Custom template directory (Phase 4)
+  templateDir?: string;
 };
 
 /**
@@ -63,6 +65,7 @@ export type CliContext = {
   printTweets: (tweets: TweetData[], opts?: { json?: boolean; emptyMessage?: string; showSeparator?: boolean }) => void;
   extractTweetId: (tweetIdOrUrl: string) => string;
   parseIntegerOption: typeof parseIntegerOption;
+  parseVarFlags: typeof parseVarFlags;
 };
 
 const COOKIE_SOURCES: CookieSource[] = ['safari', 'chrome', 'firefox'];
@@ -70,6 +73,49 @@ const COOKIE_SOURCES: CookieSource[] = ['safari', 'chrome', 'firefox'];
 const INTEGER_REGEX = /^[+-]?\d+$/;
 
 export type IntegerOptionParseResult = { ok: true; value: number } | { ok: false; error: string };
+
+/**
+ * Parse variable flags from CLI (Phase 4)
+ *
+ * Parses --var key=value flags into a record.
+ *
+ * @param vars - Array of key=value strings
+ * @returns Record of variable key-value pairs
+ * @throws {Error} If format is invalid (missing = or missing key)
+ *
+ * @example
+ * parseVarFlags(['domain=ML', 'focus=NLP'])
+ * // → { domain: 'ML', focus: 'NLP' }
+ */
+export function parseVarFlags(vars: string[]): Record<string, string> {
+  const result: Record<string, string> = {};
+
+  for (const v of vars) {
+    const eqIndex = v.indexOf('=');
+    if (eqIndex === -1) {
+      throw new Error(
+        `Invalid --var format: ${v}\n\n` +
+          `Expected format: --var key=value\n` +
+          `Example: --var domain=ML --var focus=NLP`
+      );
+    }
+
+    const key = v.slice(0, eqIndex).trim();
+    const value = v.slice(eqIndex + 1).trim();
+
+    if (!key) {
+      throw new Error(
+        `Invalid --var format: ${v}\n\n` +
+          `Missing variable name before '='\n` +
+          `Expected format: --var key=value`
+      );
+    }
+
+    result[key] = value;
+  }
+
+  return result;
+}
 
 export function parseIntegerOption(
   raw: string | number | undefined | null,
@@ -219,10 +265,17 @@ function loadConfig(warn: (message: string) => void): XKitConfig {
   const globalPath = join(homedir(), '.config', 'xkit', 'config.json5');
   const localPath = join(process.cwd(), '.xkitrc.json5');
 
-  return {
+  const config = {
     ...readConfigFile(globalPath, warn),
     ...readConfigFile(localPath, warn),
   };
+
+  // Set default template directory (Phase 4)
+  if (!config.templateDir) {
+    config.templateDir = join(homedir(), '.xkit', 'templates');
+  }
+
+  return config;
 }
 
 type CredentialsOptions = {
@@ -419,5 +472,6 @@ export function createCliContext(normalizedArgs: string[], env: NodeJS.ProcessEn
     printTweets,
     extractTweetId,
     parseIntegerOption,
+    parseVarFlags,
   };
 }

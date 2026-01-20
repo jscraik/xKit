@@ -85,4 +85,7 @@ export interface EnrichmentConfig {
   fetchThreads?: boolean;
   summaryPersona?: string;
   summaryLength?: string;
+  // Custom template support (Phase 4)
+  summaryTemplate?: string;
+  summaryTemplateVars?: Record<string, string>;
 }

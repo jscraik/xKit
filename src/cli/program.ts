@@ -15,6 +15,8 @@ import { registerQueryIdsCommand } from '../commands/query-ids.js';
 import { registerReadCommands } from '../commands/read.js';
 import { registerSearchCommands } from '../commands/search.js';
 import { registerSetupCommand } from '../commands/setup.js';
+import { registerSummarizeCommand } from '../commands/summarize.js';
+import { registerTemplateCommands } from '../commands/templates.js';
 import { registerUnbookmarkCommand } from '../commands/unbookmark.js';
 import { registerUserCommands } from '../commands/users.js';
 import { registerGenerateSkillsCommand } from '../commands/generate-skills.js';
@@ -58,6 +60,9 @@ export const KNOWN_COMMANDS = new Set([
   'generate-skills',
   'learn',
   'recap',
+  'summarize',
+  'template',
+  'templates',
 ]);
 
 /**
@@ -212,6 +217,8 @@ export function createProgram(ctx: CliContext): Command {
   registerGenerateSkillsCommand(program, ctx);
   registerLearnCommand(program, ctx);
   registerRecapCommand(program, ctx);
+  registerSummarizeCommand(program, ctx);
+  registerTemplateCommands(program, ctx);
 
   return program;
 }

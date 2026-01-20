@@ -27,6 +27,9 @@ export interface EnhancedSummaryOptions {
     contentType?: ContentType;
     language?: string;
     customInstructions?: string;
+    // Custom template support (Phase 4)
+    template?: string;
+    templateVars?: Record<string, string>;
 }
 
 /**
@@ -188,7 +191,7 @@ export class OllamaClient {
         } & EnhancedSummaryOptions
     ): Promise<SummaryResult> {
         return this.executeWithLimits(async () => {
-            const { url, title, siteName, persona, length, contentType, language, customInstructions } = options;
+            const { url, title, siteName, persona, length, contentType, language, customInstructions, template, templateVars } = options;
 
             // Use enhanced prompt builder with security (escapeXmlTags)
             const safeContent = escapeXmlTags(content);
@@ -202,6 +205,9 @@ export class OllamaClient {
                 contentType,
                 language,
                 customInstructions,
+                // Custom template support (Phase 4)
+                template,
+                templateVars,
             });
 
             const response = await this.client.generate({

@@ -39,9 +39,26 @@ export interface TemplateSchema {
 
 /**
  * Default template schema for xKit
+ *
+ * Phase 4: Extended with custom template variables (focus, methodology, format, audience, context)
  */
 export const DEFAULT_TEMPLATE_SCHEMA: TemplateSchema = {
-  allowedVariables: ['url', 'title', 'author', 'domain', 'language', 'difficulty', 'category'],
+  allowedVariables: [
+    // Original variables
+    'url',
+    'title',
+    'author',
+    'domain',
+    'language',
+    'difficulty',
+    'category',
+    // Custom template variables (Phase 4)
+    'focus',
+    'methodology',
+    'format',
+    'audience',
+    'context',
+  ],
   forbiddenPatterns: [
     // System access (dangerous)
     /process\./,

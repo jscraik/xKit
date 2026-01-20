@@ -164,6 +164,50 @@ xkit daemon start --interval 30m
 
 **See the complete guide:** [docs/bookmark-archiving.md](docs/bookmark-archiving.md)
 
+### Custom Templates
+
+⭐ **NEW**: Create domain-specific summarization templates with variable substitution.
+
+```bash
+# Use a custom template
+xkit archive --summarize --template research-paper -n 10
+
+# Override template variables
+xkit archive --summarize --template research-paper --var domain=ML --var focus=NLP -n 10
+
+# Multiple variables
+xkit archive --summarize --template technical-doc \
+  --var context="API design" \
+  --var focus="architecture" \
+  -n 10
+```
+
+**Template Features:**
+
+- 📝 YAML frontmatter with metadata
+- 🔤 Variable substitution with `{{variable}}` syntax
+- ✅ Security validation (forbidden patterns, max length)
+- 📂 Default values and override support
+- 🎯 Category organization
+
+**Create templates at:** `~/.xkit/templates/`
+
+```markdown
+---
+name: research-paper
+description: Academic paper summary with methodology focus
+category: academic
+variables:
+  domain: Computer Science
+  focus: algorithms
+---
+
+You are analyzing a {{domain}} research paper.
+Focus your summary on: {{focus}}
+```
+
+**See the complete guide:** [docs/CUSTOM_TEMPLATES.md](docs/CUSTOM_TEMPLATES.md)
+
 ## Library
 
 Use `xkit` as a library (same GraphQL client as the CLI):

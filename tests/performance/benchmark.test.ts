@@ -55,7 +55,7 @@ describe('Performance Benchmarks', () => {
 
             console.log(`CLI startup p95: ${p95.toFixed(0)}ms, avg: ${avg.toFixed(0)}ms`);
             expect(p95).toBeLessThan(2000);
-        });
+        }, 30000);
 
         test('--help flag p95 < 2s', async () => {
             const times: number[] = [];

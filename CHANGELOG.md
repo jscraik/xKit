@@ -4,6 +4,40 @@
 
 ### Added
 
+- **LLM Integration** - Multi-provider LLM support for bookmark analysis
+  - OpenAI API integration (GPT-4, GPT-4 Turbo, GPT-3.5 Turbo)
+  - Anthropic Claude API integration (Opus, Sonnet, Haiku)
+  - Ollama local LLM support (Qwen, Llama, Mistral models)
+  - Unified LLM client interface with token tracking
+  - Model Router with cost-optimization strategies (fast, balanced, quality, optimized)
+  - Automatic fallback and retry logic
+
+- **Bookmark Analysis** - Advanced bookmark analysis with LLM
+  - `xkit analyze-bookmarks` command for analyzing exported bookmarks
+  - LLM-powered categorization by topic
+  - Usefulness scoring (heuristic, LLM, or hybrid methods)
+  - Custom analysis script support
+  - Analysis output with categories and scores
+
+- **Semantic Search** - Vector embeddings for similar bookmarks
+  - Ollama-based embedding generation (nomic-embed-text, mxbai-embed-large, etc.)
+  - In-memory vector store with similarity search
+  - `--embed` flag to generate embeddings
+  - `--similar <id>` flag to find similar bookmarks
+
+- **Bookmark Export** - X API-based bookmark export
+  - `xkit export-bookmarks` command for JSON export
+  - Resumable exports with state management
+  - Rate limiting and retry logic
+  - X API v2 authentication
+
+- **Documentation** - Comprehensive new documentation
+  - [LLM Integration Guide](docs/llm-integration.md) - Complete LLM setup and usage
+  - [API Reference](docs/api-reference.md) - Full library API documentation
+  - [Configuration Reference](docs/configuration.md) - Unified config documentation
+  - [Contributing Guide](CONTRIBUTING.md) - Developer onboarding and workflow
+  - [Examples](examples/) - Practical usage examples and custom scripts
+
 - **Bookmark Archiving System** - Comprehensive bookmark archiving inspired by Smaug
   - `xkit archive` command for unified bookmark archiving workflow
   - `xkit setup` interactive configuration wizard

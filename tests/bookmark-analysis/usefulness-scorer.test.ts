@@ -285,7 +285,7 @@ describe('UsefulnessScorer', () => {
         text: async () => 'Internal Server Error',
       });
 
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const loggerErrorSpy = vi.spyOn(logger, 'error').mockImplementation(() => {});
 
       const scorer = new UsefulnessScorer(llmConfig);
       const score = await scorer.score(sampleBookmark);
@@ -300,7 +300,7 @@ describe('UsefulnessScorer', () => {
     it('should fallback to heuristic on network error', async () => {
       global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
 
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const loggerErrorSpy = vi.spyOn(logger, 'error').mockImplementation(() => {});
 
       const scorer = new UsefulnessScorer(llmConfig);
       const score = await scorer.score(sampleBookmark);
@@ -356,7 +356,7 @@ describe('UsefulnessScorer', () => {
         }),
       });
 
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const loggerErrorSpy = vi.spyOn(logger, 'error').mockImplementation(() => {});
 
       const scorer = new UsefulnessScorer(llmConfig);
       const score = await scorer.score(sampleBookmark);
@@ -424,7 +424,7 @@ describe('UsefulnessScorer', () => {
     it('should handle LLM failure in hybrid mode', async () => {
       global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
 
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const loggerErrorSpy = vi.spyOn(logger, 'error').mockImplementation(() => {});
 
       const scorer = new UsefulnessScorer(hybridConfig);
       const score = await scorer.score(sampleBookmark);
@@ -589,7 +589,7 @@ describe('UsefulnessScorer', () => {
       const scorer = new UsefulnessScorer(invalidConfig);
 
       // Should fallback to heuristic on error
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const loggerErrorSpy = vi.spyOn(logger, 'error').mockImplementation(() => {});
       const score = await scorer.score(sampleBookmark);
 
       expect(score).toBeGreaterThanOrEqual(0);
@@ -616,7 +616,7 @@ describe('UsefulnessScorer', () => {
       };
 
       const scorer = new UsefulnessScorer(invalidConfig);
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const loggerErrorSpy = vi.spyOn(logger, 'error').mockImplementation(() => {});
 
       const score = await scorer.score(sampleBookmark);
 

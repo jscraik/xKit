@@ -208,6 +208,60 @@ Focus your summary on: {{focus}}
 
 **See the complete guide:** [docs/CUSTOM_TEMPLATES.md](docs/CUSTOM_TEMPLATES.md)
 
+## Analysis & Export
+
+### Export Bookmarks
+
+Export your bookmarks to JSON for analysis and backup:
+
+```bash
+# Export all bookmarks (requires X API credentials)
+xkit export-bookmarks
+
+# Resume interrupted export
+xkit export-bookmarks --resume
+
+# Custom output directory
+xkit export-bookmarks --output-dir ./my-exports
+```
+
+**See:** [docs/llm-integration.md](docs/llm-integration.md) for API credential setup.
+
+### Analyze Bookmarks
+
+Analyze exported bookmarks using LLM categorization and usefulness scoring:
+
+```bash
+# Basic analysis with heuristic scoring (no API key required)
+xkit analyze-bookmarks --input bookmarks.json --method heuristic
+
+# LLM-powered categorization
+xkit analyze-bookmarks --input bookmarks.json --method llm
+
+# Hybrid scoring (LLM + heuristics)
+xkit analyze-bookmarks --input bookmarks.json --method hybrid
+
+# With model cost optimization
+xkit analyze-bookmarks --input bookmarks.json --model-strategy balanced
+```
+
+### Semantic Search (Ollama)
+
+Generate embeddings and find similar bookmarks using local Ollama:
+
+```bash
+# Generate embeddings (requires Ollama running)
+xkit analyze-bookmarks --input bookmarks.json --embed
+
+# Find bookmarks similar to a specific ID
+xkit analyze-bookmarks --input bookmarks.json --similar 1234567890
+
+# Use custom embedding model
+xkit analyze-bookmarks --input bookmarks.json --embed --embedding-model mxbai-embed-large
+```
+
+**See:** [docs/llm-integration.md](docs/llm-integration.md) for complete LLM and Ollama setup guide.
+
 ## Library
 
 Use `xkit` as a library (same GraphQL client as the CLI):
@@ -256,6 +310,12 @@ const sportsNews = await client.getNews(10, {
 - `xkit list-timeline <list-id-or-url> [-n count] [--json] [--json-full]` — get tweets from a list timeline.
 - `xkit whoami` — print which Twitter account your cookies belong to.
 - `xkit check` — show available credentials and their source.
+- `xkit export-bookmarks [--resume] [--output-dir <dir>]` — export bookmarks to JSON (requires X API credentials).
+- `xkit analyze-bookmarks --input <file> [--method <method>] [--model-strategy <strategy>]` — analyze bookmarks with LLM.
+- `xkit analyze-bookmarks --input <file> [--embed] [--similar <id>]` — semantic search with Ollama embeddings.
+- `xkit setup` — interactive configuration wizard.
+- `xkit archive` — unified bookmark archiving command (see Bookmark Archiving below).
+- `xkit daemon start|stop|status` — continuous background archiving.
 
 ### News & Trending
 
@@ -489,6 +549,25 @@ xkit tweet "hi" --media img.png --alt "desc"
 - `xkit check` to confirm credential sources.
 - `xkit whoami` to confirm the authenticated account.
 - `xkit read <tweet-id-or-url>` to confirm read access.
+
+## Examples
+
+See `examples/` directory for complete usage examples:
+
+- **`bookmark-archiving.js`** - Full bookmark archiving workflow with enrichment, categorization, markdown output, state management, webhooks, and statistics
+- **`domain-analysis.js`** - Custom analysis script for domain categorization
+- **`sentiment-analysis.py`** - Sentiment analysis using keyword-based heuristics
+- **`templates/`** - Custom summarization templates (research-paper, blog-post, technical-doc)
+
+```bash
+# Run bookmark archiving example
+node examples/bookmark-archiving.js
+
+# Use custom analysis scripts
+xkit analyze-bookmarks --input bookmarks.json --scripts examples/domain-analysis.js
+```
+
+See [examples/README.md](examples/README.md) for detailed documentation.
 
 ## Development
 

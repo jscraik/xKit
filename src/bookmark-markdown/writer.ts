@@ -4,6 +4,7 @@
 
 import { appendFileSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
+import { logger } from '../observability/logger.js';
 import type { CategorizedBookmark } from '../bookmark-categorization/types.js';
 import { MarkdownTemplates } from './templates.js';
 import type { MarkdownConfig } from './types.js';
@@ -129,7 +130,13 @@ export class MarkdownWriter {
 
       return filePath;
     } catch (error) {
-      console.error(`Failed to write knowledge file for bookmark ${bookmark.id}:`, error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error({
+        event: 'markdown_write_failed',
+        bookmarkId: bookmark.id,
+        filePath,
+        error: errorMessage,
+      }, 'Failed to write knowledge file');
       return null;
     }
   }

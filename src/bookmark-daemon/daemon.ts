@@ -4,6 +4,18 @@
 
 import type { DaemonConfig, DaemonEventHandler, DaemonStatus } from './types.js';
 
+// Logger will be imported from a shared utilities module
+// Using a placeholder that should be replaced with the actual logger import
+// For example: import logger from '../utils/logger.js';
+const logger = {
+  info: (meta: Record<string, unknown>, msg: string) => {
+    console.log(JSON.stringify({ ...meta, level: 'info', message: msg }));
+  },
+  error: (meta: Record<string, unknown>, msg: string) => {
+    console.error(JSON.stringify({ ...meta, level: 'error', message: msg }));
+  },
+};
+
 export class BookmarkDaemon {
   private config: DaemonConfig;
   private status: DaemonStatus;
@@ -59,7 +71,9 @@ export class BookmarkDaemon {
    */
   async start(): Promise<void> {
     if (this.status.running) {
-      console.log('Daemon already running');
+      logger.info({
+        event: 'daemon_already_running',
+      }, 'Daemon already running');
       return;
     }
 
@@ -70,7 +84,13 @@ export class BookmarkDaemon {
     this.status.running = true;
     await this.emit('start');
 
-    console.log(`🐉 Daemon started (interval: ${this.formatInterval(this.config.interval)})`);
+    const formattedInterval = this.formatInterval(this.config.interval);
+    logger.info({
+      event: 'daemon_started',
+      interval: this.config.interval,
+      formattedInterval,
+      runOnStart: this.config.runOnStart,
+    }, `Daemon started (interval: ${formattedInterval})`);
 
     // Run immediately if configured
     if (this.config.runOnStart) {
@@ -80,7 +100,11 @@ export class BookmarkDaemon {
     // Schedule periodic runs
     this.intervalId = setInterval(() => {
       this.runOnce().catch((error) => {
-        console.error('Scheduled run failed:', error);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        logger.error({
+          event: 'daemon_scheduled_run_failed',
+          error: errorMessage,
+        }, 'Scheduled run failed');
       });
     }, this.config.interval);
 
@@ -93,7 +117,9 @@ export class BookmarkDaemon {
    */
   async stop(): Promise<void> {
     if (!this.status.running) {
-      console.log('Daemon not running');
+      logger.info({
+        event: 'daemon_not_running',
+      }, 'Daemon not running');
       return;
     }
 
@@ -106,7 +132,9 @@ export class BookmarkDaemon {
     this.status.nextRun = undefined;
     await this.emit('stop');
 
-    console.log('🛑 Daemon stopped');
+    logger.info({
+      event: 'daemon_stopped',
+    }, 'Daemon stopped');
   }
 
   /**
@@ -140,10 +168,21 @@ export class BookmarkDaemon {
         await this.emit('error', error);
 
         if (retries <= this.config.maxRetries) {
-          console.log(`Retry ${retries}/${this.config.maxRetries} in ${this.config.retryDelay}ms...`);
+          logger.info({
+            event: 'daemon_retry_attempt',
+            attempt: retries,
+            maxRetries: this.config.maxRetries,
+            retryDelay: this.config.retryDelay,
+          }, `Retry ${retries}/${this.config.maxRetries} in ${this.config.retryDelay}ms...`);
           await this.sleep(this.config.retryDelay);
         } else {
-          console.error('Max retries reached');
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          logger.error({
+            event: 'daemon_max_retries_reached',
+            retries,
+            maxRetries: this.config.maxRetries,
+            lastError: errorMessage,
+          }, 'Max retries reached');
           throw error;
         }
       }

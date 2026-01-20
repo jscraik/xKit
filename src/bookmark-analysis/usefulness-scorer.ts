@@ -5,6 +5,7 @@
 import type { BookmarkRecord } from '../bookmark-export/types.js';
 import type { Analyzer } from './analysis-engine.js';
 import type { AnalysisResult, ScoringConfig } from './types.js';
+import { logger } from '../observability/logger.js';
 
 /**
  * UsefulnessScorer evaluates bookmarks and assigns usefulness scores between 0 and 100
@@ -129,7 +130,16 @@ export class UsefulnessScorer implements Analyzer {
 
       return score;
     } catch (error) {
-      console.error('LLM scoring failed:', error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+
+      logger.error({
+        event: 'llm_scoring_failed',
+        bookmarkId: bookmark.id,
+        error: errorMessage,
+        provider: this.config.llmConfig?.provider,
+        model: this.config.llmConfig?.model,
+      }, 'LLM scoring failed - falling back to heuristic scoring');
+
       // Fallback to heuristic scoring on LLM failure
       return this.scoreHeuristic(bookmark);
     }

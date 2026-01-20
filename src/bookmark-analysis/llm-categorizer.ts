@@ -5,11 +5,10 @@
 import type { BookmarkRecord } from '../bookmark-export/types.js';
 import type { Analyzer } from './analysis-engine.js';
 import type { AnalysisResult, LLMConfig } from './types.js';
-import type { TokenUsage } from './token-types.js';
-import type { TokenTracker } from './token-tracker.js';
 import type { ModelRouter } from './model-router.js';
 import type { RouterConfig } from './model-router.js';
-import { Ollama } from 'ollama';
+import { logger } from '../observability/logger.js';
+import { createLLMClient, type LLMClient, type LLMClientConfig } from '../llm/llm-clients.js';
 
 // Synchronous import to avoid race condition in constructor
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -66,28 +65,12 @@ export class LLMCategorizer implements Analyzer {
       return; // Already initialized
     }
 
-    switch (this.config.provider) {
-      case 'openai':
-        if (!this.config.apiKey) {
-          throw new Error('OpenAI API key is required');
-        }
-        this.llmClient = new OpenAIClient(this.config.apiKey, this.config.model);
-        break;
-      case 'anthropic':
-        if (!this.config.apiKey) {
-          throw new Error('Anthropic API key is required');
-        }
-        this.llmClient = new AnthropicClient(this.config.apiKey, this.config.model);
-        break;
-      case 'ollama':
-        // Ollama is local, no API key needed
-        this.llmClient = new OllamaLLMClient('', this.config.model);
-        break;
-      case 'custom':
-        throw new Error('Custom LLM provider not yet implemented');
-      default:
-        throw new Error(`Unsupported LLM provider: ${this.config.provider}`);
-    }
+    // Use factory function to create client
+    this.llmClient = createLLMClient({
+      provider: this.config.provider,
+      apiKey: this.config.apiKey,
+      model: this.config.model,
+    });
   }
 
   /**
@@ -115,7 +98,7 @@ export class LLMCategorizer implements Analyzer {
         const result = await router.withFallback(
           'categorization',
           ['fast', 'balanced', 'quality'],
-          async (model, provider) => {
+          async (model: string, provider: string) => {
             // Create client for this model
             const client = this.createClientForModel(provider, model);
             return await client.complete(prompt);
@@ -134,7 +117,17 @@ export class LLMCategorizer implements Analyzer {
     } catch (error) {
       // Handle LLM failures with "uncategorized" fallback
       // Validates: Requirement 4.5
-      console.error('LLM categorization failed:', error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const textPreview = text.substring(0, 50); // Redact full text for security
+
+      logger.error({
+        event: 'llm_categorization_failed',
+        textPreview,
+        error: errorMessage,
+        provider: this.config.provider,
+        model: this.config.model,
+      }, 'LLM categorization failed');
+
       return ['uncategorized'];
     }
   }
@@ -143,23 +136,20 @@ export class LLMCategorizer implements Analyzer {
    * Create a client for a specific model/provider combination
    */
   private createClientForModel(provider: string, model: string): LLMClient {
-    switch (provider) {
-      case 'openai':
-        if (!this.config.apiKey) {
-          throw new Error('OpenAI API key is required');
-        }
-        return new OpenAIClient(this.config.apiKey, model);
-      case 'anthropic':
-        if (!this.config.apiKey) {
-          throw new Error('Anthropic API key is required');
-        }
-        return new AnthropicClient(this.config.apiKey, model);
-      case 'ollama':
-        // Ollama is a local LLM - no API key needed
-        // Uses OLLAMA_HOST and OLLAMA_MODEL environment variables
-        return new OllamaLLMClient('', model);
-      default:
-        throw new Error(`Unsupported LLM provider: ${provider}`);
+    const config: LLMClientConfig = {
+      provider: provider as LLMClientConfig['provider'],
+      apiKey: this.config.apiKey,
+      model,
+    };
+
+    try {
+      return createLLMClient(config);
+    } catch (error) {
+      // If custom provider not implemented, fallback to OpenAI
+      if (provider === 'custom') {
+        return createLLMClient({ provider: 'openai', apiKey: this.config.apiKey, model });
+      }
+      throw error;
     }
   }
 
@@ -258,220 +248,4 @@ export class LLMCategorizer implements Analyzer {
   }
 }
 
-/**
- * Abstract LLM client interface
- */
-interface LLMClient {
-  complete(prompt: string): Promise<string>;
-  completeWithUsage(prompt: string, tracker?: TokenTracker): Promise<{ content: string; usage?: TokenUsage }>;
-}
-
-/**
- * OpenAI client implementation
- */
-class OpenAIClient implements LLMClient {
-  private apiKey: string;
-  private model: string;
-
-  constructor(apiKey: string, model: string) {
-    this.apiKey = apiKey;
-    this.model = model || 'gpt-4';
-  }
-
-  async complete(prompt: string): Promise<string> {
-    const result = await this.completeWithUsage(prompt);
-    return result.content;
-  }
-
-  async completeWithUsage(prompt: string, tracker?: TokenTracker): Promise<{ content: string; usage?: TokenUsage }> {
-    // Make API call to OpenAI
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.apiKey}`,
-      },
-      body: JSON.stringify({
-        model: this.model,
-        messages: [
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
-        temperature: 0.3, // Lower temperature for more consistent categorization
-        max_tokens: 100, // Categories should be short
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`OpenAI API error: ${response.status} - ${error}`);
-    }
-
-    const data = (await response.json()) as {
-      choices?: Array<{
-        message: {
-          content: string;
-        };
-      }>;
-      usage?: {
-        prompt_tokens: number;
-        completion_tokens: number;
-        total_tokens: number;
-      };
-    };
-
-    if (!data.choices || data.choices.length === 0) {
-      throw new Error('No response from OpenAI');
-    }
-
-    const usage: TokenUsage = {
-      input: data.usage?.prompt_tokens || 0,
-      output: data.usage?.completion_tokens || 0,
-      cacheRead: 0,
-      cacheWrite: 0,
-      cost: 0, // Will be calculated by tracker
-    };
-
-    if (tracker && data.usage) {
-      tracker.record('categorization', this.model, 'openai', usage);
-    }
-
-    return { content: data.choices[0].message.content, usage };
-  }
-}
-
-/**
- * Anthropic client implementation
- */
-class AnthropicClient implements LLMClient {
-  private apiKey: string;
-  private model: string;
-
-  constructor(apiKey: string, model: string) {
-    this.apiKey = apiKey;
-    this.model = model || 'claude-3-haiku-20240307';
-  }
-
-  async complete(prompt: string): Promise<string> {
-    const result = await this.completeWithUsage(prompt);
-    return result.content;
-  }
-
-  async completeWithUsage(prompt: string, tracker?: TokenTracker): Promise<{ content: string; usage?: TokenUsage }> {
-    // Make API call to Anthropic
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': this.apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: this.model,
-        max_tokens: 100,
-        messages: [
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
-        temperature: 0.3,
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`Anthropic API error: ${response.status} - ${error}`);
-    }
-
-    const data = (await response.json()) as {
-      content?: Array<{
-        text: string;
-      }>;
-      usage?: {
-        input_tokens: number;
-        output_tokens: number;
-        cache_creation_input_tokens?: number;
-        cache_read_input_tokens?: number;
-      };
-    };
-
-    if (!data.content || data.content.length === 0) {
-      throw new Error('No response from Anthropic');
-    }
-
-    const usage: TokenUsage = {
-      input: data.usage?.input_tokens || 0,
-      output: data.usage?.output_tokens || 0,
-      cacheRead: data.usage?.cache_read_input_tokens || 0,
-      cacheWrite: data.usage?.cache_creation_input_tokens || 0,
-      cost: 0,
-    };
-
-    if (tracker && data.usage) {
-      tracker.record('categorization', this.model, 'anthropic', usage);
-    }
-
-    return { content: data.content[0].text, usage };
-  }
-}
-
-/**
- * Ollama client implementation for local LLM
- */
-class OllamaLLMClient implements LLMClient {
-  private client: Ollama;
-  private model: string;
-  private host: string;
-
-  constructor(apiKey: string, model: string) {
-    // apiKey is ignored for Ollama (local LLM)
-    this.model = model || process.env.OLLAMA_MODEL || 'qwen2.5:7b';
-    this.host = process.env.OLLAMA_HOST || 'http://localhost:11434';
-
-    this.client = new Ollama({
-      host: this.host,
-    });
-  }
-
-  async complete(prompt: string): Promise<string> {
-    const result = await this.completeWithUsage(prompt);
-    return result.content;
-  }
-
-  async completeWithUsage(prompt: string, tracker?: TokenTracker): Promise<{ content: string; usage?: TokenUsage }> {
-    try {
-      const response = await this.client.generate({
-        model: this.model,
-        prompt,
-        stream: false,
-        options: {
-          temperature: 0.3,
-          top_p: 0.9,
-          num_predict: 100, // Categories should be short
-        },
-      });
-
-      // Extract token usage from Ollama response
-      const usage: TokenUsage = {
-        input: response.prompt_eval_count || 0,
-        output: response.eval_count || 0,
-        cacheRead: 0,
-        cacheWrite: 0,
-        cost: 0, // Ollama is free (local)
-      };
-
-      if (tracker) {
-        tracker.record('categorization', this.model, 'ollama', usage);
-      }
-
-      return { content: response.response, usage };
-    } catch (error) {
-      throw new Error(
-        `Ollama error (${this.host}/${this.model}): ${error instanceof Error ? error.message : String(error)}`
-      );
-    }
-  }
-}
+// All LLM client implementations removed - now using shared implementations from src/llm/llm-clients.ts

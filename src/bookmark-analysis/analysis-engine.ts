@@ -164,7 +164,10 @@ export class AnalysisEngine {
         });
 
         // Continue with remaining analyzers (Requirement 8.2)
-        console.error(`Error analyzing bookmark ${bookmark.id} with ${analyzer.name}:`, error);
+        this.logger.error(
+          `Error analyzing bookmark ${bookmark.id} with ${analyzer.name}`,
+          { event: 'bookmark_analysis_failed', bookmarkId: bookmark.id, analyzerName: analyzer.name, error: errorMessage }
+        );
       }
     }
 

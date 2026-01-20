@@ -4,6 +4,7 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { LLMCategorizer } from '../../src/bookmark-analysis/llm-categorizer.js';
+import { logger } from '../../src/observability/logger.js';
 import type { LLMConfig } from '../../src/bookmark-analysis/types.js';
 import type { BookmarkRecord } from '../../src/bookmark-export/types.js';
 
@@ -79,30 +80,36 @@ describe('LLMCategorizer', () => {
         text: async () => 'Internal Server Error',
       });
 
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const loggerErrorSpy = vi.spyOn(logger, 'error').mockImplementation(() => {});
 
       const categorizer = new LLMCategorizer(mockConfig);
       const result = await categorizer.analyze(sampleBookmark);
 
       expect(result.categories).toEqual(['uncategorized']);
-      expect(consoleSpy).toHaveBeenCalledWith('LLM categorization failed:', expect.any(Error));
+      expect(loggerErrorSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ event: 'llm_categorization_failed' }),
+        expect.stringContaining('LLM categorization failed')
+      );
 
-      consoleSpy.mockRestore();
+      loggerErrorSpy.mockRestore();
     });
 
     it('should handle network errors with "uncategorized" fallback', async () => {
       // Mock network error
       global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
 
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const loggerErrorSpy = vi.spyOn(logger, 'error').mockImplementation(() => {});
 
       const categorizer = new LLMCategorizer(mockConfig);
       const result = await categorizer.analyze(sampleBookmark);
 
       expect(result.categories).toEqual(['uncategorized']);
-      expect(consoleSpy).toHaveBeenCalledWith('LLM categorization failed:', expect.any(Error));
+      expect(loggerErrorSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ event: 'llm_categorization_failed' }),
+        expect.stringContaining('LLM categorization failed')
+      );
 
-      consoleSpy.mockRestore();
+      loggerErrorSpy.mockRestore();
     });
 
     it('should handle LLM timeout with "uncategorized" fallback', async () => {
@@ -118,15 +125,18 @@ describe('LLMCategorizer', () => {
         });
       });
 
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const loggerErrorSpy = vi.spyOn(logger, 'error').mockImplementation(() => {});
 
       const categorizer = new LLMCategorizer(mockConfig);
       const result = await categorizer.analyze(sampleBookmark);
 
       expect(result.categories).toEqual(['uncategorized']);
-      expect(consoleSpy).toHaveBeenCalledWith('LLM categorization failed:', expect.any(Error));
+      expect(loggerErrorSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ event: 'llm_categorization_failed' }),
+        expect.stringContaining('LLM categorization failed')
+      );
 
-      consoleSpy.mockRestore();
+      loggerErrorSpy.mockRestore();
     });
   });
 
@@ -382,13 +392,13 @@ describe('LLMCategorizer', () => {
         text: async () => 'Unauthorized',
       });
 
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const loggerErrorSpy = vi.spyOn(logger, 'error').mockImplementation(() => {});
 
       const categorizer = new LLMCategorizer(anthropicConfig);
       const categories = await categorizer.categorize('test text');
 
       expect(categories).toEqual(['uncategorized']);
-      consoleSpy.mockRestore();
+      loggerErrorSpy.mockRestore();
     });
   });
 

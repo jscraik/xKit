@@ -2,6 +2,7 @@
  * Bookmark folder management
  */
 
+import { logger } from '../observability/logger.js';
 import type { EnrichedBookmark } from '../bookmark-enrichment/types.js';
 import type { TwitterClient } from '../lib/twitter-client.js';
 import type { FolderConfig, FolderMapping } from './types.js';
@@ -69,7 +70,13 @@ export class FolderManager {
           }
         }
       } catch (error) {
-        console.error(`Failed to fetch folder ${folderName} (${folderId}):`, error);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        logger.error({
+          event: 'folder_fetch_failed',
+          folderId,
+          folderName,
+          error: errorMessage,
+        }, 'Failed to fetch folder');
       }
     }
 

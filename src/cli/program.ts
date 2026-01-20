@@ -17,6 +17,7 @@ import { registerSearchCommands } from '../commands/search.js';
 import { registerSetupCommand } from '../commands/setup.js';
 import { registerUnbookmarkCommand } from '../commands/unbookmark.js';
 import { registerUserCommands } from '../commands/users.js';
+import { registerGenerateSkillsCommand } from '../commands/generate-skills.js';
 import { getCliVersion } from '../lib/version.js';
 import { type CliContext, collectCookieSource } from './shared.js';
 import { metrics } from '../metrics/metrics-collector.js';
@@ -52,6 +53,7 @@ export const KNOWN_COMMANDS = new Set([
   'export-bookmarks',
   'analyze-bookmarks',
   'metrics',
+  'generate-skills',
 ]);
 
 /**
@@ -203,6 +205,7 @@ export function createProgram(ctx: CliContext): Command {
   registerBookmarkAnalysisCommand(program, ctx);
   registerCacheCommand(program, ctx);
   registerMetricsCommand(program, ctx);
+  registerGenerateSkillsCommand(program, ctx);
 
   return program;
 }

@@ -41,6 +41,7 @@ analysis-engine-test-*/
 analysis-engine-error-test-*/
 analysis-engine-property-test-*/
 analysis-engine-error-property-test-*/
+*-property-test-*/
 script-runner-test-*/
 script-runner-property-test-*/
 

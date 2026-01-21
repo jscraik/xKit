@@ -1,0 +1,20 @@
+{
+  "attempt_id": "20260120-214243-iter0025",
+  "iteration": 25,
+  "task_id": "9",
+  "task_title": "Add `checkDiskSpace()` to `scripts/migration/lib/disk.ts`",
+  "started_at": "2026-01-20T21:42:43.664024+00:00",
+  "ended_at": "2026-01-20T21:44:32.662571+00:00",
+  "runner_ok": true,
+  "gates_ok": null,
+  "judge_ok": null,
+  "review_ok": null,
+  "blocked": false,
+  "exit_signal": false,
+  "return_code": 0,
+  "prompt_hash": "c90b4a52e36ddc7ce5c5c9833a11c0f3089e0c0cf03634252aeffa27360c078a",
+  "branch": "main",
+  "log_path": "/Users/jamiecraik/dev/xKit/.ralph/logs/20260120T214243Z-iter0025-claude.log",
+  "receipts_dir": "/Users/jamiecraik/dev/xKit/.ralph/receipts/9/20260120-214243-iter0025",
+  "context_dir": "/Users/jamiecraik/dev/xKit/.ralph/context/9/20260120-214243-iter0025"
+}

@@ -1,0 +1,20 @@
+{
+  "attempt_id": "20260120-211041-iter0013",
+  "iteration": 13,
+  "task_id": "5",
+  "task_title": "Add `generateEnhancedFilename()` to `src/bookmark-markdown/filename.ts`",
+  "started_at": "2026-01-20T21:10:41.868555+00:00",
+  "ended_at": "2026-01-20T21:16:19.208101+00:00",
+  "runner_ok": true,
+  "gates_ok": null,
+  "judge_ok": null,
+  "review_ok": null,
+  "blocked": false,
+  "exit_signal": false,
+  "return_code": 0,
+  "prompt_hash": "a315299499ca3f3628f4a90070e24e73f6c03b8e607e4a50049d0aebaeba4a0e",
+  "branch": "main",
+  "log_path": "/Users/jamiecraik/dev/xKit/.ralph/logs/20260120T211041Z-iter0013-claude.log",
+  "receipts_dir": "/Users/jamiecraik/dev/xKit/.ralph/receipts/5/20260120-211041-iter0013",
+  "context_dir": "/Users/jamiecraik/dev/xKit/.ralph/context/5/20260120-211041-iter0013"
+}

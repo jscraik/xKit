@@ -1,0 +1,20 @@
+{
+  "attempt_id": "20260120-204456-iter0007",
+  "iteration": 7,
+  "task_id": "3",
+  "task_title": "Add `sanitizeSlug()` to `src/bookmark-organization/sanitize.ts`",
+  "started_at": "2026-01-20T20:44:56.519313+00:00",
+  "ended_at": "2026-01-20T20:46:49.679248+00:00",
+  "runner_ok": true,
+  "gates_ok": null,
+  "judge_ok": null,
+  "review_ok": null,
+  "blocked": false,
+  "exit_signal": false,
+  "return_code": 0,
+  "prompt_hash": "641c73ec43676a21ac116b2cf19ececa0e9ab58f47682e84c7092547dfb1dee7",
+  "branch": "main",
+  "log_path": "/Users/jamiecraik/dev/xKit/.ralph/logs/20260120T204456Z-iter0007-claude.log",
+  "receipts_dir": "/Users/jamiecraik/dev/xKit/.ralph/receipts/3/20260120-204456-iter0007",
+  "context_dir": "/Users/jamiecraik/dev/xKit/.ralph/context/3/20260120-204456-iter0007"
+}

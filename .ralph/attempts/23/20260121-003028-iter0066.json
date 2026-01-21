@@ -1,0 +1,20 @@
+{
+  "attempt_id": "20260121-003028-iter0066",
+  "iteration": 66,
+  "task_id": "23",
+  "task_title": "Update `MarkdownWriter` constructor to use degraded output",
+  "started_at": "2026-01-21T00:30:28.961058+00:00",
+  "ended_at": "2026-01-21T00:34:18.849366+00:00",
+  "runner_ok": true,
+  "gates_ok": null,
+  "judge_ok": null,
+  "review_ok": null,
+  "blocked": false,
+  "exit_signal": false,
+  "return_code": 0,
+  "prompt_hash": "09dbe5850fa21d89613cd8b588924a80404c30c74a3e33f896110ecf05b08515",
+  "branch": "main",
+  "log_path": "/Users/jamiecraik/dev/xKit/.ralph/logs/20260121T003028Z-iter0066-claude.log",
+  "receipts_dir": "/Users/jamiecraik/dev/xKit/.ralph/receipts/23/20260121-003028-iter0066",
+  "context_dir": "/Users/jamiecraik/dev/xKit/.ralph/context/23/20260121-003028-iter0066"
+}

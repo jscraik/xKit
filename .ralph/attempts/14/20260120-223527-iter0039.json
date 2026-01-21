@@ -1,0 +1,20 @@
+{
+  "attempt_id": "20260120-223527-iter0039",
+  "iteration": 39,
+  "task_id": "14",
+  "task_title": "Add checkpoint system to `scripts/migration/lib/checkpoint.ts`",
+  "started_at": "2026-01-20T22:35:27.183255+00:00",
+  "ended_at": "2026-01-20T22:37:28.358018+00:00",
+  "runner_ok": false,
+  "gates_ok": null,
+  "judge_ok": null,
+  "review_ok": null,
+  "blocked": false,
+  "exit_signal": false,
+  "return_code": 124,
+  "prompt_hash": "3eb23091a92919e34f618f06e94843f5532edc090a393f0e6c0f1199f9150b23",
+  "branch": "main",
+  "log_path": "/Users/jamiecraik/dev/xKit/.ralph/logs/20260120T223527Z-iter0039-claude.log",
+  "receipts_dir": "/Users/jamiecraik/dev/xKit/.ralph/receipts/14/20260120-223527-iter0039",
+  "context_dir": "/Users/jamiecraik/dev/xKit/.ralph/context/14/20260120-223527-iter0039"
+}

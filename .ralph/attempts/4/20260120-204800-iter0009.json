@@ -1,0 +1,20 @@
+{
+  "attempt_id": "20260120-204800-iter0009",
+  "iteration": 9,
+  "task_id": "4",
+  "task_title": "Add real name cache functions to `src/bookmark-organization/cache.ts`",
+  "started_at": "2026-01-20T20:48:00.927577+00:00",
+  "ended_at": "2026-01-20T20:55:47.973943+00:00",
+  "runner_ok": true,
+  "gates_ok": null,
+  "judge_ok": null,
+  "review_ok": null,
+  "blocked": false,
+  "exit_signal": null,
+  "return_code": 0,
+  "prompt_hash": "d0eb0821984db66380aca7b32a2b1e886c1b2b701fc37f214f625858789fc6be",
+  "branch": "main",
+  "log_path": "/Users/jamiecraik/dev/xKit/.ralph/logs/20260120T204800Z-iter0009-claude.log",
+  "receipts_dir": "/Users/jamiecraik/dev/xKit/.ralph/receipts/4/20260120-204800-iter0009",
+  "context_dir": "/Users/jamiecraik/dev/xKit/.ralph/context/4/20260120-204800-iter0009"
+}

@@ -1,0 +1,20 @@
+{
+  "attempt_id": "20260121-002513-iter0065",
+  "iteration": 65,
+  "task_id": "22",
+  "task_title": "Add degraded mode functions to `scripts/migration/lib/degraded.ts`",
+  "started_at": "2026-01-21T00:25:13.985361+00:00",
+  "ended_at": "2026-01-21T00:30:28.953439+00:00",
+  "runner_ok": true,
+  "gates_ok": null,
+  "judge_ok": null,
+  "review_ok": null,
+  "blocked": false,
+  "exit_signal": false,
+  "return_code": 0,
+  "prompt_hash": "d30f774d20625f9a6d007ea68b2dcbf37b8f368b7206c65044c18d1f46fbbdde",
+  "branch": "main",
+  "log_path": "/Users/jamiecraik/dev/xKit/.ralph/logs/20260121T002513Z-iter0065-claude.log",
+  "receipts_dir": "/Users/jamiecraik/dev/xKit/.ralph/receipts/22/20260121-002513-iter0065",
+  "context_dir": "/Users/jamiecraik/dev/xKit/.ralph/context/22/20260121-002513-iter0065"
+}

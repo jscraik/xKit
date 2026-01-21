@@ -1,0 +1,20 @@
+{
+  "attempt_id": "20260120-235836-iter0059",
+  "iteration": 59,
+  "task_id": "20",
+  "task_title": "Add lock file functions to `src/bookmark-markdown/lock.ts`",
+  "started_at": "2026-01-20T23:58:36.053194+00:00",
+  "ended_at": "2026-01-21T00:04:48.099104+00:00",
+  "runner_ok": true,
+  "gates_ok": null,
+  "judge_ok": null,
+  "review_ok": null,
+  "blocked": true,
+  "exit_signal": false,
+  "return_code": 0,
+  "prompt_hash": "8b4e5eee4cd4580da42294dc5cf190f7c37dd95b49bd33305c1e0c4dcf1c79ae",
+  "branch": "main",
+  "log_path": "/Users/jamiecraik/dev/xKit/.ralph/logs/20260120T235836Z-iter0059-claude.log",
+  "receipts_dir": "/Users/jamiecraik/dev/xKit/.ralph/receipts/20/20260120-235836-iter0059",
+  "context_dir": "/Users/jamiecraik/dev/xKit/.ralph/context/20/20260120-235836-iter0059"
+}

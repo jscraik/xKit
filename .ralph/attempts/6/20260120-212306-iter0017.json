@@ -1,0 +1,20 @@
+{
+  "attempt_id": "20260120-212306-iter0017",
+  "iteration": 17,
+  "task_id": "6",
+  "task_title": "Add `validatePathLength()` to `src/bookmark-markdown/filename.ts`",
+  "started_at": "2026-01-20T21:23:06.243486+00:00",
+  "ended_at": "2026-01-20T21:24:54.556664+00:00",
+  "runner_ok": true,
+  "gates_ok": null,
+  "judge_ok": null,
+  "review_ok": null,
+  "blocked": true,
+  "exit_signal": false,
+  "return_code": 0,
+  "prompt_hash": "8d4445cb4550e1baf2db5d0ac3cce0c7ccbd15aaeaa88f288724f2192babf03b",
+  "branch": "main",
+  "log_path": "/Users/jamiecraik/dev/xKit/.ralph/logs/20260120T212306Z-iter0017-claude.log",
+  "receipts_dir": "/Users/jamiecraik/dev/xKit/.ralph/receipts/6/20260120-212306-iter0017",
+  "context_dir": "/Users/jamiecraik/dev/xKit/.ralph/context/6/20260120-212306-iter0017"
+}

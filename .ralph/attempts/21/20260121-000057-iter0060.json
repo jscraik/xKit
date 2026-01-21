@@ -1,0 +1,20 @@
+{
+  "attempt_id": "20260121-000057-iter0060",
+  "iteration": 60,
+  "task_id": "21",
+  "task_title": "Update bookmark archiving to check for migration lock",
+  "started_at": "2026-01-21T00:00:57.445071+00:00",
+  "ended_at": "2026-01-21T00:05:40.586005+00:00",
+  "runner_ok": true,
+  "gates_ok": null,
+  "judge_ok": null,
+  "review_ok": null,
+  "blocked": false,
+  "exit_signal": false,
+  "return_code": 0,
+  "prompt_hash": "fa51464ea27af24f02346c7be97e9e61b35cd29a20a36645a1441c827af46f20",
+  "branch": "main",
+  "log_path": "/Users/jamiecraik/dev/xKit/.ralph/logs/20260121T000057Z-iter0060-claude.log",
+  "receipts_dir": "/Users/jamiecraik/dev/xKit/.ralph/receipts/21/20260121-000057-iter0060",
+  "context_dir": "/Users/jamiecraik/dev/xKit/.ralph/context/21/20260121-000057-iter0060"
+}

@@ -1,0 +1,20 @@
+{
+  "attempt_id": "20260120-212454-iter0018",
+  "iteration": 18,
+  "task_id": "7",
+  "task_title": "Update `MarkdownWriter.generateFilename()` in `src/bookmark-markdown/writer.ts`",
+  "started_at": "2026-01-20T21:24:54.564302+00:00",
+  "ended_at": "2026-01-20T21:27:07.517159+00:00",
+  "runner_ok": true,
+  "gates_ok": null,
+  "judge_ok": null,
+  "review_ok": null,
+  "blocked": false,
+  "exit_signal": false,
+  "return_code": 0,
+  "prompt_hash": "6a8deab252a48bc6b2acb3defb471420f3128df816ba6dc6bd062d8d7a5ed10e",
+  "branch": "main",
+  "log_path": "/Users/jamiecraik/dev/xKit/.ralph/logs/20260120T212454Z-iter0018-claude.log",
+  "receipts_dir": "/Users/jamiecraik/dev/xKit/.ralph/receipts/7/20260120-212454-iter0018",
+  "context_dir": "/Users/jamiecraik/dev/xKit/.ralph/context/7/20260120-212454-iter0018"
+}

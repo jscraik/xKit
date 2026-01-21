@@ -1,0 +1,36 @@
+# RALPH loop configuration for xKit knowledge reorganization
+
+[files]
+prd = ".ralph/PRD.md"
+build_prompt = ".ralph/PROMPT_build.md"
+plan_prompt = ".ralph/PROMPT_plan.md"
+judge_prompt = ".ralph/PROMPT_judge.md"
+agents = ".ralph/AGENTS.md"
+progress = ".ralph/progress.md"
+state = ".ralph/state.json"
+specs_dir = ".ralph/specs"
+logs_dir = ".ralph/logs"
+
+[tracker]
+kind = "markdown"
+
+[runners.codex]
+argv = ["codex", "exec", "--full-auto", "-"]
+
+[runners.claude]
+argv = ["claude", "-p"]
+
+[gates]
+commands = [
+  "pnpm lint",
+  "pnpm test",
+  "pnpm build"
+]
+
+[loop]
+no_progress_limit = 3
+rate_limit_per_hour = 30
+
+[quality]
+evidence_required = true
+acceptance_test_required = true

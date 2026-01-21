@@ -1,0 +1,387 @@
+src/bookmark-analysis/pricing.ts:54:26 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  i The computed expression can be simplified without the use of a string literal.
+  
+    52 │   // Check for Ollama models
+    53 │   if (model.startsWith('llama') || model.startsWith('mistral') || model.startsWith('qwen')) {
+  > 54 │     return MODEL_PRICING['ollama'];
+       │                          ^^^^^^^^
+    55 │   }
+    56 │   return undefined;
+  
+  i Unsafe fix: Use a literal key instead.
+  
+    52 52 │     // Check for Ollama models
+    53 53 │     if (model.startsWith('llama') || model.startsWith('mistral') || model.startsWith('qwen')) {
+    54    │ - ····return·MODEL_PRICING['ollama'];
+       54 │ + ····return·MODEL_PRICING.ollama;
+    55 55 │     }
+    56 56 │     return undefined;
+  
+
+src/bookmark-analysis/retry-strategy.ts:218:7 lint/complexity/noUselessContinue  FIXABLE  ━━━━━━━━━━
+
+  i Unnecessary continue statement
+  
+    217 │       // Try next tier
+  > 218 │       continue;
+        │       ^^^^^^^^^
+    219 │     }
+    220 │   }
+  
+  i Safe fix: Delete the unnecessary continue statement
+  
+    214 214 │           // Circuit breaker tracks its own failures via execute()
+    215 215 │         }
+    216     │ - 
+    217     │ - ······//·Try·next·tier
+    218     │ - ······continue;
+    219 216 │       }
+    220 217 │     }
+  
+
+src/bookmark-analysis/retry-strategy.ts:104:39 lint/style/useExponentiationOperator  FIXABLE  ━━━━━━━━━━
+
+  i Use the '**' operator instead of 'Math.pow'.
+  
+    102 │   config: RetryConfig,
+    103 │ ): number {
+  > 104 │   const delay = config.initialDelay * Math.pow(config.backoffMultiplier, attempt - 1);
+        │                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    105 │   return Math.min(delay, config.maxDelay);
+    106 │ }
+  
+  i Safe fix: Use the '**' operator instead of 'Math.pow'.
+  
+    102 102 │     config: RetryConfig,
+    103 103 │   ): number {
+    104     │ - ··const·delay·=·config.initialDelay·*·Math.pow(config.backoffMultiplier,·attempt·-·1);
+        104 │ + ··const·delay·=·config.initialDelay·*·config.backoffMultiplier·**·(attempt·-·1);
+    105 105 │     return Math.min(delay, config.maxDelay);
+    106 106 │   }
+  
+
+src/bookmark-analysis/config-loader.ts:52:8 lint/complexity/noStaticOnlyClass ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid classes that contain only static members.
+  
+     50 │ };
+     51 │ 
+   > 52 │ export class AnalysisConfigLoader {
+        │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 53 │   /**
+         ...
+  > 138 │     return item && typeof item === 'object' && !Array.isArray(item);
+  > 139 │   }
+  > 140 │ }
+        │ ^
+    141 │ 
+  
+  i Prefer using simple functions instead of classes with only static members.
+  
+
+src/bookmark-analysis/model-config.ts:159:3 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    157 │  */
+    158 │ export function validateStrategy(
+  > 159 │   strategy: ModelStrategy,
+        │   ^^^^^^^^
+    160 │   tiers: Record<string, ModelTier>,
+    161 │ ): { valid: boolean; errors: string[] } {
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend strategy with an underscore.
+  
+    157 157 │    */
+    158 158 │   export function validateStrategy(
+    159     │ - ··strategy:·ModelStrategy,
+        159 │ + ··_strategy:·ModelStrategy,
+    160 160 │     tiers: Record<string, ModelTier>,
+    161 161 │   ): { valid: boolean; errors: string[] } {
+  
+
+src/bookmark-analysis/model-router.ts:82:5 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    80 │    */
+    81 │   async withFallback(
+  > 82 │     operation: ModelOperation,
+       │     ^^^^^^^^^
+    83 │     tierNames: ModelTierType[],
+    84 │     executeWithModel: (model: string, provider: string) => Promise<any>,
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend operation with an underscore.
+  
+     80  80 │      */
+     81  81 │     async withFallback(
+     82     │ - ····operation:·ModelOperation,
+         82 │ + ····_operation:·ModelOperation,
+     83  83 │       tierNames: ModelTierType[],
+     84  84 │       executeWithModel: (model: string, provider: string) => Promise<any>,
+  
+
+src/bookmark-analysis/retry-strategy.ts:5:26 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━
+
+  ! Several of these imports are unused.
+  
+    3 │  */
+    4 │ 
+  > 5 │ import type { ModelTier, ModelTierType } from './model-config.js';
+      │                          ^^^^^^^^^^^^^
+    6 │ import type { CircuitBreaker } from './circuit-breaker.js';
+    7 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    5 │ import·type·{·ModelTier,·ModelTierType·}·from·'./model-config.js';
+      │                          --------------                           
+
+src/bookmark-analysis/bookmark-embedder.ts:232:11 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  × Template literals are preferred over string concatenation.
+  
+    230 │       const sanitized = this.sanitizeText(bookmark.text);
+    231 │       const text = sanitized.length > MAX_TEXT_LENGTH
+  > 232 │         ? sanitized.substring(0, MAX_TEXT_LENGTH) + '...'
+        │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    233 │         : sanitized;
+    234 │       parts.push(text);
+  
+  i Unsafe fix: Use a template literal.
+  
+    230 230 │         const sanitized = this.sanitizeText(bookmark.text);
+    231 231 │         const text = sanitized.length > MAX_TEXT_LENGTH
+    232     │ - ········?·sanitized.substring(0,·MAX_TEXT_LENGTH)·+·'...'
+        232 │ + ········?·`${sanitized.substring(0,·MAX_TEXT_LENGTH)}...`
+    233 233 │           : sanitized;
+    234 234 │         parts.push(text);
+  
+
+src/bookmark-analysis/config-loader.ts:116:36 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected any. Specify a different type.
+  
+    114 │    * Deep merge two objects
+    115 │    */
+  > 116 │   private static mergeDeep(target: any, source: any): any {
+        │                                    ^^^
+    117 │     const output = { ...target };
+    118 │     if (AnalysisConfigLoader.isObject(target) && AnalysisConfigLoader.isObject(source)) {
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src/bookmark-analysis/config-loader.ts:116:49 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected any. Specify a different type.
+  
+    114 │    * Deep merge two objects
+    115 │    */
+  > 116 │   private static mergeDeep(target: any, source: any): any {
+        │                                                 ^^^
+    117 │     const output = { ...target };
+    118 │     if (AnalysisConfigLoader.isObject(target) && AnalysisConfigLoader.isObject(source)) {
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src/bookmark-analysis/config-loader.ts:116:55 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected any. Specify a different type.
+  
+    114 │    * Deep merge two objects
+    115 │    */
+  > 116 │   private static mergeDeep(target: any, source: any): any {
+        │                                                       ^^^
+    117 │     const output = { ...target };
+    118 │     if (AnalysisConfigLoader.isObject(target) && AnalysisConfigLoader.isObject(source)) {
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src/bookmark-analysis/llm-categorizer.ts:5:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━
+
+  × The imports and exports are not sorted.
+  
+    3 │  */
+    4 │ 
+  > 5 │ import type { BookmarkRecord } from '../bookmark-export/types.js';
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ import type { Analyzer } from './analysis-engine.js';
+    7 │ import type { AnalysisResult, LLMConfig } from './types.js';
+  
+  i Safe fix: Organize Imports (Biome)
+  
+      4   4 │   
+      5   5 │   import type { BookmarkRecord } from '../bookmark-export/types.js';
+      6     │ - import·type·{·Analyzer·}·from·'./analysis-engine.js';
+      7     │ - import·type·{·AnalysisResult,·LLMConfig·}·from·'./types.js';
+      8     │ - import·type·{·ModelRouter·}·from·'./model-router.js';
+      9     │ - import·type·{·RouterConfig·}·from·'./model-router.js';
+     10     │ - import·{·logger·}·from·'../observability/logger.js';
+     11     │ - import·{·createLLMClient,·type·LLMClient,·type·LLMClientConfig·}·from·'../llm/llm-clients.js';
+          6 │ + import·{·createLLMClient,·type·LLMClient,·type·LLMClientConfig·}·from·'../llm/llm-clients.js';
+          7 │ + import·{·logger·}·from·'../observability/logger.js';
+          8 │ + import·type·{·Analyzer·}·from·'./analysis-engine.js';
+          9 │ + import·type·{·ModelRouter,·RouterConfig·}·from·'./model-router.js';
+         10 │ + import·type·{·AnalysisResult,·LLMConfig·}·from·'./types.js';
+     12  11 │   
+     13  12 │   // Synchronous import to avoid race condition in constructor
+  
+
+src/bookmark-analysis/llm-categorizer.ts:183:31 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━
+
+  × This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  
+    181 │     // Remove common prefixes/suffixes
+    182 │     let cleaned = response.trim();
+  > 183 │     cleaned = cleaned.replace(/^(categories?|topics?|labels?):\s*/i, '');
+        │                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    184 │     cleaned = cleaned.replace(/^["'`]|["'`]$/g, '');
+    185 │ 
+  
+  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+src/bookmark-analysis/llm-categorizer.ts:200:14 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━
+
+  × This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  
+    198 │     // Parse as comma-separated list
+    199 │     const categories = cleaned
+  > 200 │       .split(/[,;\n]/)
+        │              ^^^^^^^^
+    201 │       .map((c) => c.trim().toLowerCase())
+    202 │       .filter((c) => c.length > 0 && c.length < 50); // Reasonable category length
+  
+  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+src/bookmark-analysis/model-router.ts:5:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  × The imports and exports are not sorted.
+  
+    3 │  */
+    4 │ 
+  > 5 │ import type { ModelTier, ModelStrategy, ModelOperation, ModelTierType } from './model-config.js';
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ import { getModelTier, getModelTiersByQuality, validateStrategy } from './model-config.js';
+    7 │ import { calculateCost } from './pricing.js';
+  
+  i Safe fix: Organize Imports (Biome)
+  
+      3   3 │    */
+      4   4 │   
+      5     │ - import·type·{·ModelTier,·ModelStrategy,·ModelOperation,·ModelTierType·}·from·'./model-config.js';
+          5 │ + import·type·{·ModelOperation,·ModelStrategy,·ModelTier,·ModelTierType·}·from·'./model-config.js';
+      6   6 │   import { getModelTier, getModelTiersByQuality, validateStrategy } from './model-config.js';
+      7   7 │   import { calculateCost } from './pricing.js';
+  
+
+src/bookmark-analysis/model-router.ts:34:38 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected any. Specify a different type.
+  
+    32 │  * Execution result with model metadata
+    33 │  */
+  > 34 │ export interface ExecutionResult<T = any> {
+       │                                      ^^^
+    35 │   /** The result from the model */
+    36 │   result: T;
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src/bookmark-analysis/model-router.ts:84:68 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected any. Specify a different type.
+  
+    82 │     operation: ModelOperation,
+    83 │     tierNames: ModelTierType[],
+  > 84 │     executeWithModel: (model: string, provider: string) => Promise<any>,
+       │                                                                    ^^^
+    85 │   ): Promise<ExecutionResult> {
+    86 │     let lastError: Error | undefined;
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src/bookmark-analysis/retry-strategy.ts:5:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  × The imports and exports are not sorted.
+  
+    3 │  */
+    4 │ 
+  > 5 │ import type { ModelTier, ModelTierType } from './model-config.js';
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ import type { CircuitBreaker } from './circuit-breaker.js';
+    7 │ 
+  
+  i Safe fix: Organize Imports (Biome)
+  
+      3   3 │    */
+      4   4 │   
+      5     │ - import·type·{·ModelTier,·ModelTierType·}·from·'./model-config.js';
+      6     │ - import·type·{·CircuitBreaker·}·from·'./circuit-breaker.js';
+          5 │ + import·type·{·CircuitBreaker·}·from·'./circuit-breaker.js';
+          6 │ + import·type·{·ModelTier,·ModelTierType·}·from·'./model-config.js';
+      7   7 │   
+      8   8 │   /**
+  
+
+src/bookmark-analysis/retry-strategy.ts:210:41 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected any. Specify a different type.
+  
+    208 │     } catch (error) {
+    209 │       lastError = error instanceof Error ? error : new Error(String(error));
+  > 210 │       allAttempts.push(...(lastError as any).attemptsDetail || []);
+        │                                         ^^^
+    211 │ 
+    212 │       // Trip the circuit breaker if configured
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src/bookmark-analysis/schema-validator.ts:5:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━
+
+  × The imports and exports are not sorted.
+  
+    3 │  */
+    4 │ 
+  > 5 │ import Ajv, { type ErrorObject } from 'ajv';
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ import addFormats from 'ajv-formats';
+    7 │ import { readFileSync } from 'node:fs';
+  
+  i Safe fix: Organize Imports (Biome)
+  
+     3  3 │    */
+     4  4 │   
+     5    │ - import·Ajv,·{·type·ErrorObject·}·from·'ajv';
+     6    │ - import·addFormats·from·'ajv-formats';
+     7    │ - import·{·readFileSync·}·from·'node:fs';
+     8    │ - import·{·dirname,·join·}·from·'node:path';
+     9    │ - import·{·fileURLToPath·}·from·'node:url';
+        5 │ + import·{·readFileSync·}·from·'node:fs';
+        6 │ + import·{·dirname,·join·}·from·'node:path';
+        7 │ + import·{·fileURLToPath·}·from·'node:url';
+        8 │ + import·Ajv,·{·type·ErrorObject·}·from·'ajv';
+        9 │ + import·addFormats·from·'ajv-formats';
+    10 10 │   import type { AnalysisExport } from './types.js';
+    11 11 │   
+  
+
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+

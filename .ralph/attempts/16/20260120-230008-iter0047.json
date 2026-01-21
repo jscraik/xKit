@@ -1,0 +1,20 @@
+{
+  "attempt_id": "20260120-230008-iter0047",
+  "iteration": 47,
+  "task_id": "16",
+  "task_title": "Add main migration logic to `scripts/migrate-to-author-first.mjs`",
+  "started_at": "2026-01-20T23:00:08.146705+00:00",
+  "ended_at": "2026-01-20T23:06:54.842925+00:00",
+  "runner_ok": false,
+  "gates_ok": null,
+  "judge_ok": null,
+  "review_ok": null,
+  "blocked": true,
+  "exit_signal": false,
+  "return_code": 124,
+  "prompt_hash": "fa010fa6843099c99f2d6da6670e50397269a59529664e2ffb231169728f9b96",
+  "branch": "main",
+  "log_path": "/Users/jamiecraik/dev/xKit/.ralph/logs/20260120T230008Z-iter0047-claude.log",
+  "receipts_dir": "/Users/jamiecraik/dev/xKit/.ralph/receipts/16/20260120-230008-iter0047",
+  "context_dir": "/Users/jamiecraik/dev/xKit/.ralph/context/16/20260120-230008-iter0047"
+}

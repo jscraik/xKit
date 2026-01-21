@@ -1,0 +1,20 @@
+{
+  "attempt_id": "20260120-222735-iter0036",
+  "iteration": 36,
+  "task_id": "13",
+  "task_title": "Add `moveFileWithTimeout()` to `scripts/migration/lib/files.ts`",
+  "started_at": "2026-01-20T22:27:35.615253+00:00",
+  "ended_at": "2026-01-20T22:29:36.547435+00:00",
+  "runner_ok": false,
+  "gates_ok": null,
+  "judge_ok": null,
+  "review_ok": null,
+  "blocked": false,
+  "exit_signal": false,
+  "return_code": 124,
+  "prompt_hash": "135ef6c02108cd64074c7561ded561ced4f36833bef2587c59d09047da9398fe",
+  "branch": "main",
+  "log_path": "/Users/jamiecraik/dev/xKit/.ralph/logs/20260120T222735Z-iter0036-claude.log",
+  "receipts_dir": "/Users/jamiecraik/dev/xKit/.ralph/receipts/13/20260120-222735-iter0036",
+  "context_dir": "/Users/jamiecraik/dev/xKit/.ralph/context/13/20260120-222735-iter0036"
+}

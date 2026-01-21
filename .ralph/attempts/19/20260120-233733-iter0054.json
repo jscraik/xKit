@@ -1,0 +1,20 @@
+{
+  "attempt_id": "20260120-233733-iter0054",
+  "iteration": 54,
+  "task_id": "19",
+  "task_title": "Create `scripts/rollback-migration.mjs`",
+  "started_at": "2026-01-20T23:37:33.063869+00:00",
+  "ended_at": "2026-01-20T23:44:00.841913+00:00",
+  "runner_ok": true,
+  "gates_ok": null,
+  "judge_ok": null,
+  "review_ok": null,
+  "blocked": false,
+  "exit_signal": false,
+  "return_code": 0,
+  "prompt_hash": "d06e867e267cccc2c91527a36297914b6838aac7b4d3fe5e0c2827f60613f2a1",
+  "branch": "main",
+  "log_path": "/Users/jamiecraik/dev/xKit/.ralph/logs/20260120T233733Z-iter0054-claude.log",
+  "receipts_dir": "/Users/jamiecraik/dev/xKit/.ralph/receipts/19/20260120-233733-iter0054",
+  "context_dir": "/Users/jamiecraik/dev/xKit/.ralph/context/19/20260120-233733-iter0054"
+}

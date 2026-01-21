@@ -1,0 +1,16 @@
+
+> @brainwav/xkit@0.7.0 lint /Users/jamiecraik/dev/xKit
+> pnpm run lint:biome && pnpm run lint:oxlint
+
+
+> @brainwav/xkit@0.7.0 lint:biome /Users/jamiecraik/dev/xKit
+> biome check .
+
+The number of diagnostics exceeds the limit allowed. Use --max-diagnostics to increase it.
+Diagnostics not shown: 496.
+Checked 213 files in 261ms. No fixes applied.
+Found 434 errors.
+Found 52 warnings.
+Found 30 infos.
+ ELIFECYCLE  Command failed with exit code 1.
+ ELIFECYCLE  Command failed with exit code 1.

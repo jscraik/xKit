@@ -1,0 +1,279 @@
+src/bookmark-analysis/config-loader.ts:52:8 lint/complexity/noStaticOnlyClass ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid classes that contain only static members.
+  
+     50 │ };
+     51 │ 
+   > 52 │ export class AnalysisConfigLoader {
+        │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 53 │   /**
+         ...
+  > 138 │     return item && typeof item === 'object' && !Array.isArray(item);
+  > 139 │   }
+  > 140 │ }
+        │ ^
+    141 │ 
+  
+  i Prefer using simple functions instead of classes with only static members.
+  
+
+src/bookmark-analysis/analysis-engine.ts:251:46 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━
+
+  × This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  
+    249 │     try {
+    250 │       // Add _partial suffix to filename
+  > 251 │       const partialPath = outputPath.replace(/\.json$/, '_partial.json');
+        │                                              ^^^^^^^^^
+    252 │ 
+    253 │       this.logger.warn('Writing partial results due to critical failure', {
+  
+  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+src/bookmark-analysis/config-loader.ts:116:36 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected any. Specify a different type.
+  
+    114 │    * Deep merge two objects
+    115 │    */
+  > 116 │   private static mergeDeep(target: any, source: any): any {
+        │                                    ^^^
+    117 │     const output = { ...target };
+    118 │     if (AnalysisConfigLoader.isObject(target) && AnalysisConfigLoader.isObject(source)) {
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src/bookmark-analysis/config-loader.ts:116:49 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected any. Specify a different type.
+  
+    114 │    * Deep merge two objects
+    115 │    */
+  > 116 │   private static mergeDeep(target: any, source: any): any {
+        │                                                 ^^^
+    117 │     const output = { ...target };
+    118 │     if (AnalysisConfigLoader.isObject(target) && AnalysisConfigLoader.isObject(source)) {
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src/bookmark-analysis/config-loader.ts:116:55 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected any. Specify a different type.
+  
+    114 │    * Deep merge two objects
+    115 │    */
+  > 116 │   private static mergeDeep(target: any, source: any): any {
+        │                                                       ^^^
+    117 │     const output = { ...target };
+    118 │     if (AnalysisConfigLoader.isObject(target) && AnalysisConfigLoader.isObject(source)) {
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src/bookmark-analysis/config-loader.ts:137:33 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected any. Specify a different type.
+  
+    135 │    * Check if value is an object
+    136 │    */
+  > 137 │   private static isObject(item: any): boolean {
+        │                                 ^^^
+    138 │     return item && typeof item === 'object' && !Array.isArray(item);
+    139 │   }
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src/bookmark-analysis/llm-categorizer.ts:185:31 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━
+
+  × This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  
+    183 │     // Remove common prefixes/suffixes
+    184 │     let cleaned = response.trim();
+  > 185 │     cleaned = cleaned.replace(/^(categories?|topics?|labels?):\s*/i, '');
+        │                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    186 │     cleaned = cleaned.replace(/^["'`]|["'`]$/g, '');
+    187 │ 
+  
+  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+src/bookmark-analysis/llm-categorizer.ts:202:14 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━
+
+  × This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  
+    200 │     // Parse as comma-separated list
+    201 │     const categories = cleaned
+  > 202 │       .split(/[,;\n]/)
+        │              ^^^^^^^^
+    203 │       .map((c) => c.trim().toLowerCase())
+    204 │       .filter((c) => c.length > 0 && c.length < 50); // Reasonable category length
+  
+  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+src/bookmark-analysis/model-router.ts:34:38 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected any. Specify a different type.
+  
+    32 │  * Execution result with model metadata
+    33 │  */
+  > 34 │ export interface ExecutionResult<T = any> {
+       │                                      ^^^
+    35 │   /** The result from the model */
+    36 │   result: T;
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src/bookmark-analysis/model-router.ts:84:68 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected any. Specify a different type.
+  
+    82 │     _operation: ModelOperation,
+    83 │     tierNames: ModelTierType[],
+  > 84 │     executeWithModel: (model: string, provider: string) => Promise<any>,
+       │                                                                    ^^^
+    85 │   ): Promise<ExecutionResult> {
+    86 │     let lastError: Error | undefined;
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src/bookmark-analysis/retry-strategy.ts:203:42 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected any. Specify a different type.
+  
+    201 │     } catch (error) {
+    202 │       lastError = error instanceof Error ? error : new Error(String(error));
+  > 203 │       allAttempts.push(...((lastError as any).attemptsDetail || []));
+        │                                          ^^^
+    204 │ 
+    205 │       // Trip the circuit breaker if configured
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src/bookmark-analysis/script-runner.ts:100:41 lint/style/noNonNullAssertion ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Forbidden non-null assertion.
+  
+     99 │       // Spawn the script process
+  > 100 │       const child = spawn(interpreter, [this.scriptPath!], {
+        │                                         ^^^^^^^^^^^^^^^^
+    101 │         stdio: ['pipe', 'pipe', 'pipe'],
+    102 │       });
+  
+
+src/bookmark-analysis/script-runner.ts:113:26 lint/style/noNonNullAssertion ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Forbidden non-null assertion.
+  
+    111 │       child.stdout.on('data', (data: Buffer) => {
+    112 │         outputSize += data.length;
+  > 113 │         if (outputSize > this.config.maxOutputSize!) {
+        │                          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    114 │           child.kill('SIGTERM');
+    115 │           reject(new Error(`Script output exceeded maximum size of ${this.config.maxOutputSize} bytes`));
+  
+
+src/bookmark-analysis/usefulness-scorer.ts:184:34 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━
+
+  × This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  
+    182 │   private parseScore(response: string): number {
+    183 │     // Extract the first number from the response
+  > 184 │     const match = response.match(/\d+/);
+        │                                  ^^^^^
+    185 │ 
+    186 │     if (!match) {
+  
+  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+src/bookmark-analysis/work-item.ts:16:12 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected any. Specify a different type.
+  
+    14 │   id: string;
+    15 │   sequence: number;
+  > 16 │   result?: any;
+       │            ^^^
+    17 │   error?: Error;
+    18 │ }
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src/bookmark-analysis/worker-handler.ts:61:57 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected any. Specify a different type.
+  
+    59 │ }
+    60 │ 
+  > 61 │ async function processBookmark(item: WorkItem): Promise<any> {
+       │                                                         ^^^
+    62 │   // For now, return the bookmark as-is
+    63 │   // In a full implementation, this would:
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src/bookmark-analysis/worker-pool.ts:11:17 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected any. Specify a different type.
+  
+    10 │ export class WorkerPool {
+  > 11 │   private pool: any; // Piscina instance
+       │                 ^^^
+    12 │   private processedCount = 0;
+    13 │   private errorCount = 0;
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src/bookmark-categorization/categorizer.ts:62:47 lint/style/noNonNullAssertion ━━━━━━━━━━━━━━━━━━━━━
+
+  × Forbidden non-null assertion.
+  
+    61 │     // Fall back to default category
+  > 62 │     const defaultCat = this.config.categories[this.config.defaultCategory!];
+       │                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    63 │     return this.applyCategory(bookmark, defaultCat, this.config.defaultCategory!);
+    64 │   }
+  
+
+src/bookmark-categorization/categorizer.ts:63:53 lint/style/noNonNullAssertion ━━━━━━━━━━━━━━━━━━━━━
+
+  × Forbidden non-null assertion.
+  
+    61 │     // Fall back to default category
+    62 │     const defaultCat = this.config.categories[this.config.defaultCategory!];
+  > 63 │     return this.applyCategory(bookmark, defaultCat, this.config.defaultCategory!);
+       │                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    64 │   }
+    65 │ 
+  
+
+src/bookmark-enrichment/article-extractor.ts:156:7 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━
+
+  × This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  
+    154 │   private extractPublishedTime(html: string): string | undefined {
+    155 │     const patterns = [
+  > 156 │       /<meta[^>]*property=["']article:published_time["'][^>]*content=["']([^"']*)["']/i,
+        │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    157 │       /<meta[^>]*name=["']datePublished["'][^>]*content=["']([^"']*)["']/i,
+    158 │       /<meta[^>]*property=["']og:published_time["'][^>]*content=["']([^"']*)["']/i,
+  
+  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+

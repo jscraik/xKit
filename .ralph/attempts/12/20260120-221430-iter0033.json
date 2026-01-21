@@ -1,0 +1,20 @@
+{
+  "attempt_id": "20260120-221430-iter0033",
+  "iteration": 33,
+  "task_id": "12",
+  "task_title": "Add dry-run mode to `scripts/migrate-to-author-first.mjs`",
+  "started_at": "2026-01-20T22:14:30.340361+00:00",
+  "ended_at": "2026-01-20T22:17:31.271101+00:00",
+  "runner_ok": false,
+  "gates_ok": null,
+  "judge_ok": null,
+  "review_ok": null,
+  "blocked": false,
+  "exit_signal": false,
+  "return_code": 124,
+  "prompt_hash": "04c57bcfad802ed22f39909cd03182b735bc2fde0239b22304963cf020f21616",
+  "branch": "main",
+  "log_path": "/Users/jamiecraik/dev/xKit/.ralph/logs/20260120T221430Z-iter0033-claude.log",
+  "receipts_dir": "/Users/jamiecraik/dev/xKit/.ralph/receipts/12/20260120-221430-iter0033",
+  "context_dir": "/Users/jamiecraik/dev/xKit/.ralph/context/12/20260120-221430-iter0033"
+}

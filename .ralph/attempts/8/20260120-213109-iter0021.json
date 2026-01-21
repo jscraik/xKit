@@ -1,0 +1,20 @@
+{
+  "attempt_id": "20260120-213109-iter0021",
+  "iteration": 21,
+  "task_id": "8",
+  "task_title": "Add `getDirectorySize()` to `scripts/migration/lib/disk.ts`",
+  "started_at": "2026-01-20T21:31:09.797359+00:00",
+  "ended_at": "2026-01-20T21:33:46.735890+00:00",
+  "runner_ok": true,
+  "gates_ok": null,
+  "judge_ok": null,
+  "review_ok": null,
+  "blocked": false,
+  "exit_signal": false,
+  "return_code": 0,
+  "prompt_hash": "0899353379244eddeaf3bb70070f443e98116dac2896b8701948ace088ac4942",
+  "branch": "main",
+  "log_path": "/Users/jamiecraik/dev/xKit/.ralph/logs/20260120T213109Z-iter0021-claude.log",
+  "receipts_dir": "/Users/jamiecraik/dev/xKit/.ralph/receipts/8/20260120-213109-iter0021",
+  "context_dir": "/Users/jamiecraik/dev/xKit/.ralph/context/8/20260120-213109-iter0021"
+}

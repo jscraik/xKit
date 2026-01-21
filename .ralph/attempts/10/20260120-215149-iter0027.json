@@ -1,0 +1,20 @@
+{
+  "attempt_id": "20260120-215149-iter0027",
+  "iteration": 27,
+  "task_id": "10",
+  "task_title": "Add `preFlightChecks()` to `scripts/migration/lib/check.ts`",
+  "started_at": "2026-01-20T21:51:49.944920+00:00",
+  "ended_at": "2026-01-20T21:53:51.562500+00:00",
+  "runner_ok": false,
+  "gates_ok": null,
+  "judge_ok": null,
+  "review_ok": null,
+  "blocked": false,
+  "exit_signal": false,
+  "return_code": 124,
+  "prompt_hash": "b24522476fd9f24a41a51fdbb1fbb87a38145db5979181294451bf1dbc7a5f0a",
+  "branch": "main",
+  "log_path": "/Users/jamiecraik/dev/xKit/.ralph/logs/20260120T215149Z-iter0027-claude.log",
+  "receipts_dir": "/Users/jamiecraik/dev/xKit/.ralph/receipts/10/20260120-215149-iter0027",
+  "context_dir": "/Users/jamiecraik/dev/xKit/.ralph/context/10/20260120-215149-iter0027"
+}

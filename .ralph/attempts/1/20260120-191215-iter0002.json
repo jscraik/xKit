@@ -1,0 +1,20 @@
+{
+  "attempt_id": "20260120-191215-iter0002",
+  "iteration": 2,
+  "task_id": "1",
+  "task_title": "Create `src/bookmark-organization/types.ts` file",
+  "started_at": "2026-01-20T19:12:15.380684+00:00",
+  "ended_at": "2026-01-20T19:14:16.529199+00:00",
+  "runner_ok": false,
+  "gates_ok": false,
+  "judge_ok": null,
+  "review_ok": null,
+  "blocked": false,
+  "exit_signal": false,
+  "return_code": 124,
+  "prompt_hash": "80f6cb586de196b9f48250776928d39c45a1a73c646ab4a1de5a68012c74882c",
+  "branch": "main",
+  "log_path": "/Users/jamiecraik/dev/xKit/.ralph/logs/20260120T191215Z-iter0002-claude.log",
+  "receipts_dir": "/Users/jamiecraik/dev/xKit/.ralph/receipts/1/20260120-191215-iter0002",
+  "context_dir": "/Users/jamiecraik/dev/xKit/.ralph/context/1/20260120-191215-iter0002"
+}

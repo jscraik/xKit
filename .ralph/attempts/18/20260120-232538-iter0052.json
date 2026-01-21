@@ -1,0 +1,20 @@
+{
+  "attempt_id": "20260120-232538-iter0052",
+  "iteration": 52,
+  "task_id": "18",
+  "task_title": "Add backup creation to `scripts/migrate-to-author-first.mjs`",
+  "started_at": "2026-01-20T23:25:38.897731+00:00",
+  "ended_at": "2026-01-20T23:31:45.807741+00:00",
+  "runner_ok": true,
+  "gates_ok": null,
+  "judge_ok": null,
+  "review_ok": null,
+  "blocked": false,
+  "exit_signal": false,
+  "return_code": 0,
+  "prompt_hash": "d4ed365f3ae851ea77eeaea227b928d3d00619f1a1f9afd8e45188bacad40f98",
+  "branch": "main",
+  "log_path": "/Users/jamiecraik/dev/xKit/.ralph/logs/20260120T232538Z-iter0052-claude.log",
+  "receipts_dir": "/Users/jamiecraik/dev/xKit/.ralph/receipts/18/20260120-232538-iter0052",
+  "context_dir": "/Users/jamiecraik/dev/xKit/.ralph/context/18/20260120-232538-iter0052"
+}

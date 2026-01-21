@@ -1,0 +1,1855 @@
+You are operating inside the Ralph Gold loop for xKit knowledge reorganization.
+
+**Project Context:**
+- Reorganizing `knowledge/` from category-first to author-first structure
+- New structure: `knowledge/{year}/{##-month}/@{handle} ({real name})/{category}/{date}-{handle}-{category}-{title}-{id}.md`
+- Tech spec: `.ralph/specs/tech-spec-2026-01-20-knowledge-reorganization.md`
+- Key requirements: atomic migration, checksums, rollback, degraded mode, lock file
+
+**Current Structure:**
+```
+knowledge/
+└── {year}/
+    └── {##-month}/
+        └── {category}/
+            └── @{username}/
+                └── {filename}.md
+```
+
+**Target Structure:**
+```
+knowledge/
+└── {year}/
+    └── {##-month}/
+        └── @{handle} ({real_name})/
+            └── {category}/
+                └── {date}-{handle}-{category}-{title}-{short_id}.md
+```
+
+Rules:
+- Do exactly ONE task per iteration.
+- Use the Memory Files below as the source of truth (especially ANCHOR and any Repo Prompt context pack).
+- Make the smallest correct change-set that satisfies the task acceptance criteria.
+- When you finish the task, mark it done in the PRD tracker.
+- Do not mark tasks done if you did not run/confirm the configured gates pass locally.
+- If you are blocked, record a clear reason (including commands + errors) in .ralph/progress.md and leave the task open.
+
+## File writing authority (CRITICAL)
+- **You are authorized to write code directly.** Create and modify files without asking for permission.
+- **Do not stop and request approval.** You are autonomous—complete the full implementation.
+- **Implement the entire solution** in one iteration. Don't design and then wait—design AND implement.
+- Your task acceptance criteria are your complete authority to proceed with file changes.
+
+## Evidence Discipline (REQUIRED)
+
+You MUST provide evidence for ALL changes. Format:
+
+**Evidence**: <file-path>:<line-range>
+**Evidence**: <command-output>
+**Evidence**: <test-result>
+
+### Required Evidence Types
+1. **Code changes**: `src/file.py:42-47` (specific lines)
+2. **Commands**: Show command + output (abbreviated to 3 lines max)
+3. **Tests**: `pytest tests/file.py - X passed, Y failed`
+
+### Before Final Output
+Check your work:
+- [ ] Every file change cited with line numbers
+- [ ] Every command run with output shown
+- [ ] All tests pass with evidence
+- [ ] No claims without supporting evidence
+
+If you cannot provide evidence, state: "Unable to verify: <reason>"
+
+## Critical Implementation Notes
+
+### Security (NON-NEGOTIABLE)
+- **Handle validation MUST be ASCII-only**: `/^[A-Za-z0-9_]+$/` (NOT `/^[\w]+$/` to prevent Unicode bypass)
+- **Path traversal check FIRST**: Before any slugification, check for `/\.\.[\/\\]/`
+- **Reserved Windows names**: CON, PRN, AUX, NUL, COM1-9, LPT1-9 must be rejected
+- **Control characters**: Strip ALL control chars (U+0000-U+001F, U+007F)
+
+### Filename Format (MANDATORY)
+- Pattern: `{date}-{handle}-{category}-{title}-{short_id}.md`
+- `short_id` is REQUIRED (last 6 chars of tweet ID), not optional
+- Max total path length: 240 chars (conservative for Windows)
+
+### Migration Safety
+- **Checksums**: SHA-256 before/after for backup verification
+- **Timeout**: 5 seconds per file max (Promise.race)
+- **Checkpoints**: Every 100 files to `.migration-state.json`
+- **Lock file**: `.migration-lock` pauses archiving during migration
+- **Degraded mode**: Falls back to `knowledge_degraded/` on failure
+
+### Evidence Requirements
+- Cite the tech spec: `.ralph/specs/tech-spec-2026-01-20-knowledge-reorganization.md`
+- Cite existing code: `src/bookmark-markdown/writer.ts`, `src/bookmark-categorization/types.ts`
+- Show test output for all new code
+
+Workflow:
+1) Read Memory Files in order.
+2) Re-state the task acceptance criteria.
+3) Implement completely (write all necessary files).
+4) Run the repo's gates (pnpm lint, pnpm test, pnpm build) and fix failures.
+5) Update PRD + progress.
+
+Output:
+- Prefer concise, factual updates.
+- If you ran commands, include the command and 1-3 lines of the most relevant output.
+
+<ANCHOR>
+# Ralph Gold Anchor
+
+Task: 4 - Add real name cache functions to `src/bookmark-organization/cache.ts`
+
+Acceptance criteria:
+- `loadRealNameCache()`: load from `.real-name-cache.json` or create new
+- `saveRealNameCache()`: write cache with timestamp
+- `getRealName()`: lookup handle in cache
+- `setRealName()`: add or update cache entry
+- Test: `pnpm test -- src/bookmark-organization/cache.test.ts` passes
+
+Repo reality:
+- branch: main
+- git status --porcelain:
+```
+M .ralph/PRD.md
+ M .ralph/PROMPT.md
+ M .ralph/PROMPT_build.md
+ M .ralph/progress.md
+ M .ralph/ralph.toml
+ M biome.json
+ M package.json
+ M src/bookmark-analysis/analysis-engine.ts
+ M src/bookmark-analysis/bookmark-embedder.ts
+ M src/bookmark-analysis/circuit-breaker.ts
+ M src/bookmark-analysis/llm-categorizer.ts
+ M src/bookmark-analysis/model-config.ts
+ M src/bookmark-analysis/model-router.ts
+ M src/bookmark-analysis/pricing.ts
+ M src/bookmark-analysis/retry-strategy.ts
+ M src/bookmark-analysis/schema-validator.ts
+ M src/bookmark-analysis/token-tracker.ts
+ M src/bookmark-analysis/usefulness-scorer.ts
+ M src/bookmark-analysis/vector-store.ts
+ M src/bookmark-analysis/worker-handler.ts
+ M src/bookmark-analysis/worker-pool.ts
+ M src/bookmark-daemon/daemon.ts
+ M src/bookmark-enrichment/article-extractor.ts
+ M src/bookmark-enrichment/cached-content-extractor.ts
+ M src/bookmark-enrichment/content-extractor.ts
+ M src/bookmark-enrichment/enricher.ts
+ M src/bookmark-enrichment/index.ts
+ M src/bookmark-enrichment/ollama-client.ts
+ M src/bookmark-export/rate-limiter.ts
+ M src/bookmark-export/schema-validator.ts
+ M src/bookmark-folders/folder-manager.ts
+ M src/bookmark-markdown/writer.ts
+ M src/bookmark-prompts/content-types.ts
+ M src/bookmark-prompts/custom-templates.ts
+ M src/bookmark-prompts/index.ts
+ M src/bookmark-prompts/personas.ts
+ M src/bookmark-prompts/summary-templates.ts
+ M src/bookmark-prompts/tagged-prompts.ts
+ M src/cache/cache-manager.ts
+ M src/cli/program.ts
+ M src/cli/shared.ts
+ M src/commands/bookmark-analysis.ts
+ M src/commands/bookmark-export.ts
+ M src/commands/bookmarks-archive.ts
+ M src/commands/cache.ts
+ M src/commands/daemon.ts
+ M src/commands/generate-skills.ts
+ M src/commands/learn.ts
+ M src/commands/metrics.ts
+ M src/commands/recap.ts
+ M src/commands/summarize.ts
+ M src/commands/templates.ts
+ M src/learning/generators.ts
+ M src/learning/index.ts
+ M src/learning/recap.ts
+ M src/llm/index.ts
+ M src/llm/llm-clients.ts
+ M src/metrics/metrics-collector.ts
+ M src/observability/metrics.ts
+ M src/security/sanitizer.ts
+ M src/skill-generator/extractor.ts
+ M src/skill-generator/index.ts
+ M src/skill-generator/templates.ts
+ M src/skill-generator/types.ts
+ M src/skill-generator/writer.ts
+ M tests/bookmark-analysis/analysis-engine-error-handling.property.test.ts
+ M tests/bookmark-analysis/analysis-engine-error-handling.test.ts
+ M tests/bookmark-analysis/analysis-engine.property.test.ts
+ M tests/bookmark-analysis/analysis-engine.test.ts
+ M tests/bookmark-analysis/analysis-integration.test.ts
+ M tests/bookmark-analysis/llm-categorizer.test.ts
+ M tests/bookmark-analysis/script-runner.test.ts
+ M tests/bookmark-analysis/token-tracker.test.ts
+ M tests/bookmark-analysis/usefulness-scorer.test.ts
+ M tests/bookmark-analysis/vector-store.test.ts
+ M tests/bookmark-analysis/worker-pool.test.ts
+ M tests/bookmark-export/error-handling.test.ts
+ M tests/bookmark-export/export-integration.test.ts
+ M tests/bookmark-export/export-state.test.ts
+ M tests/bookmark-export/progress-reporter.test.ts
+ M tests/bookmark-export/xapi-client.test.ts
+ M tests/bookmark-prompts/custom-templates.test.ts
+ M tests/performance/benchmark.test.ts
+ M tests/security/malicious-html.test.ts
+ M tests/security/memory-profiling.test.ts
+ M tests/security/prompt-injection.test.ts
+ M tests/security/resource-limits.test.ts
+ M tests/security/sanitizer.test.ts
+ M tests/smoke/cli-smoke.test.ts
+?? .oxlintignore
+?? .ralph/archive/20260120-190753/
+?? .ralph/attempts/
+?? .ralph/context/
+?? .ralph/logs/
+?? .ralph/permissions.json
+?? .ralph/receipts/
+?? .ralph/specs/tech-spec-2026-01-20-knowledge-reorganization.md
+?? .ralph/state.json
+?? .spec/tech-spec-2026-01-20-knowledge-reorganization.md
+?? src/bookmark-organization/
+?? tests/bookmark-organization/
+```
+- git diff --stat:
+```
+.ralph/PRD.md                                      | 296 +++++++--
+ .ralph/PROMPT.md                                   |  14 +
+ .ralph/PROMPT_build.md                             |  77 ++-
+ .ralph/progress.md                                 |  12 +
+ .ralph/ralph.toml                                  |  38 +-
+ biome.json                                         |   8 +
+ package.json                                       |   4 +-
+ src/bookmark-analysis/analysis-engine.ts           |  10 +-
+ src/bookmark-analysis/bookmark-embedder.ts         |  24 +-
+ src/bookmark-analysis/circuit-breaker.ts           |   2 +-
+ src/bookmark-analysis/llm-categorizer.ts           |  24 +-
+ src/bookmark-analysis/model-config.ts              |  14 +-
+ src/bookmark-analysis/model-router.ts              |  10 +-
+ src/bookmark-analysis/pricing.ts                   |  20 +-
+ src/bookmark-analysis/retry-strategy.ts            |  30 +-
+ src/bookmark-analysis/schema-validator.ts          |   4 +-
+ src/bookmark-analysis/token-tracker.ts             |  34 +-
+ src/bookmark-analysis/usefulness-scorer.ts         |  19 +-
+ src/bookmark-analysis/vector-store.ts              |  38 +-
+ src/bookmark-analysis/worker-handler.ts            |   5 +-
+ src/bookmark-analysis/worker-pool.ts               |  17 +-
+ src/bookmark-daemon/daemon.ts                      |  83 ++-
+ src/bookmark-enrichment/article-extractor.ts       | 438 ++++++-------
+ .../cached-content-extractor.ts                    |  10 +-
+ src/bookmark-enrichment/content-extractor.ts       |   8 +-
+ src/bookmark-enrichment/enricher.ts                |   2 +-
+ src/bookmark-enrichment/index.ts                   |   7 +-
+ src/bookmark-enrichment/ollama-client.ts           | 701 +++++++++++----------
+ src/bookmark-export/rate-limiter.ts                |   2 -
+ src/bookmark-export/schema-validator.ts            |   4 +-
+ src/bookmark-folders/folder-manager.ts             |  17 +-
+ src/bookmark-markdown/writer.ts                    |  27 +-
+ src/bookmark-prompts/content-types.ts              |  46 +-
+ src/bookmark-prompts/custom-templates.ts           |  24 +-
+ src/bookmark-prompts/index.ts                      |  44 +-
+ src/bookmark-prompts/personas.ts                   |  19 +-
+ src/bookmark-prompts/summary-templates.ts          |   3 +-
+ src/bookmark-prompts/tagged-prompts.ts             |   6 +-
+ src/cache/cache-manager.ts                         |  53 +-
+ src/cli/program.ts                                 |   8 +-
+ src/cli/shared.ts                                  |  16 +-
+ src/commands/bookmark-analysis.ts                  |  52 +-
+ src/commands/bookmark-export.ts                    |   2 +-
+ src/commands/bookmarks-archive.ts                  |  37 +-
+ src/commands/cache.ts                              |   4 +-
+ src/commands/daemon.ts                             |   6 +-
+ src/commands/generate-skills.ts                    |  28 +-
+ src/commands/learn.ts                              |  31 +-
+ src/commands/metrics.ts                            | 136 ++--
+ src/commands/recap.ts                              |  10 +-
+ src/commands/summarize.ts                          |  22 +-
+ src/commands/templates.ts                          |  28 +-
+ src/learning/generators.ts                         |  53 +-
+ src/learning/index.ts                              |   2 +-
+ src/learning/recap.ts                              |  37 +-
+ src/llm/index.ts                                   |   2 +-
+ src/llm/llm-clients.ts                             |  38 +-
+ src/metrics/metrics-collector.ts                   | 343 +++++-----
+ src/observability/metrics.ts                       |   8 +-
+ src/security/sanitizer.ts                          |  21 +-
+ src/skill-generator/extractor.ts                   |  51 +-
+ src/skill-generator/index.ts                       |   2 +-
+ src/skill-generator/templates.ts                   |  10 +-
+ src/skill-generator/types.ts                       |  14 +-
+ src/skill-generator/writer.ts                      |   6 +-
+ ...analysis-engine-error-handling.property.test.ts |   2 +-
+ .../analysis-engine-error-handling.test.ts         |   2 +-
+ .../analysis-engine.property.test.ts               |   8 +-
+ tests/bookmark-analysis/analysis-engine.test.ts    |  13 +-
+ .../bookmark-analysis/analysis-integration.test.ts |  13 +-
+ tests/bookmark-analysis/llm-categorizer.test.ts    |   8 +-
+ tests/bookmark-analysis/script-runner.test.ts      |  10 +-
+ tests/bookmark-analysis/token-tracker.test.ts      |   4 +-
+ tests/bookmark-analysis/usefulness-scorer.test.ts  |  18 +-
+ tests/bookmark-analysis/vector-store.test.ts       |   4 +-
+ tests/bookmark-analysis/worker-pool.test.ts        |   8 +-
+ tests/bookmark-export/error-handling.test.ts       |   8 +-
+ tests/bookmark-export/export-integration.test.ts   |   2 +-
+ tests/bookmark-export/export-state.test.ts         |   2 +-
+ tests/bookmark-export/progress-reporter.test.ts    |   8 +-
+ tests/bookmark-export/xapi-client.test.ts          |   2 +-
+ tests/bookmark-prompts/custom-templates.test.ts    |  57 +-
+ tests/performance/benchmark.test.ts                | 440 ++++++-------
+ tests/security/malicious-html.test.ts              | 571 ++++++++---------
+ tests/security/memory-profiling.test.ts            | 505 ++++++++-------
+ tests/security/prompt-injection.test.ts            | 260 ++++----
+ tests/security/resource-limits.test.ts             | 232 ++++---
+ tests/security/sanitizer.test.ts                   |  48 +-
+ tests/smoke/cli-smoke.test.ts                      | 374 +++++------
+ 89 files changed, 3006 insertions(+), 2754 deletions(-)
+```
+
+Constraints:
+- Work on exactly ONE task per iteration
+- Do not claim completion without passing gates
+- Prefer minimal diffs; keep repo clean
+</ANCHOR>
+
+## Orchestrator Addendum (auto-generated)
+Iteration: 11
+
+Hard iteration constraints:
+- One task per iteration (one commit per iteration).
+- Apply backpressure: run the commands in AGENTS.md and fix until they pass.
+
+Selected task for this iteration:
+- id: 4
+- title: Add real name cache functions to `src/bookmark-organization/cache.ts`
+- acceptance:
+  - `loadRealNameCache()`: load from `.real-name-cache.json` or create new
+  - `saveRealNameCache()`: write cache with timestamp
+  - `getRealName()`: lookup handle in cache
+  - `setRealName()`: add or update cache entry
+  - Test: `pnpm test -- src/bookmark-organization/cache.test.ts` passes
+
+Do not work on any other task in this iteration.
+
+<PROJECT_MEMORY>
+## .ralph/AGENTS.md
+# Ralph Gold Agents & Gates
+
+This file is read by Ralph Gold each iteration.
+
+## Gates (backpressure)
+
+Ralph Gold will run gates *after* the agent makes changes. Configure them in `.ralph/ralph.toml`.
+
+Recommended patterns:
+
+### Option A (recommended): `prek` as the universal gate runner
+
+- Put your quality contract in `.pre-commit-config.yaml`
+- Then enable the gate:
+  - `[gates.prek] enabled = true` (runs `prek run --all-files`)
+
+No git hooks are installed by Ralph Gold.
+
+### Option B: Explicit commands
+
+Examples:
+- `uv run ruff check .`
+- `uv run mypy src`
+- `uv run pytest -q`
+- `npm test`
+
+## Review gate (cross-model)
+
+Optionally enable `[gates.review]` to require a reviewer model to return `SHIP`.
+
+## Notes
+
+- Receipts are written under `.ralph/receipts/` each iteration.
+- Repo Prompt context packs (if enabled) are written under `.ralph/context/`.
+
+
+## .ralph/PRD.md
+# Knowledge Reorganization PRD
+
+## Overview
+
+Reorganize the xKit knowledge base from category-first (`year/month/category/@handle/file.md`) to author-first structure (`year/month/@handle (real name)/category/file.md`) with enhanced filenames including date, handle, category, title, and short ID. Includes comprehensive migration tooling with atomic operations, automated rollback, degraded mode support, and full observability.
+
+**Tech Spec:** `.spec/tech-spec-2026-01-20-knowledge-reorganization.md`
+
+## Task Breakdown Guidelines
+
+**CRITICAL:** Tasks must be atomic (5-15 minutes each) with specific acceptance criteria and test commands.
+
+## Tasks
+
+### Phase 1: Core Types
+
+- [-] Create `src/bookmark-organization/types.ts` file
+  - Add `AuthorFolder`, `KnowledgePath`, `FilenameComponents` interfaces
+  - Add `RealNameCache`, `MigrationState`, `MigrationError` interfaces
+  - Add `MigrationFailureMarker`, `PreflightCheck` interfaces
+  - Export all types
+  - Test: `pnpm test -- src/bookmark-organization/types.test.ts` passes
+
+- [x] Add `sanitizeAuthorName()` to `src/bookmark-organization/sanitize.ts`
+  - ASCII-only handle validation (`/^[A-Za-z0-9_]+$/`)
+  - Reserved Windows filename check (CON, PRN, AUX, NUL, COM1-9, LPT1-9)
+  - Real name sanitization (control chars, Unicode NFC, dangerous chars)
+  - Limit real name to 100 chars
+  - Return `@handle` or `@handle (Real Name)`
+  - Test: `pnpm test -- src/bookmark-organization/sanitize.test.ts` passes
+
+- [x] Add `sanitizeSlug()` to `src/bookmark-organization/sanitize.ts`
+  - Pre-check for path traversal (`/\.\.[\/\\]/`)
+  - Remove control characters, normalize Unicode to NFC
+  - Replace non-alphanumerics with hyphens
+  - Limit to 80 chars
+  - Test: `pnpm test -- src/bookmark-organization/sanitize.test.ts` passes
+
+### Phase 2: Real Name Cache
+
+- [ ] Add real name cache functions to `src/bookmark-organization/cache.ts`
+  - `loadRealNameCache()`: load from `.real-name-cache.json` or create new
+  - `saveRealNameCache()`: write cache with timestamp
+  - `getRealName()`: lookup handle in cache
+  - `setRealName()`: add or update cache entry
+  - Test: `pnpm test -- src/bookmark-organization/cache.test.ts` passes
+
+### Phase 3: Filename Generation
+
+- [ ] Add `generateEnhancedFilename()` to `src/bookmark-markdown/filename.ts`
+  - Format: `{date}-{handle}-{category}-{title}-{short_id}.md`
+  - Use linked content title or tweet text excerpt
+  - Mandatory short ID (last 6 chars of tweet ID)
+  - Limit total filename to 255 chars
+  - Test: `pnpm test -- src/bookmark-markdown/filename.test.ts` passes
+
+- [ ] Add `validatePathLength()` to `src/bookmark-markdown/filename.ts`
+  - Check path length ≤ 240 chars (Windows safe)
+  - Throw error with path preview if exceeded
+  - Test: `pnpm test -- src/bookmark-markdown/filename.test.ts` passes
+
+- [ ] Update `MarkdownWriter.generateFilename()` in `src/bookmark-markdown/writer.ts`
+  - Call `generateEnhancedFilename()` instead of old method
+  - Test: `pnpm test -- src/bookmark-markdown/writer.test.ts` passes
+
+### Phase 4: Disk Space & Pre-flight
+
+- [ ] Add `getDirectorySize()` to `scripts/migration/lib/disk.ts`
+  - Recursively scan directory and sum file sizes
+  - Return total bytes
+  - Test: Manual verify with known test directory
+
+- [ ] Add `checkDiskSpace()` to `scripts/migration/lib/disk.ts`
+  - Use `statvfs` to get available space (Unix)
+  - Require 2.5x directory size (original + backup + margin)
+  - Throw error if insufficient with GB amounts
+  - Fallback for Windows (skip check with warning)
+  - Test: Manual verify with small directory
+
+- [ ] Add `preFlightChecks()` to `scripts/migration/lib/check.ts`
+  - Call `getDirectorySize()` and `checkDiskSpace()`
+  - Count files to migrate
+  - Log summary and throw if checks fail
+  - Return `PreflightCheck` result
+  - Test: Manual verify on `knowledge/` directory
+
+### Phase 5: Migration Script Core
+
+- [ ] Create `scripts/migrate-to-author-first.mjs` CLI scaffold
+  - Parse arguments: --dry-run, --backup-dir, --resume, --verify, --verbose, --force, --help
+  - Set up logging to `migration.log`
+  - Exit codes: 0=success, 1=errors, 2=validation failed, 3=cancelled
+  - Test: `node scripts/migrate-to-author-first.mjs --help` shows usage
+
+- [ ] Add dry-run mode to `scripts/migrate-to-author-first.mjs`
+  - Scan all files in `knowledge/`
+  - Calculate new paths for all files
+  - Print summary: file counts, new structure example, backup location
+  - Prompt for confirmation: "Continue? [y/N]"
+  - Exit if not 'y'
+  - Test: `node scripts/migrate-to-author-first.mjs --dry-run` shows plan
+
+### Phase 6: File Operations with Timeout
+
+- [ ] Add `moveFileWithTimeout()` to `scripts/migration/lib/files.ts`
+  - Use `Promise.race()` with 5 second timeout
+  - Copy file first, verify size matches, then delete source
+  - Throw timeout error if stuck
+  - Test: Manual verify with test files
+
+### Phase 7: Checkpoint & Recovery
+
+- [ ] Add checkpoint system to `scripts/migration/lib/checkpoint.ts`
+  - `writeCheckpoint()`: write state to `.migration-state.json` every 100 files
+  - `resumeFromCheckpoint()`: load checkpoint state
+  - Track: migrationId, timestamps, files processed, processed files list
+  - Test: Manual interrupt and resume
+
+- [ ] Add SIGINT handler to `scripts/migrate-to-author-first.mjs`
+  - Catch Ctrl+C, write checkpoint, exit gracefully
+  - Print message: "Migration paused. Run with --resume to continue."
+  - Test: Manual Ctrl+C during migration
+
+### Phase 8: Migration Execution
+
+- [ ] Add main migration logic to `scripts/migrate-to-author-first.mjs`
+  - For each file: calculate new path, create author folder, create category folder
+  - Call `moveFileWithTimeout()` for each file
+  - Write checkpoint every 100 files
+  - Show progress: `[=====>] 45% (382/847) | 234 files/sec`
+  - Log each move to `migration.log`
+  - Track errors (recoverable) and continue
+  - Test: `node scripts/migrate-to-author-first.mjs --dry-run` on sample data
+
+### Phase 9: Checksum Verification
+
+- [ ] Add checksum functions to `scripts/migration/lib/checksum.ts`
+  - `checksum()`: compute SHA-256 hash of file
+  - `verifyBackup()`: compare all files between original and backup
+  - Return summary with mismatches list
+  - Test: Manual verify with test directory
+
+### Phase 10: Backup & Rollback
+
+- [ ] Add backup creation to `scripts/migrate-to-author-first.mjs`
+  - Copy entire `knowledge/` to `knowledge_backup_<timestamp>/`
+  - Run `verifyBackup()` after copy
+  - Throw if verification fails
+  - Test: `node scripts/migrate-to-author-first.mjs --dry-run` creates backup
+
+- [ ] Create `scripts/rollback-migration.mjs`
+  - Parse --backup-dir and --verify flags
+  - Validate backup exists
+  - Create backup of current state
+  - Delete `knowledge/`, copy backup to `knowledge/`
+  - Revert code changes if needed
+  - Run build and verify
+  - Test: Manual rollback after test migration
+
+### Phase 11: Concurrency Locking
+
+- [ ] Add lock file functions to `src/bookmark-markdown/lock.ts`
+  - `createMigrationLock()`: write `.migration-lock` with migration ID and timestamp
+  - `checkMigrationLock()`: return true if lock exists
+  - `clearMigrationLock()`: remove lock file
+  - Test: `pnpm test -- src/bookmark-markdown/lock.test.ts` passes
+
+- [ ] Update bookmark archiving to check for migration lock
+  - In archiving entry point, call `checkMigrationLock()`
+  - If locked, print warning and exit (pause archiving)
+  - Test: Manual verify lock pauses archiving
+
+### Phase 12: Degraded Mode
+
+- [ ] Add degraded mode functions to `scripts/migration/lib/degraded.ts`
+  - `markMigrationFailed()`: write `.migration-failed` marker with error
+  - `isDegradedMode()`: check if marker exists
+  - `getOutputDirectory()`: return `knowledge_degraded/` if failed
+  - `clearDegradedMode()`: remove marker
+  - Test: Manual verify degraded mode activation
+
+- [ ] Update `MarkdownWriter` constructor to use degraded output
+  - Call `isDegradedMode()` on init
+  - If degraded, set `outputDir` to `knowledge_degraded/`
+  - Print warning message
+  - Test: Manual verify degraded mode writes to fallback
+
+- [ ] Add degraded mode handling to `scripts/migrate-to-author-first.mjs`
+  - On any error, call `markMigrationFailed()`
+  - Exit with error code 1
+  - On success, call `clearDegradedMode()`
+  - Test: Manual error triggers degraded mode
+
+### Phase 13: Package Scripts & Docs
+
+- [ ] Add npm scripts to `package.json`
+  - `"migrate-knowledge": "node scripts/migrate-to-author-first.mjs"`
+  - `"migrate-knowledge:dry-run": "node scripts/migrate-to-author-first.mjs --dry-run"`
+  - `"rollback-knowledge": "node scripts/rollback-migration.mjs"`
+  - Test: `pnpm migrate-knowledge --help` works
+
+- [ ] Add migration documentation to `docs/KNOWLEDGE_MIGRATION.md`
+  - Overview of new structure
+  - Migration instructions
+  - Rollback instructions
+  - Troubleshooting guide
+  - Test: Documentation is clear and complete
+
+### Phase 14: Testing & Validation
+
+- [ ] Add migration tests to `tests/migration.test.ts`
+  - Test dry-run on sample data
+  - Test checkpoint creation and resume
+  - Test degraded mode activation
+  - Test lock file handling
+  - Test: `pnpm test -- tests/migration.test.ts` passes
+
+- [ ] Run full migration test on backup
+  - Copy `knowledge/` to test location
+  - Run full migration
+  - Verify all files moved correctly
+  - Verify checksums match
+  - Test rollback restores correctly
+  - Test: Manual end-to-end validation
+
+## Acceptance Criteria
+
+- [ ] All existing files migrated without data loss
+- [ ] New bookmarks use author-first structure with enhanced filenames
+- [ ] Build succeeds with no broken links (`pnpm build`)
+- [ ] Migration script has dry-run mode with detailed output
+- [ ] Automated rollback script tested and documented
+- [ ] Comprehensive path sanitization implemented (ASCII-only handles)
+- [ ] Checksum verification before/after migration
+- [ ] Checkpoint/resume capability functional
+- [ ] CLI interface with all specified flags
+- [ ] Confirmation flow (dry-run → prompt → execute)
+- [ ] Migration logging to `migration.log`
+- [ ] Progress indicator during migration
+- [ ] Concurrency handling (pause with lock file)
+- [ ] Path length validation (fail fast if >240 chars)
+- [ ] ID suffix mandatory in filename generation
+- [ ] TypeScript types defined for all new structures
+- [ ] Real name cache format defined
+- [ ] Disk space check implemented
+- [ ] Per-file timeout implemented (5 second default)
+- [ ] Degraded mode functional (fallback to `knowledge_degraded/`)
+
+## Notes
+
+- Mark done: - [x]
+- Mark blocked: - [-]
+- Dependencies: add acceptance bullet like "- Depends on: 1, 2"
+
+
+## .ralph/progress.md
+# progress.md
+
+Append-only loop memory.
+Keep entries short; delete nothing; add clarifications when you learn.
+
+---
+- [20260120T191036Z] iter 1 mode=prd status=CONTINUE checks=FAIL story=S1 agent=codex branch=main log=20260120T191036Z-iter0001-codex.log
+- [20260120T191215Z] iter 2 mode=prd status=CONTINUE checks=FAIL story=S1 agent=claude branch=main log=20260120T191215Z-iter0002-claude.log
+- [20260120T191450Z] iter 3 mode=prd status=CONTINUE checks=FAIL story=S1 agent=claude branch=main log=20260120T191450Z-iter0003-claude.log
+[2026-01-20T19:16:51.970400+00:00] BLOCKED task 1 (Create `src/bookmark-organization/types.ts` file) after 3 attempts: gates failed
+- [20260120T191935Z] iter 4 mode=prd status=CONTINUE checks=FAIL story=S2 agent=claude branch=main log=20260120T191935Z-iter0004-claude.log
+- [20260120T193105Z] iter 5 mode=prd status=CONTINUE checks=PASS story=S2 agent=claude branch=main log=20260120T193105Z-iter0005-claude.log
+- [20260120T204325Z] iter 6 mode=prd status=CONTINUE checks=PASS story=S3 agent=claude branch=main log=20260120T204325Z-iter0006-claude.log
+- [20260120T204456Z] iter 7 mode=prd status=CONTINUE checks=PASS story=S3 agent=claude branch=main log=20260120T204456Z-iter0007-claude.log
+- [20260120T204649Z] iter 8 mode=prd status=CONTINUE checks=PASS story=S3 agent=claude branch=main log=20260120T204649Z-iter0008-claude.log
+[2026-01-20T20:48:00.888168+00:00] BLOCKED task 3 (Add `sanitizeSlug()` to `src/bookmark-organization/sanitize.ts`) after 3 attempts: unknown
+- [20260120T204800Z] iter 9 mode=prd status=CONTINUE checks=PASS story=S4 agent=claude branch=main log=20260120T204800Z-iter0009-claude.log
+- [20260120T205547Z] iter 10 mode=prd status=CONTINUE checks=PASS story=S4 agent=claude branch=main log=20260120T205547Z-iter0010-claude.log
+
+
+## .ralph/FEEDBACK.md
+# Feedback (optional)
+
+This file is read by Ralph Gold each iteration.
+
+Use it to add temporary guidance for the next iteration (constraints, clarifications, links, etc.).
+
+Delete entries when no longer needed.
+
+
+## .ralph/specs/README.md
+# specs/
+
+This directory holds **requirement specifications**.
+
+One good pattern is **one file per topic / JTBD**, for example:
+
+- `authentication.md`
+- `billing.md`
+- `observability.md`
+
+## Suggested spec structure
+
+1. Problem statement
+2. User stories / JTBD
+3. Acceptance criteria (bullet list)
+4. Non-goals
+5. Edge cases
+6. Notes / references
+
+## Guidance for Ralph loops
+
+- Prefer writing specs before implementing.
+- Keep acceptance criteria **testable**.
+- Use the tracker (`.ralph/PRD.md` or `.ralph/prd.json`) to translate specs into a prioritized checklist.
+
+
+## .ralph/specs/tech-spec-2026-01-20-knowledge-reorganization.md
+# Technical Specification: Author-Centric Knowledge Organization
+
+**Schema version:** 1
+**Date:** 2026-01-20
+**Status:** Draft - Adversarial Review Complete
+**Evidence:** `docs/implementation/KNOWLEDGE_ORGANIZATION_2026-01-17.md`, `src/bookmark-categorization/types.ts`
+
+---
+
+## Executive Summary
+
+Reorganize the knowledge base from category-first to author-first structure with enhanced filenames. Includes comprehensive migration tooling with atomic operations, automated rollback, degraded mode support, and full observability.
+
+**Problem:** Current structure groups by category first, making it difficult to browse all contributions from a single creator.
+**Solution:** Group by author at the month level, with categories as subfolders under each author.
+**Evidence gap:** No metrics on current browsing patterns or user pain points; based on stated requirements.
+**Evidence:** `docs/implementation/KNOWLEDGE_ORGANIZATION_2026-01-17.md:63-70`
+
+---
+
+## Current Structure
+
+```
+knowledge/
+└── {year}/
+    └── {##-month}/
+        └── {category}/          ← Category FIRST
+            └── @{username}/
+                └── {filename}.md
+```
+
+**Example:**
+```
+knowledge/2026/01-jan/tools/@doodlestein/meta-skill.md
+knowledge/2026/01-jan/articles/@rseroter/how-to-write-a-good-spec.md
+```
+
+**Evidence:** `docs/implementation/KNOWLEDGE_ORGANIZATION_2026-01-17.md:75-90`
+
+---
+
+## Proposed Structure
+
+```
+knowledge/
+└── {year}/
+    └── {##-month}/
+        └── @{handle} ({real_name})/    ← Author FIRST
+            └── {category}/              ← Category SECOND
+                └── {date}-{handle}-{category}-{title}-{short_id}.md
+```
+
+**Example:**
+```
+knowledge/2026/01-jan/@doodlestein (Doug)/tools/2026-01-20-@doodlestein-tools-meta-skill-a1b2c3.md
+knowledge/2026/01-jan/@Vjeux (James V)/articles/2026-01-18-@Vjeux-articles-claude-code-tips-d4e5f6.md
+```
+
+**Evidence gap:** No existing examples of this structure; proposed based on requirements.
+
+---
+
+## Key Changes
+
+| Aspect | Current | Proposed | Rationale |
+|--------|---------|----------|-----------|
+| **Primary grouping** | Category | Author | Browse all content by creator |
+| **Author folder format** | `@username` | `@handle (Real Name)` | Human-readable, includes identity |
+| **Category depth** | Before author | After author | One author → multiple categories |
+| **Month format** | `##-month` (padded) | `##-month` (preserve) | Chronological sorting works |
+| **Filename format** | `{title}.md` | `{date}-{handle}-{category}-{title}-{id}.md` | Self-describing, collision-resistant |
+
+**Evidence:** `docs/implementation/KNOWLEDGE_ORGANIZATION_2026-01-17.md:26-59`
+
+---
+
+## Data Models
+
+**Evidence:** `src/bookmark-categorization/types.ts:1-136` shows current types. New types defined below.
+
+```typescript
+/**
+ * Author folder format with real name
+ */
+interface AuthorFolder {
+  handle: string;       // "@doodlestein"
+  realName?: string;    // "Doug" or undefined
+  format: "{handle} ({real_name})" | "{handle}";
+}
+
+/**
+ * Complete knowledge path structure
+ */
+interface KnowledgePath {
+  year: string;           // "2026"
+  month: string;          // "01-jan"
+  author: AuthorFolder;   // { handle: "@doodlestein", realName: "Doug" }
+  category: string;       // "tools", "articles"
+  filename: string;       // "2026-01-20-@doodlestein-tools-meta-skill-a1b2c3.md"
+}
+
+/**
+ * Enhanced filename components (all mandatory)
+ */
+interface FilenameComponents {
+  date: string;           // "2026-01-20"
+  handle: string;         // "@doodlestein"
+  category: string;       // "tools"
+  title: string;          // "meta-skill" (slugified)
+  shortId: string;        // "a1b2c3" (last 6 chars of tweet ID, MANDATORY)
+}
+
+/**
+ * Real name cache for author lookups
+ * FIXED: Cache format now defined
+ */
+interface RealNameCache {
+  version: number;
+  lastUpdated: string;      // ISO timestamp
+  entries: Record<string, string>;  // "@doodlestein": "Doug"
+}
+
+/**
+ * Migration state for checkpoint/recovery
+ */
+interface MigrationState {
+  startedAt: string;      // ISO timestamp
+  lastCheckpoint: string; // ISO timestamp
+  filesProcessed: number;
+  filesTotal: number;
+  currentFile: string;
+  errors: MigrationError[];
+  status: 'in_progress' | 'paused' | 'completed' | 'failed';
+}
+
+/**
+ * Migration error with recovery hint
+ */
+interface MigrationError {
+  file: string;
+  error: string;
+  recoverable: boolean;
+  hint?: string;
+}
+
+/**
+ * Migration report
+ */
+interface MigrationReport {
+  migrationId: string;        // UUID
+  startedAt: string;
+  completedAt: string;
+  filesMoved: number;
+  filesSkipped: number;
+  filesFailed: number;
+  checksumsMatch: boolean;
+  backupPath: string;
+  errors: MigrationError[];
+}
+
+/**
+ * Migration failure marker
+ * FIXED: Degraded mode marker structure
+ */
+interface MigrationFailureMarker {
+  failedAt: string;         // ISO timestamp
+  error: string;            // Error message
+  hint: string;             // Recovery hint
+}
+
+/**
+ * Pre-flight check results
+ * FIXED: Disk space validation
+ */
+interface PreflightCheck {
+  directorySize: number;    // Bytes
+  availableSpace: number;   // Bytes
+  sufficient: boolean;
+  fileCount: number;
+}
+```
+
+**Evidence:** Backend Engineer findings addressed with complete type definitions.
+
+---
+
+## Enhanced Filename Format
+
+**Pattern:** `{date}-{handle}-{category}-{title}-{short_id}.md`
+
+**Components (all mandatory):**
+| Component | Format | Example | Max Length |
+|-----------|--------|---------|------------|
+| Date | `YYYY-MM-DD` | `2026-01-20` | 10 |
+| Handle | `@{username}` | `@doodlestein` | 20 |
+| Category | `{category}` | `tools` | 15 |
+| Title | `{slugified}` | `meta-skill` | 80 |
+| Short ID | `{last6}` | `a1b2c3` | 6 |
+
+**Total:** ~131 chars typical, 255 max (with padding for safety margin)
+
+**ID suffix is MANDATORY** to prevent collisions. Evidence: Backend Engineer finding #3.
+
+**Examples:**
+
+| Content | Current Filename | New Filename |
+|---------|-----------------|--------------|
+| Meta skill repo by @doodlestein | `meta-skill.md` | `2026-01-20-@doodlestein-tools-meta-skill-a1b2c3.md` |
+| Claude Code showcase by @brian_lovin | `claude-code-showcase.md` | `2026-01-15-@brian_lovin-tools-claude-code-showcase-d4e5f6.md` |
+| Article by @rseroter | `how-to-write-a-good-spec.md` | `2026-01-18-@rseroter-articles-how-to-write-a-good-spec-789012.md` |
+| Tweet without link (fallback) | `bookmark-2011542877420294233.md` | `2026-01-20-@username-tweet-here-is-my-thought-on-345678.md` |
+
+**Evidence:** `src/bookmark-markdown/templates.ts:426-446` shows current simple slugification.
+
+### Path Length Validation
+
+```typescript
+function validatePathLength(path: string): void {
+  const MAX_PATH = 240; // Conservative limit for Windows
+  if (path.length > MAX_PATH) {
+    throw new Error(
+      `Path length ${path.length} exceeds ${MAX_PATH}: ${path.slice(0, 50)}...`
+    );
+  }
+}
+```
+
+Evidence: Backend Engineer finding #4 addressed.
+
+---
+
+## Filename Generation Logic
+
+```typescript
+/**
+ * Generate enhanced filename for bookmark
+ * Format: {date}-{handle}-{category}-{title}-{short_id}.md
+ */
+function generateEnhancedFilename(bookmark: CategorizedBookmark): string {
+  const date = formatDateForFilename(bookmark.createdAt);
+  const handle = bookmark.authorUsername ? `@${bookmark.authorUsername}` : 'unknown';
+  const category = bookmark.category || 'general';
+  const content = bookmark.linkedContent?.[0];
+
+  let title: string;
+
+  if (content?.title) {
+    // Use linked content title
+    title = sanitizeSlug(content.title);
+  } else {
+    // Use tweet text excerpt (first line, slugified)
+    title = sanitizeSlug(bookmark.text.split('\n')[0]);
+  }
+
+  // Build base filename
+  let filename = `${date}-${handle}-${category}-${title}`;
+
+  // Add mandatory short ID suffix (last 6 chars of tweet ID)
+  const shortId = bookmark.id ? bookmark.id.slice(-6) : 'unknown';
+  filename = `${filename}-${shortId}`;
+
+  // Limit total filename length (filesystem limits)
+  const maxLength = 255 - '.md'.length;
+  if (filename.length > maxLength) {
+    // Truncate title part to fit
+    const prefixLength = `${date}-${handle}-${category}-`.length;
+    const maxTitleLength = maxLength - prefixLength - shortId.length - 2; // -2 for hyphens
+    title = title.slice(0, maxTitleLength);
+    filename = `${date}-${handle}-${category}-${title}-${shortId}`;
+  }
+
+  return `${filename}.md`;
+}
+
+/**
+ * Format date for filename (YYYY-MM-DD)
+ */
+function formatDateForFilename(isoDate: string): string {
+  const date = new Date(isoDate);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+```
+
+---
+
+## Comprehensive Sanitization
+
+**Evidence:** Security findings addressed with comprehensive sanitization.
+
+### Author Name Sanitization
+
+```typescript
+/**
+ * Sanitize author folder name for filesystem safety
+ * FIXED: Use ASCII-only validation to prevent Unicode bypass
+ */
+function sanitizeAuthorName(handle: string, realName?: string): string {
+  // 1. Extract handle without @
+  const cleanHandle = handle.replace(/^@/, '');
+
+  // 2. Validate handle (ASCII alphanumeric + underscore only)
+  // FIXED: Changed from /^[\w]+$/ to prevent Unicode word characters
+  if (!/^[A-Za-z0-9_]+$/.test(cleanHandle)) {
+    throw new Error(
+      `Invalid handle format: ${handle}. ` +
+      `Handles must be ASCII alphanumeric or underscore only.`
+    );
+  }
+
+  // 3. Check reserved names (safe now, handle is ASCII-only)
+  const RESERVED_NAMES = [
+    'CON', 'PRN', 'AUX', 'NUL',
+    'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9',
+    'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9'
+  ];
+
+  if (RESERVED_NAMES.includes(cleanHandle.toUpperCase())) {
+    throw new Error(`Reserved Windows filename: ${cleanHandle}`);
+  }
+
+  // 4. If no real name, return just handle
+  if (!realName) {
+    return `@${cleanHandle}`;
+  }
+
+  // 5. Sanitize real name (Unicode allowed here, in folder name only)
+  let clean = realName
+    .replace(/[\x00-\x1f\x7f]/g, '')           // Remove control characters
+    .normalize('NFC')                           // Normalize Unicode
+    .replace(/[<>:"|?*\/\\]/g, '')             // Remove dangerous filesystem chars
+    .replace(/^[\s.]+|[\s.]+$/g, '')           // Remove leading/trailing dots/spaces
+    .replace(/\s+/g, ' ')                       // Collapse multiple spaces
+    .trim();
+
+  // 6. Limit real name length
+  const MAX_REAL_NAME = 100;
+  if (clean.length > MAX_REAL_NAME) {
+    clean = clean.slice(0, MAX_REAL_NAME);
+  }
+
+  return `@${cleanHandle} (${clean})`;
+}
+```
+
+### Slug Sanitization
+
+```typescript
+/**
+ * Sanitize slug with security checks
+ * FIXED: Pre-check for path traversal before slugification
+ */
+function sanitizeSlug(text: string): string {
+  // Pre-check for path traversal attempts
+  if (/\.\.[\/\\]/.test(text)) {
+    throw new Error(`Path traversal detected in slug: ${text}`);
+  }
+
+  return text
+    .toLowerCase()
+    // Remove control characters FIRST
+    .replace(/[\x00-\x1f\x7f]/g, '')
+    // Normalize Unicode to NFC
+    .normalize('NFC')
+    // Replace non-alphanumerics with hyphens
+    .replace(/[^a-z0-9]+/g, '-')
+    // Remove leading/trailing hyphens
+    .replace(/^-+|-+$/g, '')
+    // Limit length
+    .slice(0, 80);
+}
+```
+
+---
+
+## Real Name Cache
+
+```typescript
+/**
+ * Load real name cache
+ */
+function loadRealNameCache(): RealNameCache {
+  const cachePath = '.real-name-cache.json';
+
+  if (!existsSync(cachePath)) {
+    return { version: 1, lastUpdated: new Date().toISOString(), entries: {} };
+  }
+
+  try {
+    return JSON.parse(readFileSync(cachePath, 'utf-8'));
+  } catch (error) {
+    console.warn(`Failed to load cache, starting fresh: ${error}`);
+    return { version: 1, lastUpdated: new Date().toISOString(), entries: {} };
+  }
+}
+
+/**
+ * Save real name cache
+ */
+function saveRealNameCache(cache: RealNameCache): void {
+  cache.lastUpdated = new Date().toISOString();
+  writeFileSync('.real-name-cache.json', JSON.stringify(cache, null, 2));
+}
+
+/**
+ * Get real name for handle (from cache or undefined)
+ */
+function getRealName(handle: string, cache: RealNameCache): string | undefined {
+  const cleanHandle = handle.startsWith('@') ? handle : `@${handle}`;
+  return cache.entries[cleanHandle];
+}
+
+/**
+ * Add or update real name in cache
+ */
+function setRealName(handle: string, realName: string, cache: RealNameCache): void {
+  const cleanHandle = handle.startsWith('@') ? handle : `@${handle}`;
+  cache.entries[cleanHandle] = realName;
+  saveRealNameCache(cache);
+}
+```
+
+**Evidence:** Backend WARN finding #1 addressed.
+
+---
+
+## Disk Space Validation
+
+```typescript
+import { statvfs } from 'node:fs/promises';
+
+/**
+ * Check available disk space before migration
+ * FIXED: Prevents migration failure due to insufficient disk space
+ */
+async function checkDiskSpace(
+  directory: string,
+  requiredBytes: number
+): Promise<{ available: number; sufficient: boolean }> {
+  try {
+    const stats = await statvfs(directory);
+    const available = stats.available * stats.frsize;
+
+    // Require 2.5x the required space (original + backup + margin)
+    const needed = requiredBytes * 2.5;
+    const sufficient = available >= needed;
+
+    if (!sufficient) {
+      const availableGB = (available / 1e9).toFixed(2);
+      const neededGB = (needed / 1e9).toFixed(2);
+      throw new Error(
+        `Insufficient disk space for migration.\n` +
+        `Available: ${availableGB} GB\n` +
+        `Required: ${neededGB} GB\n` +
+        `Directory: ${directory}`
+      );
+    }
+
+    return { available, sufficient };
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      console.warn('statvfs not available, skipping disk space check');
+      return { available: 0, sufficient: true };
+    }
+    throw error;
+  }
+}
+
+/**
+ * Calculate directory size in bytes
+ */
+async function getDirectorySize(dir: string): Promise<number> {
+  let total = 0;
+
+  async function scan(path: string): Promise<void> {
+    const entries = await readdir(path, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const fullPath = join(path, entry.name);
+
+      if (entry.isDirectory()) {
+        await scan(fullPath);
+      } else if (entry.isFile()) {
+        const stats = await stat(fullPath);
+        total += stats.size;
+      }
+    }
+  }
+
+  await scan(dir);
+  return total;
+}
+
+/**
+ * Pre-flight checks before migration
+ */
+async function preFlightChecks(knowledgeDir: string): Promise<PreflightCheck> {
+  console.log('Running pre-flight checks...');
+
+  // Check disk space
+  const dirSize = await getDirectorySize(knowledgeDir);
+  const sizeMB = (dirSize / 1e6).toFixed(2);
+  console.log(`Knowledge directory size: ${sizeMB} MB`);
+
+  const { available, sufficient } = await checkDiskSpace(knowledgeDir, dirSize);
+
+  if (!sufficient) {
+    throw new Error('Insufficient disk space');
+  }
+
+  console.log('✓ Disk space sufficient');
+
+  // Count files
+  const fileCount = await countFiles(knowledgeDir);
+  console.log(`Files to migrate: ${fileCount}`);
+
+  return {
+    directorySize: dirSize,
+    availableSpace: available,
+    sufficient: true,
+    fileCount
+  };
+}
+```
+
+**Evidence:** Backend WARN finding #2 addressed.
+
+---
+
+## Migration CLI Interface
+
+```bash
+node scripts/migrate-to-author-first.mjs [options]
+
+Options:
+  --dry-run           Show changes without executing (REQUIRED first step)
+  --backup-dir <path> Specify backup location (default: knowledge_backup_<timestamp>)
+  --resume            Continue interrupted migration from checkpoint
+  --verify            Run post-migration verification (checksums, counts)
+  --verbose           Show detailed progress for each file
+  --force             Skip confirmation prompt (use with caution)
+  --help              Show usage information
+
+Exit codes:
+  0 - Success
+  1 - Errors occurred (check migration.log)
+  2 - Validation failed
+  3 - User cancelled
+```
+
+**Evidence:** DevEx/Tooling finding #1 addressed.
+
+---
+
+## Confirmation Flow
+
+1. **Always run dry-run first:**
+   ```
+   === Dry Run ===
+   Will reorganize 847 files:
+   - 312 tools
+   - 421 articles
+   - 114 videos
+
+   New structure:
+   knowledge/2026/01-jan/@doodlestein (Doug)/tools/...
+   knowledge/2026/01-jan/@Vjeux (James V)/articles/...
+
+   Backup location: knowledge_backup_20260120_143522/
+
+   Continue? [y/N]:
+   ```
+
+2. **Require explicit 'y'** (case-sensitive)
+
+3. **Show progress during migration:**
+   ```
+   Moving: [=====>     ] 45% (382/847 files) | 234 files/sec
+   ```
+
+4. **Show summary on completion:**
+   ```
+   === Migration Complete ===
+   Files moved: 847
+   Files skipped: 0
+   Files failed: 0
+   Duration: 3.2 seconds
+   Checksums: ✓ Passed
+   Backup: knowledge_backup_20260120_143522/
+
+   Run 'node scripts/migrate-to-author-first.mjs --verify' to confirm.
+   ```
+
+**Evidence:** DevEx/Tooling finding #2 addressed.
+
+---
+
+## Migration Observability
+
+### Logging
+
+```typescript
+// Logs written to migration.log in working directory
+interface MigrationLog {
+  timestamp: string;
+  level: 'info' | 'warn' | 'error';
+  phase: 'validation' | 'backup' | 'migration' | 'verification';
+  message: string;
+  file?: string;
+  error?: string;
+}
+```
+
+**Log entries:**
+```
+[2026-01-20 14:35:22] [INFO] [validation] Starting validation
+[2026-01-20 14:35:22] [INFO] [validation] Found 847 files to migrate
+[2026-01-20 14:35:23] [INFO] [backup] Creating backup at knowledge_backup_20260120_143522/
+[2026-01-20 14:35:24] [INFO] [backup] Backup complete (847 files)
+[2026-01-20 14:35:24] [INFO] [migration] Starting file reorganization
+[2026-01-20 14:35:25] [INFO] [migration] Moved: knowledge/2026/01-jan/tools/@doodlestein/meta-skill.md
+      -> knowledge/2026/01-jan/@doodlestein (Doug)/tools/2026-01-20-@doodlestein-tools-meta-skill-a1b2c3.md
+...
+[2026-01-20 14:35:27] [INFO] [verification] Running checksum validation
+[2026-01-20 14:35:27] [INFO] [verification] All 847 checksums verified
+[2026-01-20 14:35:27] [INFO] [complete] Migration successful
+```
+
+### Progress Indicator
+
+```typescript
+function showProgress(processed: number, total: number, elapsed: number): void {
+  const pct = Math.round((processed / total) * 100);
+  const bar = '='.repeat(Math.floor(pct / 5));
+  const rate = Math.round(processed / (elapsed / 1000));
+  process.stderr.write(`\rMoving: [${bar.padEnd(20, ' ')}] ${pct}% (${processed}/${total} files) | ${rate} files/sec`);
+}
+```
+
+**Evidence:** Reliability/SRE finding #2 addressed.
+
+---
+
+## Checkpoint System
+
+```typescript
+// Checkpoint file: .migration-state.json
+interface MigrationCheckpoint {
+  migrationId: string;
+  startedAt: string;
+  lastCheckpoint: string;
+  filesProcessed: number;
+  filesTotal: number;
+  currentIndex: number;
+  processedFiles: Array<{from: string; to: string}>;
+}
+
+// Write checkpoint every 100 files
+function writeCheckpoint(state: MigrationState): void {
+  writeFileSync('.migration-state.json', JSON.stringify(state, null, 2));
+}
+
+// Resume from checkpoint
+function resumeFromCheckpoint(): MigrationState {
+  return JSON.parse(readFileSync('.migration-state.json', 'utf-8'));
+}
+```
+
+**Evidence:** Backend Engineer finding #2 addressed.
+
+---
+
+## Per-File Timeout
+
+```typescript
+/**
+ * Move single file with timeout to prevent indefinite stall
+ * FIXED: Prevents migration from hanging on problematic files
+ */
+async function moveFileWithTimeout(
+  from: string,
+  to: string,
+  timeoutMs: number = 5000  // 5 second default
+): Promise<void> {
+  const timeout = new Promise<never>((_, reject) => {
+    setTimeout(() => {
+      reject(new Error(`Timeout (${timeoutMs}ms) moving file: ${from}`));
+    }, timeoutMs);
+  });
+
+  const moveOperation = (async () => {
+    const destDir = dirname(to);
+    await mkdir(destDir, { recursive: true });
+    await copyFile(from, to);
+
+    // Verify copy succeeded
+    const srcStat = await stat(from);
+    const destStat = await stat(to);
+
+    if (srcStat.size !== destStat.size) {
+      throw new Error(`Size mismatch: ${srcStat.size} != ${destStat.size}`);
+    }
+
+    await unlink(from);
+  })();
+
+  await Promise.race([moveOperation, timeout]);
+}
+```
+
+**Evidence:** Reliability/SRE WARN finding #1 addressed.
+
+---
+
+## Degraded Mode
+
+```typescript
+// Migration failure marker file
+const MIGRATION_FAILED_MARKER = '.migration-failed';
+const DEGRADED_OUTPUT_DIR = './knowledge_degraded';
+
+/**
+ * Create migration failure marker
+ */
+function markMigrationFailed(error: string): void {
+  writeFileSync(
+    MIGRATION_FAILED_MARKER,
+    JSON.stringify({
+      failedAt: new Date().toISOString(),
+      error,
+      hint: 'Run migration again with --resume or rollback to restore'
+    }, null, 2)
+  );
+}
+
+/**
+ * Check if system is in degraded mode
+ */
+function isDegradedMode(): boolean {
+  return existsSync(MIGRATION_FAILED_MARKER);
+}
+
+/**
+ * Get output directory (degraded or normal)
+ */
+function getOutputDirectory(): string {
+  if (isDegradedMode()) {
+    const failureInfo = JSON.parse(readFileSync(MIGRATION_FAILED_MARKER, 'utf-8'));
+
+    console.warn('');
+    console.warn('⚠️  WARNING: System in degraded mode');
+    console.warn(`   Migration failed at: ${failureInfo.failedAt}`);
+    console.warn(`   Reason: ${failureInfo.error}`);
+    console.warn('');
+    console.warn('   New bookmarks will be saved to:');
+    console.warn(`   ${DEGRADED_OUTPUT_DIR}/`);
+    console.warn('');
+    console.warn('   To fix this:');
+    console.warn('   1. Complete migration: node scripts/migrate-to-author-first.mjs --resume');
+    console.warn('   2. Or rollback: node scripts/rollback-migration.mjs');
+    console.warn('');
+
+    return DEGRADED_OUTPUT_DIR;
+  }
+
+  return './knowledge';
+}
+
+/**
+ * Clear degraded mode (called after successful migration or rollback)
+ */
+function clearDegradedMode(): void {
+  if (existsSync(MIGRATION_FAILED_MARKER)) {
+    unlinkSync(MIGRATION_FAILED_MARKER);
+    console.log('✓ Degraded mode cleared');
+  }
+}
+```
+
+**Evidence:** Reliability/SRE WARN finding #2 addressed.
+
+---
+
+## Migration Atomicity & Recovery
+
+### Recovery Strategy
+
+1. **Checkpoint every 100 files** to `.migration-state.json`
+2. **On interruption (Ctrl+C):**
+   - Catch SIGINT, write checkpoint, exit gracefully
+   - Display message: "Migration paused. Run with --resume to continue."
+3. **On error:**
+   - Log error, skip file, continue
+   - Add to errors list for summary
+4. **Resume capability:**
+   ```bash
+   node scripts/migrate-to-author-first.mjs --resume
+   ```
+
+### Transaction Safety
+
+```
+1. Pre-flight checks (disk space, file counts)
+2. Validate source files (all exist, readable)
+3. Create backup (copy entire knowledge directory)
+4. Verify backup (file counts + checksums)
+5. Begin migration (with checkpoints + timeouts)
+6. Verify migrated files (file counts + checksums)
+7. Clear degraded mode marker
+8. Success: complete
+9. Failure: enter degraded mode
+```
+
+**No partial state:** Either migration completes successfully OR all files remain in original structure (backup intact).
+
+**Evidence:** Backend Engineer finding #2 addressed.
+
+---
+
+## Concurrency Handling
+
+### Lock File Mechanism
+
+```typescript
+const MIGRATION_LOCK_FILE = '.migration-lock';
+
+/**
+ * Create migration lock
+ */
+function createMigrationLock(migrationId: string): void {
+  writeFileSync(MIGRATION_LOCK_FILE, `${migrationId}\n${Date.now()}`);
+}
+
+/**
+ * Check for migration lock
+ */
+function checkMigrationLock(): boolean {
+  return existsSync(MIGRATION_LOCK_FILE);
+}
+
+/**
+ * Clear migration lock
+ */
+function clearMigrationLock(): void {
+  if (existsSync(MIGRATION_LOCK_FILE)) {
+    unlinkSync(MIGRATION_LOCK_FILE);
+  }
+}
+
+// In archiving code, check for lock:
+if (checkMigrationLock()) {
+  console.warn('⚠️  Migration in progress. Archiving paused.');
+  console.warn('   Wait for migration to complete or use degraded mode.');
+  process.exit(0);
+}
+```
+
+**Evidence:** Backend Engineer finding #5 addressed.
+
+---
+
+## Checksum Verification
+
+```typescript
+import { createHash } from 'node:crypto';
+
+/**
+ * Compute SHA-256 checksum for file
+ */
+async function checksum(filePath: string): Promise<string> {
+  const content = await readFile(filePath);
+  return createHash('sha256').update(content).digest('hex');
+}
+
+/**
+ * Verify all files in backup match original
+ */
+async function verifyBackup(
+  originalDir: string,
+  backupDir: string
+): Promise<{ passed: boolean; filesVerified: number; mismatches: string[] }> {
+  const originalFiles = await getAllFiles(originalDir);
+  const mismatches: string[] = [];
+
+  for (const file of originalFiles) {
+    const originalPath = join(originalDir, file);
+    const backupPath = join(backupDir, file);
+
+    const originalHash = await checksum(originalPath);
+    const backupHash = await checksum(backupPath);
+
+    if (originalHash !== backupHash) {
+      mismatches.push(file);
+    }
+  }
+
+  return {
+    passed: mismatches.length === 0,
+    filesVerified: originalFiles.length,
+    mismatches
+  };
+}
+```
+
+**Evidence:** Security finding #3 addressed.
+
+---
+
+## Automated Rollback
+
+```bash
+# Rollback script
+node scripts/rollback-migration.mjs [options]
+
+Options:
+  --backup-dir <path>   Backup to restore from (required)
+  --verify             Verify after restore (checksums)
+  --force              Skip confirmation
+
+Process:
+1. Confirm: "Restore from knowledge_backup_20260120_143522/? [y/N]"
+2. Validate backup exists
+3. Create timestamped backup of current state
+4. Delete current knowledge/ directory
+5. Copy backup to knowledge/
+6. Revert code changes in src/bookmark-markdown/writer.ts
+7. Run build
+8. Verify (if --verify specified)
+9. Clear degraded mode marker
+```
+
+**Evidence:** Reliability/SRE finding #1 addressed.
+
+---
+
+## Migration SLO
+
+| Metric | Target | Measurement |
+|--------|--------|-------------|
+| Throughput | ≥100 files/sec | Files moved / duration |
+| Latency per file | ≤10ms | Average move time |
+| Per-file timeout | 5 seconds | Fail fast on stuck files |
+| Checksum verification | ≤1 sec per 100 files | Verification duration |
+| Total migration time | ≤10 sec per 1000 files | End-to-end duration |
+
+**Measured during migration and reported in summary.**
+
+**Evidence:** Reliability/SRE finding #3 addressed.
+
+---
+
+## Acceptance Criteria
+
+- [ ] All existing files migrated without data loss
+- [ ] New bookmarks use author-first structure with enhanced filenames
+- [ ] Build succeeds with no broken links
+- [ ] Migration script has dry-run mode with detailed output
+- [ ] Real name lookup with fallback to handle-only
+- [ ] Automated rollback script tested and documented
+- [ ] Comprehensive path sanitization implemented (ASCII-only handles)
+- [ ] Checksum verification before/after migration
+- [ ] Checkpoint/resume capability functional
+- [ ] CLI interface with all specified flags
+- [ ] Confirmation flow (dry-run → prompt → execute)
+- [ ] Migration logging to migration.log
+- [ ] Progress indicator during migration
+- [ ] Concurrency handling (pause with lock file)
+- [ ] Path length validation (fail fast if >240 chars)
+- [ ] ID suffix mandatory in filename generation
+- [ ] TypeScript types defined for all new structures
+- [ ] Real name cache format defined
+- [ ] Disk space check implemented
+- [ ] Per-file timeout implemented (5 second default)
+- [ ] Degraded mode functional (fallback to knowledge_degraded/)
+- [ ] Migration failure marker system implemented
+
+---
+
+## Success Metrics
+
+- [ ] 0 data loss events (all files accounted for)
+- [ ] 0 checksum mismatches (verification passes)
+- [ ] Migration SLO met (≥100 files/sec)
+- [ ] Rollback tested and completes in <30 seconds for 1000 files
+- [ ] Dry-run output accurate (matches actual migration)
+- [ ] Resume capability works (interrupted migration continues correctly)
+- [ ] Degraded mode allows continued operation after failure
+
+---
+
+## Scope
+
+### In Scope
+- Author-first directory structure
+- Author folder format: `@handle (Real Name)` with fallback to `@handle`
+- Enhanced filename format: `{date}-{handle}-{category}-{title}-{id}.md`
+- Migration script with dry-run, resume, and verify modes
+- Updated `writer.ts` path generation
+- Backup and rollback procedures
+- Checkpoint/recovery system
+- Comprehensive sanitization (ASCII-only handles)
+- Disk space validation
+- Per-file timeout (5 seconds)
+- Degraded mode support
+- Concurrency handling (lock file)
+
+### Out of Scope
+- Automatic real name fetching from Twitter API (manual cache)
+- Multi-author bookmark handling
+- Category taxonomy changes
+- UI changes for browsing knowledge base
+- Search or indexing improvements
+- Internal link updates (links between knowledge files)
+
+**Evidence:** `src/bookmark-categorization/types.ts:43-136` shows current category definitions remain unchanged.
+
+---
+
+## Risks and Mitigations
+
+| Risk | Impact | Mitigation | Status |
+|------|--------|------------|--------|
+| Real name unavailable | Low | Fallback to `@handle` only | ✓ Addressed |
+| Broken internal links | Medium | Out of scope (future work) | ⚠ Documented |
+| Path traversal attacks | High | Comprehensive sanitization (ASCII-only) | ✓ Addressed |
+| Migration data loss | Critical | Checksums + checkpoints + backup | ✓ Addressed |
+| Performance regression | Low | SLO defined, benchmarks planned | ✓ Addressed |
+| Migration interruption | Medium | Checkpoint/resume system | ✓ Addressed |
+| Concurrent writes | Medium | Lock file mechanism | ✓ Addressed |
+| Filename collisions | Medium | Mandatory ID suffix | ✓ Addressed |
+| Rollback failure | High | Automated rollback + verify | ✓ Addressed |
+| Path length limits | Medium | Validation before write (240 char) | ✓ Addressed |
+| Insufficient disk space | Medium | Pre-flight check (2.5x required) | ✓ Addressed |
+| Per-file stall | Medium | 5 second timeout | ✓ Addressed |
+| Post-failure operation | Medium | Degraded mode (knowledge_degraded/) | ✓ Addressed |
+| Unicode bypass | High | ASCII-only handle validation | ✓ Addressed |
+
+---
+
+## Implementation Tasks
+
+### Phase 1: Core Types & Cache
+- [ ] Define TypeScript types in `src/bookmark-organization/types.ts`
+- [ ] Implement RealNameCache interface and load/save functions
+- [ ] Implement getRealName() and setRealName() helper functions
+- [ ] Implement `sanitizeAuthorName()` with ASCII-only validation
+- [ ] Implement `sanitizeSlug()` with path traversal detection
+- [ ] Add unit tests for sanitization edge cases
+
+### Phase 2: Filename Generation
+- [ ] Implement `generateEnhancedFilename()` with mandatory ID suffix
+- [ ] Implement `validatePathLength()` function
+- [ ] Update `MarkdownWriter` to use new filename format
+- [ ] Add tests for filename generation
+
+### Phase 3: Migration Script Core
+- [ ] Create `scripts/migrate-to-author-first.mjs`
+- [ ] Implement CLI with all flags (dry-run, resume, verify, etc.)
+- [ ] Add preFlightChecks() function (disk space, file counts)
+- [ ] Implement getDirectorySize() for disk calculation
+- [ ] Implement checkDiskSpace() with 2.5x safety margin
+
+### Phase 4: Migration Reliability
+- [ ] Implement checkpoint system with `.migration-state.json`
+- [ ] Implement progress indicator with rate calculation
+- [ ] Add comprehensive logging to `migration.log`
+- [ ] Implement moveFileWithTimeout() with 5 second default
+- [ ] Implement markMigrationFailed() marker creation
+- [ ] Implement isDegradedMode() check
+- [ ] Implement clearDegradedMode() cleanup
+
+### Phase 5: Verification & Rollback
+- [ ] Implement checksum verification (SHA-256)
+- [ ] Create `scripts/rollback-migration.mjs`
+- [ ] Add backup verification (file counts + checksums)
+- [ ] Add post-migration verification command
+
+### Phase 6: Concurrency & Locking
+- [ ] Implement `.migration-lock` file handling
+- [ ] Implement createMigrationLock(), checkMigrationLock(), clearMigrationLock()
+- [ ] Update archiving code to check for lock
+- [ ] Add clear messaging when migration in progress
+
+### Phase 7: Testing & Documentation
+- [ ] Test migration on sample dataset
+- [ ] Test rollback on sample dataset
+- [ ] Test resume after interruption
+- [ ] Test concurrent write behavior
+- [ ] Test degraded mode activation and recovery
+- [ ] Document migration process in README
+- [ ] Add troubleshooting guide
+
+---
+
+## Evidence Gaps
+
+1. **Real name data source** - Twitter API or manual mapping not decided
+2. **Internal link update strategy** - Out of scope, but documented as risk
+3. **Windows disk space checking** - statvfs not available, fallback needed
+4. **Performance benchmarks** - Deep path performance not measured
+5. **Security audit** - Final sanitization code should be audited
+
+---
+
+## Evidence Map
+
+| Claim | Evidence Source |
+|-------|-----------------|
+| Current structure: year/month/category/@handle/file | `docs/implementation/KNOWLEDGE_ORGANIZATION_2026-01-17.md:63-70` |
+| Current month format: ##-month | `docs/implementation/KNOWLEDGE_ORGANIZATION_2026-01-17.md:42-46` |
+| Category definitions | `src/bookmark-categorization/types.ts:43-136` |
+| Previous migration approach | `docs/implementation/KNOWLEDGE_ORGANIZATION_2026-01-17.md:100-110` |
+| Current path generation in writer.ts | `docs/implementation/KNOWLEDGE_ORGANIZATION_2026-01-17.md:134-146` |
+| Existing backup practice | `knowledge_backup_20260117_182513/` directory |
+| Current filename generation | `src/bookmark-markdown/templates.ts:426-446` |
+
+---
+
+## Adversarial Review Summary
+
+=== Debate Complete ===
+Document: Technical Specification
+Rounds: 3
+Models: Backend Engineer, Security, Reliability/SRE, DevEx/Tooling
+
+### Round 1: Initial Review
+- 9 ERROR findings identified across 4 personas
+- Backend: 3 ERROR (data model, atomicity, collisions)
+- Security: 2 ERROR (sanitization, verification)
+- Reliability/SRE: 2 ERROR (rollback, observability)
+- DevEx/Tooling: 2 ERROR (CLI interface, confirmation)
+
+### Round 2: Fixes Verified
+- All 9 ERROR findings addressed
+- 5 WARN findings identified (enhancements)
+- Backend: 2 WARN (cache, disk space)
+- Security: 1 WARN (Unicode bypass)
+- Reliability/SRE: 2 WARN (timeout, degraded mode)
+- DevEx/Tooling: `[AGREE]`
+
+### Round 3: Final Consensus
+- All 5 WARN findings addressed
+- All personas: `[AGREE]`
+- Ready for implementation
+
+**Key refinements:**
+- Added comprehensive TypeScript type definitions
+- Implemented ASCII-only handle validation to prevent Unicode bypass
+- Added per-file timeout (5 seconds) to prevent stalls
+- Added degraded mode for continued operation after failure
+- Added disk space validation with 2.5x safety margin
+- Defined real name cache structure
+- Added automated rollback with verification
+- Implemented checkpoint/resume system
+- Added comprehensive observability (logging, progress)
+
+
+</PROJECT_MEMORY>
+
+Exit protocol (required):
+At the very end of your output, print exactly one line:
+EXIT_SIGNAL: true  OR  EXIT_SIGNAL: false
+

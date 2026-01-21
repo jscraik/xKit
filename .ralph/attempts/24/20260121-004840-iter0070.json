@@ -1,0 +1,20 @@
+{
+  "attempt_id": "20260121-004840-iter0070",
+  "iteration": 70,
+  "task_id": "24",
+  "task_title": "Add degraded mode handling to `scripts/migrate-to-author-first.mjs`",
+  "started_at": "2026-01-21T00:48:40.323851+00:00",
+  "ended_at": "2026-01-21T00:51:04.377165+00:00",
+  "runner_ok": true,
+  "gates_ok": null,
+  "judge_ok": null,
+  "review_ok": null,
+  "blocked": false,
+  "exit_signal": false,
+  "return_code": 0,
+  "prompt_hash": "31fa0476515ea54e73190f0fbadb195a90a38fea42119e5e4ffba89abf092e74",
+  "branch": "main",
+  "log_path": "/Users/jamiecraik/dev/xKit/.ralph/logs/20260121T004840Z-iter0070-claude.log",
+  "receipts_dir": "/Users/jamiecraik/dev/xKit/.ralph/receipts/24/20260121-004840-iter0070",
+  "context_dir": "/Users/jamiecraik/dev/xKit/.ralph/context/24/20260121-004840-iter0070"
+}

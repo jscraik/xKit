@@ -1,0 +1,20 @@
+{
+  "attempt_id": "20260120-225003-iter0044",
+  "iteration": 44,
+  "task_id": "15",
+  "task_title": "Add SIGINT handler to `scripts/migrate-to-author-first.mjs`",
+  "started_at": "2026-01-20T22:50:03.569701+00:00",
+  "ended_at": "2026-01-20T22:51:28.991551+00:00",
+  "runner_ok": true,
+  "gates_ok": null,
+  "judge_ok": null,
+  "review_ok": null,
+  "blocked": true,
+  "exit_signal": false,
+  "return_code": 0,
+  "prompt_hash": "eb7a57c30edffd4d772cdb5c87c777eca12e2c16aa0e72b4c22006866b2ad55e",
+  "branch": "main",
+  "log_path": "/Users/jamiecraik/dev/xKit/.ralph/logs/20260120T225003Z-iter0044-claude.log",
+  "receipts_dir": "/Users/jamiecraik/dev/xKit/.ralph/receipts/15/20260120-225003-iter0044",
+  "context_dir": "/Users/jamiecraik/dev/xKit/.ralph/context/15/20260120-225003-iter0044"
+}

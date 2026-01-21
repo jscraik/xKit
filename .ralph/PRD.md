@@ -65,19 +65,19 @@ Reorganize the xKit knowledge base from category-first (`year/month/category/@ha
 
 ### Phase 4: Disk Space & Pre-flight
 
-- [ ] Add `getDirectorySize()` to `scripts/migration/lib/disk.ts`
+- [x] Add `getDirectorySize()` to `scripts/migration/lib/disk.ts`
   - Recursively scan directory and sum file sizes
   - Return total bytes
   - Test: Manual verify with known test directory
 
-- [ ] Add `checkDiskSpace()` to `scripts/migration/lib/disk.ts`
+- [x] Add `checkDiskSpace()` to `scripts/migration/lib/disk.ts`
   - Use `statvfs` to get available space (Unix)
   - Require 2.5x directory size (original + backup + margin)
   - Throw error if insufficient with GB amounts
   - Fallback for Windows (skip check with warning)
   - Test: Manual verify with small directory
 
-- [ ] Add `preFlightChecks()` to `scripts/migration/lib/check.ts`
+- [x] Add `preFlightChecks()` to `scripts/migration/lib/check.ts`
   - Call `getDirectorySize()` and `checkDiskSpace()`
   - Count files to migrate
   - Log summary and throw if checks fail
@@ -86,13 +86,13 @@ Reorganize the xKit knowledge base from category-first (`year/month/category/@ha
 
 ### Phase 5: Migration Script Core
 
-- [ ] Create `scripts/migrate-to-author-first.mjs` CLI scaffold
+- [-] Create `scripts/migrate-to-author-first.mjs` CLI scaffold
   - Parse arguments: --dry-run, --backup-dir, --resume, --verify, --verbose, --force, --help
   - Set up logging to `migration.log`
   - Exit codes: 0=success, 1=errors, 2=validation failed, 3=cancelled
   - Test: `node scripts/migrate-to-author-first.mjs --help` shows usage
 
-- [ ] Add dry-run mode to `scripts/migrate-to-author-first.mjs`
+- [-] Add dry-run mode to `scripts/migrate-to-author-first.mjs`
   - Scan all files in `knowledge/`
   - Calculate new paths for all files
   - Print summary: file counts, new structure example, backup location
@@ -102,7 +102,7 @@ Reorganize the xKit knowledge base from category-first (`year/month/category/@ha
 
 ### Phase 6: File Operations with Timeout
 
-- [ ] Add `moveFileWithTimeout()` to `scripts/migration/lib/files.ts`
+- [-] Add `moveFileWithTimeout()` to `scripts/migration/lib/files.ts`
   - Use `Promise.race()` with 5 second timeout
   - Copy file first, verify size matches, then delete source
   - Throw timeout error if stuck
@@ -110,20 +110,20 @@ Reorganize the xKit knowledge base from category-first (`year/month/category/@ha
 
 ### Phase 7: Checkpoint & Recovery
 
-- [ ] Add checkpoint system to `scripts/migration/lib/checkpoint.ts`
+- [-] Add checkpoint system to `scripts/migration/lib/checkpoint.ts`
   - `writeCheckpoint()`: write state to `.migration-state.json` every 100 files
   - `resumeFromCheckpoint()`: load checkpoint state
   - Track: migrationId, timestamps, files processed, processed files list
   - Test: Manual interrupt and resume
 
-- [ ] Add SIGINT handler to `scripts/migrate-to-author-first.mjs`
+- [-] Add SIGINT handler to `scripts/migrate-to-author-first.mjs`
   - Catch Ctrl+C, write checkpoint, exit gracefully
   - Print message: "Migration paused. Run with --resume to continue."
   - Test: Manual Ctrl+C during migration
 
 ### Phase 8: Migration Execution
 
-- [ ] Add main migration logic to `scripts/migrate-to-author-first.mjs`
+- [-] Add main migration logic to `scripts/migrate-to-author-first.mjs`
   - For each file: calculate new path, create author folder, create category folder
   - Call `moveFileWithTimeout()` for each file
   - Write checkpoint every 100 files
@@ -134,7 +134,7 @@ Reorganize the xKit knowledge base from category-first (`year/month/category/@ha
 
 ### Phase 9: Checksum Verification
 
-- [ ] Add checksum functions to `scripts/migration/lib/checksum.ts`
+- [-] Add checksum functions to `scripts/migration/lib/checksum.ts`
   - `checksum()`: compute SHA-256 hash of file
   - `verifyBackup()`: compare all files between original and backup
   - Return summary with mismatches list
@@ -142,13 +142,13 @@ Reorganize the xKit knowledge base from category-first (`year/month/category/@ha
 
 ### Phase 10: Backup & Rollback
 
-- [ ] Add backup creation to `scripts/migrate-to-author-first.mjs`
+- [-] Add backup creation to `scripts/migrate-to-author-first.mjs`
   - Copy entire `knowledge/` to `knowledge_backup_<timestamp>/`
   - Run `verifyBackup()` after copy
   - Throw if verification fails
   - Test: `node scripts/migrate-to-author-first.mjs --dry-run` creates backup
 
-- [ ] Create `scripts/rollback-migration.mjs`
+- [-] Create `scripts/rollback-migration.mjs`
   - Parse --backup-dir and --verify flags
   - Validate backup exists
   - Create backup of current state
@@ -159,33 +159,33 @@ Reorganize the xKit knowledge base from category-first (`year/month/category/@ha
 
 ### Phase 11: Concurrency Locking
 
-- [ ] Add lock file functions to `src/bookmark-markdown/lock.ts`
+- [-] Add lock file functions to `src/bookmark-markdown/lock.ts`
   - `createMigrationLock()`: write `.migration-lock` with migration ID and timestamp
   - `checkMigrationLock()`: return true if lock exists
   - `clearMigrationLock()`: remove lock file
   - Test: `pnpm test -- src/bookmark-markdown/lock.test.ts` passes
 
-- [ ] Update bookmark archiving to check for migration lock
+- [-] Update bookmark archiving to check for migration lock
   - In archiving entry point, call `checkMigrationLock()`
   - If locked, print warning and exit (pause archiving)
   - Test: Manual verify lock pauses archiving
 
 ### Phase 12: Degraded Mode
 
-- [ ] Add degraded mode functions to `scripts/migration/lib/degraded.ts`
+- [x] Add degraded mode functions to `scripts/migration/lib/degraded.ts`
   - `markMigrationFailed()`: write `.migration-failed` marker with error
   - `isDegradedMode()`: check if marker exists
   - `getOutputDirectory()`: return `knowledge_degraded/` if failed
   - `clearDegradedMode()`: remove marker
   - Test: Manual verify degraded mode activation
 
-- [ ] Update `MarkdownWriter` constructor to use degraded output
+- [-] Update `MarkdownWriter` constructor to use degraded output
   - Call `isDegradedMode()` on init
   - If degraded, set `outputDir` to `knowledge_degraded/`
   - Print warning message
   - Test: Manual verify degraded mode writes to fallback
 
-- [ ] Add degraded mode handling to `scripts/migrate-to-author-first.mjs`
+- [-] Add degraded mode handling to `scripts/migrate-to-author-first.mjs`
   - On any error, call `markMigrationFailed()`
   - Exit with error code 1
   - On success, call `clearDegradedMode()`

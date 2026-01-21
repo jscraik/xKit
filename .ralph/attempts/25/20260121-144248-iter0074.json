@@ -1,0 +1,20 @@
+{
+  "attempt_id": "20260121-144248-iter0074",
+  "iteration": 74,
+  "task_id": "25",
+  "task_title": "Add npm scripts to `package.json`",
+  "started_at": "2026-01-21T14:42:48.120583+00:00",
+  "ended_at": "2026-01-21T14:46:38.488249+00:00",
+  "runner_ok": true,
+  "gates_ok": null,
+  "judge_ok": null,
+  "review_ok": null,
+  "blocked": true,
+  "exit_signal": false,
+  "return_code": 0,
+  "prompt_hash": "9e7266b89a89e0086ff70623dac5fd2c5b33cab725ea3e2430e7923c73b0b8fc",
+  "branch": "main",
+  "log_path": "/Users/jamiecraik/dev/xKit/.ralph/logs/20260121T144248Z-iter0074-claude.log",
+  "receipts_dir": "/Users/jamiecraik/dev/xKit/.ralph/receipts/25/20260121-144248-iter0074",
+  "context_dir": "/Users/jamiecraik/dev/xKit/.ralph/context/25/20260121-144248-iter0074"
+}

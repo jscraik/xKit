@@ -1,0 +1,20 @@
+{
+  "attempt_id": "20260121-144638-iter0075",
+  "iteration": 75,
+  "task_id": "26",
+  "task_title": "Add migration documentation to `docs/KNOWLEDGE_MIGRATION.md`",
+  "started_at": "2026-01-21T14:46:38.497458+00:00",
+  "ended_at": "2026-01-21T14:54:46.109077+00:00",
+  "runner_ok": true,
+  "gates_ok": null,
+  "judge_ok": null,
+  "review_ok": null,
+  "blocked": false,
+  "exit_signal": false,
+  "return_code": 0,
+  "prompt_hash": "6df7aa56c24e45d994ab3cf6db4025d6cf1e0a90768b9f5712bb0ac709956405",
+  "branch": "main",
+  "log_path": "/Users/jamiecraik/dev/xKit/.ralph/logs/20260121T144638Z-iter0075-claude.log",
+  "receipts_dir": "/Users/jamiecraik/dev/xKit/.ralph/receipts/26/20260121-144638-iter0075",
+  "context_dir": "/Users/jamiecraik/dev/xKit/.ralph/context/26/20260121-144638-iter0075"
+}

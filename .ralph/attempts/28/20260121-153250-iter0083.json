@@ -1,0 +1,20 @@
+{
+  "attempt_id": "20260121-153250-iter0083",
+  "iteration": 83,
+  "task_id": "28",
+  "task_title": "Run full migration test on backup",
+  "started_at": "2026-01-21T15:32:50.462984+00:00",
+  "ended_at": "2026-01-21T15:38:17.371083+00:00",
+  "runner_ok": true,
+  "gates_ok": null,
+  "judge_ok": null,
+  "review_ok": null,
+  "blocked": true,
+  "exit_signal": false,
+  "return_code": 0,
+  "prompt_hash": "337b4a57cadace122f803f4fd746b92086c4a6d3c40fd47b632e22071d5569af",
+  "branch": "main",
+  "log_path": "/Users/jamiecraik/dev/xKit/.ralph/logs/20260121T153250Z-iter0083-claude.log",
+  "receipts_dir": "/Users/jamiecraik/dev/xKit/.ralph/receipts/28/20260121-153250-iter0083",
+  "context_dir": "/Users/jamiecraik/dev/xKit/.ralph/context/28/20260121-153250-iter0083"
+}

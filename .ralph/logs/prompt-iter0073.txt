@@ -1,3 +1,378 @@
+You are operating inside the Ralph Gold loop.
+
+Rules:
+- Do exactly ONE task per iteration.
+- Use the Memory Files below as the source of truth (especially ANCHOR and any Repo Prompt context pack).
+- Make the smallest correct change-set that satisfies the task acceptance criteria.
+- When you finish the task, mark it done in the PRD tracker.
+- Do not mark tasks done if you did not run/confirm the configured gates pass locally.
+- If you are blocked, record a clear reason (including commands + errors) in .ralph/progress.md and leave the task open.
+
+## File writing authority (CRITICAL)
+- **You are authorized to write code directly.** Create and modify files without asking for permission.
+- **Do not stop and request approval.** You are autonomous—complete the full implementation.
+- **Implement the entire solution** in one iteration. Don't design and then wait—design AND implement.
+- Your task acceptance criteria are your complete authority to proceed with file changes.
+
+Workflow:
+1) Read Memory Files in order.
+2) Re-state the task acceptance criteria.
+3) Implement completely (write all necessary files).
+4) Run the repo's gates (see .ralph/AGENTS.md) and fix failures.
+5) Update PRD + progress.
+
+Output:
+- Prefer concise, factual updates.
+- If you ran commands, include the command and 1-3 lines of the most relevant output.
+
+<ANCHOR>
+# Ralph Gold Anchor
+
+Task: 25 - Add npm scripts to `package.json`
+
+Acceptance criteria:
+- `"migrate-knowledge": "node scripts/migrate-to-author-first.mjs"`
+- `"migrate-knowledge:dry-run": "node scripts/migrate-to-author-first.mjs --dry-run"`
+- `"rollback-knowledge": "node scripts/rollback-migration.mjs"`
+- Test: `pnpm migrate-knowledge --help` works
+
+Repo reality:
+- branch: main
+- git status --porcelain:
+```
+M .ralph/progress.md
+ M .ralph/state.json
+?? .ralph/attempts/25/
+?? .ralph/context/25/
+?? .ralph/logs/prompt-iter0072.txt
+?? .ralph/receipts/25/
+```
+- git diff --stat:
+```
+.ralph/progress.md |  1 +
+ .ralph/state.json  | 63 +++++++++++++++++++++++++++++++++++++++++++++++++++---
+ 2 files changed, 61 insertions(+), 3 deletions(-)
+```
+
+Constraints:
+- Work on exactly ONE task per iteration
+- Do not claim completion without passing gates
+- Prefer minimal diffs; keep repo clean
+</ANCHOR>
+
+## Orchestrator Addendum (auto-generated)
+Iteration: 73
+
+Hard iteration constraints:
+- One task per iteration (one commit per iteration).
+- Apply backpressure: run the commands in AGENTS.md and fix until they pass.
+
+Selected task for this iteration:
+- id: 25
+- title: Add npm scripts to `package.json`
+- acceptance:
+  - `"migrate-knowledge": "node scripts/migrate-to-author-first.mjs"`
+  - `"migrate-knowledge:dry-run": "node scripts/migrate-to-author-first.mjs --dry-run"`
+  - `"rollback-knowledge": "node scripts/rollback-migration.mjs"`
+  - Test: `pnpm migrate-knowledge --help` works
+
+Do not work on any other task in this iteration.
+
+<PROJECT_MEMORY>
+## .ralph/AGENTS.md
+# Ralph Gold Agents & Gates
+
+This file is read by Ralph Gold each iteration.
+
+## Gates (backpressure)
+
+Ralph Gold will run gates *after* the agent makes changes. Configure them in `.ralph/ralph.toml`.
+
+Recommended patterns:
+
+### Option A (recommended): `prek` as the universal gate runner
+
+- Put your quality contract in `.pre-commit-config.yaml`
+- Then enable the gate:
+  - `[gates.prek] enabled = true` (runs `prek run --all-files`)
+
+No git hooks are installed by Ralph Gold.
+
+### Option B: Explicit commands
+
+Examples:
+- `uv run ruff check .`
+- `uv run mypy src`
+- `uv run pytest -q`
+- `npm test`
+
+## Review gate (cross-model)
+
+Optionally enable `[gates.review]` to require a reviewer model to return `SHIP`.
+
+## Notes
+
+- Receipts are written under `.ralph/receipts/` each iteration.
+- Repo Prompt context packs (if enabled) are written under `.ralph/context/`.
+
+
+## .ralph/PRD.md
+# Knowledge Reorganization PRD
+
+## Overview
+
+Reorganize the xKit knowledge base from category-first (`year/month/category/@handle/file.md`) to author-first structure (`year/month/@handle (real name)/category/file.md`) with enhanced filenames including date, handle, category, title, and short ID. Includes comprehensive migration tooling with atomic operations, automated rollback, degraded mode support, and full observability.
+
+**Tech Spec:** `.spec/tech-spec-2026-01-20-knowledge-reorganization.md`
+
+## Task Breakdown Guidelines
+
+**CRITICAL:** Tasks must be atomic (5-15 minutes each) with specific acceptance criteria and test commands.
+
+## Tasks
+
+### Phase 1: Core Types
+
+- [-] Create `src/bookmark-organization/types.ts` file
+  - Add `AuthorFolder`, `KnowledgePath`, `FilenameComponents` interfaces
+  - Add `RealNameCache`, `MigrationState`, `MigrationError` interfaces
+  - Add `MigrationFailureMarker`, `PreflightCheck` interfaces
+  - Export all types
+  - Test: `pnpm test -- src/bookmark-organization/types.test.ts` passes
+
+- [x] Add `sanitizeAuthorName()` to `src/bookmark-organization/sanitize.ts`
+  - ASCII-only handle validation (`/^[A-Za-z0-9_]+$/`)
+  - Reserved Windows filename check (CON, PRN, AUX, NUL, COM1-9, LPT1-9)
+  - Real name sanitization (control chars, Unicode NFC, dangerous chars)
+  - Limit real name to 100 chars
+  - Return `@handle` or `@handle (Real Name)`
+  - Test: `pnpm test -- src/bookmark-organization/sanitize.test.ts` passes
+
+- [x] Add `sanitizeSlug()` to `src/bookmark-organization/sanitize.ts`
+  - Pre-check for path traversal (`/\.\.[\/\\]/`)
+  - Remove control characters, normalize Unicode to NFC
+  - Replace non-alphanumerics with hyphens
+  - Limit to 80 chars
+  - Test: `pnpm test -- src/bookmark-organization/sanitize.test.ts` passes
+
+### Phase 2: Real Name Cache
+
+- [x] Add real name cache functions to `src/bookmark-organization/cache.ts`
+  - `loadRealNameCache()`: load from `.real-name-cache.json` or create new
+  - `saveRealNameCache()`: write cache with timestamp
+  - `getRealName()`: lookup handle in cache
+  - `setRealName()`: add or update cache entry
+  - Test: `pnpm test -- src/bookmark-organization/cache.test.ts` passes
+
+### Phase 3: Filename Generation
+
+- [x] Add `generateEnhancedFilename()` to `src/bookmark-markdown/filename.ts`
+  - Format: `{date}-{handle}-{category}-{title}-{short_id}.md`
+  - Use linked content title or tweet text excerpt
+  - Mandatory short ID (last 6 chars of tweet ID)
+  - Limit total filename to 255 chars
+  - Test: `pnpm test -- src/bookmark-markdown/filename.test.ts` passes
+
+- [x] Add `validatePathLength()` to `src/bookmark-markdown/filename.ts`
+  - Check path length ≤ 240 chars (Windows safe)
+  - Throw error with path preview if exceeded
+  - Test: `pnpm test -- src/bookmark-markdown/filename.test.ts` passes
+
+- [x] Update `MarkdownWriter.generateFilename()` in `src/bookmark-markdown/writer.ts`
+  - Call `generateEnhancedFilename()` instead of old method
+  - Note: writer.test.ts does not exist yet; filename.test.ts passes
+
+### Phase 4: Disk Space & Pre-flight
+
+- [x] Add `getDirectorySize()` to `scripts/migration/lib/disk.ts`
+  - Recursively scan directory and sum file sizes
+  - Return total bytes
+  - Test: Manual verify with known test directory
+
+- [x] Add `checkDiskSpace()` to `scripts/migration/lib/disk.ts`
+  - Use `statvfs` to get available space (Unix)
+  - Require 2.5x directory size (original + backup + margin)
+  - Throw error if insufficient with GB amounts
+  - Fallback for Windows (skip check with warning)
+  - Test: Manual verify with small directory
+
+- [x] Add `preFlightChecks()` to `scripts/migration/lib/check.ts`
+  - Call `getDirectorySize()` and `checkDiskSpace()`
+  - Count files to migrate
+  - Log summary and throw if checks fail
+  - Return `PreflightCheck` result
+  - Test: Manual verify on `knowledge/` directory
+
+### Phase 5: Migration Script Core
+
+- [-] Create `scripts/migrate-to-author-first.mjs` CLI scaffold
+  - Parse arguments: --dry-run, --backup-dir, --resume, --verify, --verbose, --force, --help
+  - Set up logging to `migration.log`
+  - Exit codes: 0=success, 1=errors, 2=validation failed, 3=cancelled
+  - Test: `node scripts/migrate-to-author-first.mjs --help` shows usage
+
+- [-] Add dry-run mode to `scripts/migrate-to-author-first.mjs`
+  - Scan all files in `knowledge/`
+  - Calculate new paths for all files
+  - Print summary: file counts, new structure example, backup location
+  - Prompt for confirmation: "Continue? [y/N]"
+  - Exit if not 'y'
+  - Test: `node scripts/migrate-to-author-first.mjs --dry-run` shows plan
+
+### Phase 6: File Operations with Timeout
+
+- [-] Add `moveFileWithTimeout()` to `scripts/migration/lib/files.ts`
+  - Use `Promise.race()` with 5 second timeout
+  - Copy file first, verify size matches, then delete source
+  - Throw timeout error if stuck
+  - Test: Manual verify with test files
+
+### Phase 7: Checkpoint & Recovery
+
+- [-] Add checkpoint system to `scripts/migration/lib/checkpoint.ts`
+  - `writeCheckpoint()`: write state to `.migration-state.json` every 100 files
+  - `resumeFromCheckpoint()`: load checkpoint state
+  - Track: migrationId, timestamps, files processed, processed files list
+  - Test: Manual interrupt and resume
+
+- [-] Add SIGINT handler to `scripts/migrate-to-author-first.mjs`
+  - Catch Ctrl+C, write checkpoint, exit gracefully
+  - Print message: "Migration paused. Run with --resume to continue."
+  - Test: Manual Ctrl+C during migration
+
+### Phase 8: Migration Execution
+
+- [-] Add main migration logic to `scripts/migrate-to-author-first.mjs`
+  - For each file: calculate new path, create author folder, create category folder
+  - Call `moveFileWithTimeout()` for each file
+  - Write checkpoint every 100 files
+  - Show progress: `[=====>] 45% (382/847) | 234 files/sec`
+  - Log each move to `migration.log`
+  - Track errors (recoverable) and continue
+  - Test: `node scripts/migrate-to-author-first.mjs --dry-run` on sample data
+
+### Phase 9: Checksum Verification
+
+- [-] Add checksum functions to `scripts/migration/lib/checksum.ts`
+  - `checksum()`: compute SHA-256 hash of file
+  - `verifyBackup()`: compare all files between original and backup
+  - Return summary with mismatches list
+  - Test: Manual verify with test directory
+
+### Phase 10: Backup & Rollback
+
+- [-] Add backup creation to `scripts/migrate-to-author-first.mjs`
+  - Copy entire `knowledge/` to `knowledge_backup_<timestamp>/`
+  - Run `verifyBackup()` after copy
+  - Throw if verification fails
+  - Test: `node scripts/migrate-to-author-first.mjs --dry-run` creates backup
+
+- [-] Create `scripts/rollback-migration.mjs`
+  - Parse --backup-dir and --verify flags
+  - Validate backup exists
+  - Create backup of current state
+  - Delete `knowledge/`, copy backup to `knowledge/`
+  - Revert code changes if needed
+  - Run build and verify
+  - Test: Manual rollback after test migration
+
+### Phase 11: Concurrency Locking
+
+- [-] Add lock file functions to `src/bookmark-markdown/lock.ts`
+  - `createMigrationLock()`: write `.migration-lock` with migration ID and timestamp
+  - `checkMigrationLock()`: return true if lock exists
+  - `clearMigrationLock()`: remove lock file
+  - Test: `pnpm test -- src/bookmark-markdown/lock.test.ts` passes
+
+- [-] Update bookmark archiving to check for migration lock
+  - In archiving entry point, call `checkMigrationLock()`
+  - If locked, print warning and exit (pause archiving)
+  - Test: Manual verify lock pauses archiving
+
+### Phase 12: Degraded Mode
+
+- [x] Add degraded mode functions to `scripts/migration/lib/degraded.ts`
+  - `markMigrationFailed()`: write `.migration-failed` marker with error
+  - `isDegradedMode()`: check if marker exists
+  - `getOutputDirectory()`: return `knowledge_degraded/` if failed
+  - `clearDegradedMode()`: remove marker
+  - Test: Manual verify degraded mode activation
+
+- [-] Update `MarkdownWriter` constructor to use degraded output
+  - Call `isDegradedMode()` on init
+  - If degraded, set `outputDir` to `knowledge_degraded/`
+  - Print warning message
+  - Test: Manual verify degraded mode writes to fallback
+
+- [-] Add degraded mode handling to `scripts/migrate-to-author-first.mjs`
+  - On any error, call `markMigrationFailed()`
+  - Exit with error code 1
+  - On success, call `clearDegradedMode()`
+  - Test: Manual error triggers degraded mode
+
+### Phase 13: Package Scripts & Docs
+
+- [ ] Add npm scripts to `package.json`
+  - `"migrate-knowledge": "node scripts/migrate-to-author-first.mjs"`
+  - `"migrate-knowledge:dry-run": "node scripts/migrate-to-author-first.mjs --dry-run"`
+  - `"rollback-knowledge": "node scripts/rollback-migration.mjs"`
+  - Test: `pnpm migrate-knowledge --help` works
+
+- [ ] Add migration documentation to `docs/KNOWLEDGE_MIGRATION.md`
+  - Overview of new structure
+  - Migration instructions
+  - Rollback instructions
+  - Troubleshooting guide
+  - Test: Documentation is clear and complete
+
+### Phase 14: Testing & Validation
+
+- [ ] Add migration tests to `tests/migration.test.ts`
+  - Test dry-run on sample data
+  - Test checkpoint creation and resume
+  - Test degraded mode activation
+  - Test lock file handling
+  - Test: `pnpm test -- tests/migration.test.ts` passes
+
+- [ ] Run full migration test on backup
+  - Copy `knowledge/` to test location
+  - Run full migration
+  - Verify all files moved correctly
+  - Verify checksums match
+  - Test rollback restores correctly
+  - Test: Manual end-to-end validation
+
+## Acceptance Criteria
+
+- [ ] All existing files migrated without data loss
+- [ ] New bookmarks use author-first structure with enhanced filenames
+- [ ] Build succeeds with no broken links (`pnpm build`)
+- [ ] Migration script has dry-run mode with detailed output
+- [ ] Automated rollback script tested and documented
+- [ ] Comprehensive path sanitization implemented (ASCII-only handles)
+- [ ] Checksum verification before/after migration
+- [ ] Checkpoint/resume capability functional
+- [ ] CLI interface with all specified flags
+- [ ] Confirmation flow (dry-run → prompt → execute)
+- [ ] Migration logging to `migration.log`
+- [ ] Progress indicator during migration
+- [ ] Concurrency handling (pause with lock file)
+- [ ] Path length validation (fail fast if >240 chars)
+- [ ] ID suffix mandatory in filename generation
+- [ ] TypeScript types defined for all new structures
+- [ ] Real name cache format defined
+- [ ] Disk space check implemented
+- [ ] Per-file timeout implemented (5 second default)
+- [ ] Degraded mode functional (fallback to `knowledge_degraded/`)
+
+## Notes
+
+- Mark done: - [x]
+- Mark blocked: - [-]
+- Dependencies: add acceptance bullet like "- Depends on: 1, 2"
+
+
+## .ralph/progress.md
 # progress.md
 
 Append-only loop memory.
@@ -115,18 +490,21 @@ Keep entries short; delete nothing; add clarifications when you learn.
 - [20260121T005331Z] iter 71 mode=prd status=CONTINUE checks=PASS story=S24 agent=claude branch=main log=20260121T005331Z-iter0071-claude.log
 [2026-01-21T00:58:14.615625+00:00] BLOCKED task 24 (Add degraded mode handling to `scripts/migrate-to-author-first.mjs`) after 3 attempts: unknown
 - [20260121T143622Z] iter 72 mode=prd status=CONTINUE checks=PASS story=S25 agent=claude branch=main log=20260121T143622Z-iter0072-claude.log
-- [20260121T143835Z] iter 73 mode=prd status=CONTINUE checks=PASS story=S25 agent=claude branch=main log=20260121T143835Z-iter0073-claude.log
-- [20260121T144248Z] iter 74 mode=prd status=CONTINUE checks=PASS story=S25 agent=claude branch=main log=20260121T144248Z-iter0074-claude.log
-[2026-01-21T14:46:38.432470+00:00] BLOCKED task 25 (Add npm scripts to `package.json`) after 3 attempts: task not marked done (agent exited successfully but task not completed)
-- [20260121T144638Z] iter 75 mode=prd status=CONTINUE checks=PASS story=S26 agent=claude branch=main log=20260121T144638Z-iter0075-claude.log
-- [20260121T145446Z] iter 76 mode=prd status=CONTINUE checks=PASS story=S26 agent=claude branch=main log=20260121T145446Z-iter0076-claude.log
-- [20260121T145857Z] iter 77 mode=prd status=CONTINUE checks=PASS story=S26 agent=claude branch=main log=20260121T145857Z-iter0077-claude.log
-[2026-01-21T15:04:55.881527+00:00] BLOCKED task 26 (Add migration documentation to `docs/KNOWLEDGE_MIGRATION.md`) after 3 attempts: task not marked done (agent exited successfully but task not completed)
-- [20260121T150455Z] iter 78 mode=prd status=CONTINUE checks=PASS story=S27 agent=claude branch=main log=20260121T150455Z-iter0078-claude.log
-- [20260121T150956Z] iter 79 mode=prd status=CONTINUE checks=PASS story=S27 agent=claude branch=main log=20260121T150956Z-iter0079-claude.log
-- [20260121T151450Z] iter 80 mode=prd status=CONTINUE checks=PASS story=S27 agent=claude branch=main log=20260121T151450Z-iter0080-claude.log
-[2026-01-21T15:18:46.486315+00:00] BLOCKED task 27 (Add migration tests to `tests/migration.test.ts`) after 3 attempts: task not marked done (agent exited successfully but task not completed)
-- [20260121T151846Z] iter 81 mode=prd status=CONTINUE checks=PASS story=S28 agent=claude branch=main log=20260121T151846Z-iter0081-claude.log
-- [20260121T152548Z] iter 82 mode=prd status=CONTINUE checks=PASS story=S28 agent=claude branch=main log=20260121T152548Z-iter0082-claude.log
-- [20260121T153250Z] iter 83 mode=prd status=CONTINUE checks=PASS story=S28 agent=claude branch=main log=20260121T153250Z-iter0083-claude.log
-[2026-01-21T15:38:17.310675+00:00] BLOCKED task 28 (Run full migration test on backup) after 3 attempts: task not marked done (agent exited successfully but task not completed)
+
+
+## .ralph/FEEDBACK.md
+# Feedback (optional)
+
+This file is read by Ralph Gold each iteration.
+
+Use it to add temporary guidance for the next iteration (constraints, clarifications, links, etc.).
+
+Delete entries when no longer needed.
+
+
+</PROJECT_MEMORY>
+
+Exit protocol (required):
+At the very end of your output, print exactly one line:
+EXIT_SIGNAL: true  OR  EXIT_SIGNAL: false
+

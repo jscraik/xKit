@@ -193,13 +193,13 @@ Reorganize the xKit knowledge base from category-first (`year/month/category/@ha
 
 ### Phase 13: Package Scripts & Docs
 
-- [ ] Add npm scripts to `package.json`
+- [-] Add npm scripts to `package.json`
   - `"migrate-knowledge": "node scripts/migrate-to-author-first.mjs"`
   - `"migrate-knowledge:dry-run": "node scripts/migrate-to-author-first.mjs --dry-run"`
   - `"rollback-knowledge": "node scripts/rollback-migration.mjs"`
   - Test: `pnpm migrate-knowledge --help` works
 
-- [ ] Add migration documentation to `docs/KNOWLEDGE_MIGRATION.md`
+- [-] Add migration documentation to `docs/KNOWLEDGE_MIGRATION.md`
   - Overview of new structure
   - Migration instructions
   - Rollback instructions
@@ -208,14 +208,14 @@ Reorganize the xKit knowledge base from category-first (`year/month/category/@ha
 
 ### Phase 14: Testing & Validation
 
-- [ ] Add migration tests to `tests/migration.test.ts`
+- [-] Add migration tests to `tests/migration.test.ts`
   - Test dry-run on sample data
   - Test checkpoint creation and resume
   - Test degraded mode activation
   - Test lock file handling
   - Test: `pnpm test -- tests/migration.test.ts` passes
 
-- [ ] Run full migration test on backup
+- [-] Run full migration test on backup
   - Copy `knowledge/` to test location
   - Run full migration
   - Verify all files moved correctly

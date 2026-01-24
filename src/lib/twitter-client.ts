@@ -8,6 +8,7 @@ import { type TwitterClientPostingMethods, withPosting } from './twitter-client-
 import { type TwitterClientSearchMethods, withSearch } from './twitter-client-search.js';
 import { type TwitterClientTimelineMethods, withTimelines } from './twitter-client-timelines.js';
 import { type TwitterClientTweetDetailMethods, withTweetDetails } from './twitter-client-tweet-detail.js';
+import { type TwitterClientUserTimelineMethods, withUserTimeline } from './twitter-client-user-timeline.js';
 import { type TwitterClientUserMethods, withUsers } from './twitter-client-users.js';
 
 type TwitterClientInstance = TwitterClientBase &
@@ -19,11 +20,14 @@ type TwitterClientInstance = TwitterClientBase &
   TwitterClientSearchMethods &
   TwitterClientTimelineMethods &
   TwitterClientTweetDetailMethods &
-  TwitterClientUserMethods;
+  TwitterClientUserMethods &
+  TwitterClientUserTimelineMethods;
 
-const MixedTwitterClient = withUsers(
-  withNews(
-    withLists(withTimelines(withSearch(withTweetDetails(withPosting(withBookmarks(withMedia(TwitterClientBase))))))),
+const MixedTwitterClient = withUserTimeline(
+  withUsers(
+    withNews(
+      withLists(withTimelines(withSearch(withTweetDetails(withPosting(withBookmarks(withMedia(TwitterClientBase))))))),
+    ),
   ),
 ) as AbstractConstructor<TwitterClientInstance>;
 
@@ -39,7 +43,7 @@ const MixedTwitterClient = withUsers(
  * const results = await client.search('from:username', 5);
  * ```
  */
-export class TwitterClient extends MixedTwitterClient {}
+export class TwitterClient extends MixedTwitterClient { }
 
 export type {
   BookmarkMutationResult,
@@ -55,5 +59,6 @@ export type {
   TwitterClientOptions,
   TwitterList,
   TwitterUser,
-  UploadMediaResult,
+  UploadMediaResult
 } from './twitter-client-types.js';
+

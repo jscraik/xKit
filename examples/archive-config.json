@@ -1,0 +1,10 @@
+{
+    "users": [
+        "jh3yy",
+        "addyosmani",
+        "wesbos"
+    ],
+    "interval": 60,
+    "limit": 50,
+    "outputDir": "knowledge/profiles"
+}

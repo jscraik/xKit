@@ -78,6 +78,7 @@ export class MarkdownWriter {
    * Write a single knowledge file
    */
   private async writeKnowledgeFile(bookmark: CategorizedBookmark): Promise<string | null> {
+    let filePath: string | undefined;
     try {
       // Generate content based on category
       let content: string;
@@ -118,7 +119,7 @@ export class MarkdownWriter {
         folder = bookmark.categoryFolder || this.config.outputDir;
       }
 
-      const filePath = join(folder, filename);
+      filePath = join(folder, filename);
 
       // Ensure directory exists
       const dir = dirname(filePath);

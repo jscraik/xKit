@@ -126,6 +126,26 @@ xkit query-ids --fresh
 
 ⭐ **NEW**: xKit now includes comprehensive bookmark archiving with automatic enrichment, categorization, and knowledge base organization!
 
+## User Profile Archiving
+
+⭐ **NEW**: Archive tweets from specific users (like @jh3yy's code snippets) to your knowledge base!
+
+```bash
+# One-time archive
+node scripts/archive-user-profile.mjs @jh3yy --limit 200
+
+# Continuous archiving daemon
+node scripts/archive-user-daemon.mjs --users @jh3yy,@addyosmani --interval 60
+```
+
+**Perfect for:**
+
+- 📝 Collecting code snippets and examples from developers
+- 🎓 Building a learning library from thought leaders
+- 🔍 Research and content analysis
+
+**See the complete guide:** [docs/user-profile-archiving.md](docs/user-profile-archiving.md)
+
 ```bash
 # Interactive setup wizard
 xkit setup

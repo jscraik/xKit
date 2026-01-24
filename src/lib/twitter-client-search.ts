@@ -50,15 +50,15 @@ export function withSearch<TBase extends AbstractConstructor<TwitterClientBase>>
 
           const params = new URLSearchParams({
             variables: JSON.stringify(variables),
+            features: JSON.stringify(features),
           });
 
           const url = `${TWITTER_API_BASE}/${queryId}/SearchTimeline?${params.toString()}`;
 
           try {
             const response = await this.fetchWithTimeout(url, {
-              method: 'POST',
+              method: 'GET',
               headers: this.getHeaders(),
-              body: JSON.stringify({ variables, features, queryId }),
             });
 
             if (response.status === 404) {

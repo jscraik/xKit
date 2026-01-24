@@ -1,30 +1,31 @@
 import { Command } from 'commander';
 import { registerBookmarkAnalysisCommand } from '../commands/bookmark-analysis.js';
 import { registerBookmarkExportCommand } from '../commands/bookmark-export.js';
-import { registerBookmarksCommand } from '../commands/bookmarks.js';
 import { registerBookmarksArchiveCommand } from '../commands/bookmarks-archive.js';
+import { registerBookmarksCommand } from '../commands/bookmarks.js';
 import { registerCacheCommand } from '../commands/cache.js';
 import { registerCheckCommand } from '../commands/check.js';
 import { registerDaemonCommands } from '../commands/daemon.js';
+import { registerGenerateSkillsCommand } from '../commands/generate-skills.js';
 import { registerHelpCommand } from '../commands/help.js';
+import { registerLearnCommand } from '../commands/learn.js';
 import { registerListsCommand } from '../commands/lists.js';
 import { registerMetricsCommand } from '../commands/metrics.js';
 import { registerNewsCommands } from '../commands/news.js';
 import { registerPostCommands } from '../commands/post.js';
 import { registerQueryIdsCommand } from '../commands/query-ids.js';
 import { registerReadCommands } from '../commands/read.js';
+import { registerRecapCommand } from '../commands/recap.js';
 import { registerSearchCommands } from '../commands/search.js';
 import { registerSetupCommand } from '../commands/setup.js';
 import { registerSummarizeCommand } from '../commands/summarize.js';
 import { registerTemplateCommands } from '../commands/templates.js';
 import { registerUnbookmarkCommand } from '../commands/unbookmark.js';
+import { registerUserTimelineCommand } from '../commands/user-timeline.js';
 import { registerUserCommands } from '../commands/users.js';
-import { registerGenerateSkillsCommand } from '../commands/generate-skills.js';
-import { registerLearnCommand } from '../commands/learn.js';
-import { registerRecapCommand } from '../commands/recap.js';
 import { getCliVersion } from '../lib/version.js';
-import { type CliContext, collectCookieSource } from './shared.js';
 import { metrics } from '../metrics/metrics-collector.js';
+import { type CliContext, collectCookieSource } from './shared.js';
 
 /**
  * Known CLI commands used to detect shorthand invocations.
@@ -202,6 +203,7 @@ export function createProgram(ctx: CliContext): Command {
   registerPostCommands(program, ctx);
   registerReadCommands(program, ctx);
   registerSearchCommands(program, ctx);
+  registerUserTimelineCommand(program, ctx);
   registerNewsCommands(program, ctx);
   registerBookmarksCommand(program, ctx);
   registerBookmarksArchiveCommand(program, ctx);

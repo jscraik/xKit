@@ -9,7 +9,7 @@
  *   node scripts/archive-user-profile.mjs @jh3yy --format json
  */
 
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -80,15 +80,16 @@ console.log(`   Format: ${format}`);
 console.log(`   Output: ${outputPath}\n`);
 
 try {
-    // Build xKit command using the new user-timeline command
-    const xkitCmd = format === 'json'
-        ? `pnpm xkit user-timeline "${username}" --count ${effectiveLimit} --json`
-        : `pnpm xkit user-timeline "${username}" --count ${effectiveLimit}`;
+    // Build xKit command arguments safely (username from CLI - CRITICAL security path)
+    const args = ['xkit', 'user-timeline', username, '--count', effectiveLimit];
+    if (format === 'json') {
+        args.push('--json');
+    }
 
-    console.log(`Running: ${xkitCmd}\n`);
+    console.log(`Running: pnpm ${args.join(' ')}\n`);
 
-    // Execute xKit command
-    const output = execSync(xkitCmd, {
+    // Execute xKit command with safe argument array (prevents command injection)
+    const output = execFileSync('pnpm', args, {
         encoding: 'utf-8',
         stdio: ['inherit', 'pipe', 'inherit'],
         maxBuffer: 50 * 1024 * 1024, // 50MB buffer for large outputs

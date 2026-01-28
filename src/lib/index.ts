@@ -22,3 +22,4 @@ export type { SearchFetchOptions } from './twitter-client-search.js';
 export type { TimelineFetchOptions } from './twitter-client-timelines.js';
 export type { TweetFetchOptions } from './twitter-client-tweet-detail.js';
 export type { TweetResult, UploadMediaResult } from './twitter-client-types.js';
+export * from '../content-extraction/index.js';

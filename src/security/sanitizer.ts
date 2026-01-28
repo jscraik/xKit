@@ -221,3 +221,72 @@ export function sanitizeFilename(filename: string): string {
   // Return 'output' if empty
   return sanitized || 'output';
 }
+
+/**
+ * Validate URL protocol for security.
+ * Only allow http: and https: protocols.
+ *
+ * Attack Vector:
+ * Malicious URLs using dangerous protocols like file://, javascript:, data:
+ * could access local files, execute code, or bypass security controls.
+ *
+ * Mitigation:
+ * Parse URL and verify protocol is explicitly in the allowlist.
+ * Also reject URLs with newlines or malformed protocol separators that
+ * the native URL constructor might normalize.
+ *
+ * @param url - URL string to validate
+ * @returns true if protocol is http: or https:, false otherwise
+ *
+ * @example
+ * validateUrlProtocol('https://example.com') // true
+ * validateUrlProtocol('javascript:alert(1)') // false
+ * validateUrlProtocol('file:///etc/passwd') // false
+ */
+export function validateUrlProtocol(url: string): boolean {
+  // Reject empty or whitespace-only input
+  if (!url || url.trim().length === 0) {
+    return false;
+  }
+
+  // Reject URLs containing newlines, carriage returns, or tabs (injection attacks)
+  if (/[\n\r\t]/.test(url)) {
+    return false;
+  }
+
+  // Reject malformed protocol separators (e.g., 'https:/' instead of 'https://')
+  // The native URL constructor accepts 'https:/example.com' but we want to reject it
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    return false;
+  }
+
+  try {
+    const parsed = new URL(url);
+    return ['http:', 'https:'].includes(parsed.protocol);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Validate X (Twitter) article ID format.
+ * X article IDs are numeric strings (Snowflake IDs).
+ *
+ * Attack Vector:
+ * Non-numeric IDs could bypass validation logic or cause unexpected behavior
+ * in API calls or database queries.
+ *
+ * Mitigation:
+ * Strict regex validation to ensure only numeric strings are accepted.
+ *
+ * @param articleId - Article ID to validate
+ * @returns true if article ID is numeric, false otherwise
+ *
+ * @example
+ * validateXArticleId('1234567890') // true
+ * validateXArticleId('abc123') // false
+ * validateXArticleId('123-456') // false
+ */
+export function validateXArticleId(articleId: string): boolean {
+  return /^\d+$/.test(String(articleId));
+}

@@ -1,0 +1,30 @@
+{
+  "skill": "ui-ux-creative-coding",
+  "skill_path": "/Users/jamiecraik/dev/agent-skills/product/design/ui-ux-creative-coding",
+  "workspace_root": "/Users/jamiecraik/dev/agent-skills",
+  "run_id": "20260128-170918",
+  "cases": [
+    {
+      "name": "happy-path",
+      "passed": true,
+      "failures": [],
+      "dir": "/Users/jamiecraik/dev/xKit/artifacts/reports/skills/ui-ux-creative-coding/20260128-170918/01-happy-path",
+      "used_schema": false
+    },
+    {
+      "name": "edge-case",
+      "passed": true,
+      "failures": [],
+      "dir": "/Users/jamiecraik/dev/xKit/artifacts/reports/skills/ui-ux-creative-coding/20260128-170918/02-edge-case",
+      "used_schema": false
+    },
+    {
+      "name": "failure-mode",
+      "passed": true,
+      "failures": [],
+      "dir": "/Users/jamiecraik/dev/xKit/artifacts/reports/skills/ui-ux-creative-coding/20260128-170918/03-failure-mode",
+      "used_schema": false
+    }
+  ],
+  "passed": true
+}

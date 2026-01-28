@@ -1,0 +1,3 @@
+$ui-ux-creative-coding
+
+Use the ui-ux-creative-coding skill to design a new settings panel for a Tauri app with motion polish.

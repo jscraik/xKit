@@ -36,7 +36,8 @@ export type SkillCategory =
   | 'tool-usage'        // How to use specific tools effectively
   | 'architecture'      // Architectural patterns and decisions
   | 'testing'          // Testing strategies and techniques
-  | 'documentation';    // Documentation practices
+  | 'documentation'     // Documentation practices
+  | 'persona';          // Persona emulation based on Twitter analysis
 
 /**
  * Skill extraction options

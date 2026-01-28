@@ -1,0 +1,27 @@
+## When to use
+This skill is for UI direction + implementation. A pure brand identity kit (logo + guidelines, no UI deliverables) is an explicit anti‑pattern for this skill, so I should switch to a brand‑identity workflow instead of UI craft.
+
+## Inputs
+Objective (restated): Create a brand logo and full identity kit with no UI deliverables.
+Plan (3–7 steps):
+1) Run a brief discovery to lock brand essence, audience, and constraints.
+2) Define brand strategy pillars (positioning, personality, tone, values).
+3) Create logo directions (wordmark + symbol + lockups) with rationale.
+4) Build the visual system (color, type, grid, spacing, imagery, patterns, icon style).
+5) Write usage guidelines (do/don’t, sizing, clear space, contrast).
+6) Package a deliverable kit (markdown brand book + asset list).
+
+## Outputs
+- Brand brief + positioning
+- Logo system (wordmark/symbol/lockups, mono/1‑color variants)
+- Color palette with accessibility notes
+- Typography system (primary/secondary, hierarchy rules)
+- Layout/grid + spacing rules
+- Iconography + illustration style
+- Imagery/texture/pattern guidelines
+- Brand voice + messaging examples
+- “Do/Don’t” usage guidance
+- Deliverable index (files to export/create)
+
+## Next step
+Should I use /interview-me to explore this systematically?

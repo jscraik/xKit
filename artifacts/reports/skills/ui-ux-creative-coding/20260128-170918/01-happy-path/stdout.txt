@@ -1,0 +1,33 @@
+## When to use
+Objective: design a new settings panel for a Tauri app with motion polish using the ui-ux-creative-coding skill, while complying with your gold-standard gates and repo rules.  
+Plan (3–7 steps):  
+1) Load required instruction files (standards, engineering guidance, tooling, checklist, work rules, codestyle, user profile).  
+2) Read the skill templates (assets) and align a UI brief + component plan + motion spec.  
+3) Draft tokens + motion + component specs for the settings panel.  
+4) Propose implementation file plan and verification checklist.  
+5) (If code changes requested) implement minimal patch + stories and list verify commands.
+
+## Inputs
+Blocked: I cannot read required files under `/Users/jamiecraik/.codex/*` due to sandbox access limits.  
+Required by your rules before any significant task:  
+- `/Users/jamiecraik/.codex/instructions/standards.md`  
+- `/Users/jamiecraik/.codex/instructions/engineering-guidance.md`  
+- `/Users/jamiecraik/.codex/instructions/tooling.md`  
+- `/Users/jamiecraik/.codex/instructions/README.checklist.md`  
+- `/Users/jamiecraik/.codex/instructions/work-rules.md`  
+- `/Users/jamiecraik/.codex/instructions/CODESTYLE.md`  
+- `/Users/jamiecraik/.codex/USER_PROFILE.md`  
+- `/Users/jamiecraik/.codex/USER_PROFILE.detail.md`
+
+## Outputs
+Once unblocked, I will produce (per skill contract):  
+- UI brief (from `assets/design-brief.md`)  
+- Component plan  
+- Motion plan (from `assets/motion-spec.yml`)  
+- Tokens plan (from `assets/tokens.json`)  
+- Implementation plan (paths, APIs, a11y/perf notes)  
+- Micro‑playbook  
+- Verification notes (from `assets/acceptance-checklist.md`)
+
+## Next step
+Can you provide those `.codex` instruction files (paste here or copy into `/Users/jamiecraik/dev/agent-skills`) so I can proceed?

@@ -1,0 +1,12 @@
+
+> @brainwav/xkit@0.7.0 xkit /Users/jamiecraik/dev/xKit
+> pnpm run build:dist && node dist/cli.js search 'from:jh3yy since:2024-01-01 until:2024-12-31' -n 100 --json
+
+
+> @brainwav/xkit@0.7.0 build:dist /Users/jamiecraik/dev/xKit
+> tsc && node scripts/copy-dist-assets.js
+
+(node:65189) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+❌ Search failed: HTTP 404
+ ELIFECYCLE  Command failed with exit code 1.

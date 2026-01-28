@@ -59,12 +59,22 @@ export abstract class TwitterClientBase {
 
   protected async getTweetDetailQueryIds(): Promise<string[]> {
     const primary = await this.getQueryId('TweetDetail');
-    return Array.from(new Set([primary, '97JF30KziU00483E_8elBA', 'aFvUsJm2c-oDkJV75blV6g']));
+    return Array.from(new Set([primary, 'Kzfv17rukSzjT96BerOWZA', '97JF30KziU00483E_8elBA', 'aFvUsJm2c-oDkJV75blV6g']));
   }
 
   protected async getSearchTimelineQueryIds(): Promise<string[]> {
     const primary = await this.getQueryId('SearchTimeline');
-    return Array.from(new Set([primary, 'M1jEez78PEfVfbQLvlWMvQ', '5h0kNbk3ii97rmfY6CdgAA', 'Tp1sewRU1AsZpBWhqCZicQ']));
+    return Array.from(new Set([primary, 'f_A-Gyo204PRxixpkrchJg', 'M1jEez78PEfVfbQLvlWMvQ', '5h0kNbk3ii97rmfY6CdgAA', 'Tp1sewRU1AsZpBWhqCZicQ']));
+  }
+
+  protected async getUserTweetsQueryIds(): Promise<string[]> {
+    const primary = await this.getQueryId('UserTweets');
+    return Array.from(new Set([primary, 'a3SQAz_VP9k8VWDr9bMcXQ']));
+  }
+
+  protected async getUserByScreenNameQueryIds(): Promise<string[]> {
+    const primary = await this.getQueryId('UserByScreenName');
+    return Array.from(new Set([primary, '-oaLodhGbbnzJBACb1kk2Q']));
   }
 
   protected async fetchWithTimeout(url: string, init: RequestInit): Promise<Response> {

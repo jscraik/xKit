@@ -1,0 +1,12 @@
+Objective: Use the `ui-ux-creative-coding` skill to define a UI brief and craft a bold, shippable UI direction with implementation-ready guidance, starting from zero constraints.
+
+Plan:
+1) Confirm whether to run a structured requirements interview.
+2) Capture the core product goal, audience, and success metric.
+3) Define the UI brief + interaction model.
+4) Propose a component/system plan (tokens, states, motion rules).
+5) Draft a prototype direction (React + Tailwind v4 + Radix), with optional Three.js accents.
+
+Next step: Run a short /interview-me session to lock requirements and acceptance criteria.
+
+Should I use /interview-me to explore this systematically?

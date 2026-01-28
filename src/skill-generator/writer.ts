@@ -7,7 +7,15 @@ import { mkdirSync, existsSync, writeFileSync, readdirSync, unlinkSync, readFile
 import { join } from 'node:path';
 import { homedir } from 'node:os';
 import type { SkillCandidate, SkillCategory } from './types.js';
-import { generateSkillTemplate, formatSkillMarkdown, validateSkillTemplate } from './templates.js';
+import type { PersonaResult } from '../persona-extraction/types.js';
+import {
+  generateSkillTemplate,
+  formatSkillMarkdown,
+  validateSkillTemplate,
+  generatePersonaSkillTemplate,
+  formatPersonaSkillMarkdown,
+  validatePersonaSkillTemplate,
+} from './templates.js';
 
 /**
  * Skill writer options
@@ -245,7 +253,29 @@ Confidence: ${(candidate.confidence * 100).toFixed(0)}%
     try {
       // Read from review, remove header, write to skills
       const content = readFileSync(sourceFile, 'utf8');
-      const contentWithoutHeader = content.replace(/---\n+# ⚠️ REVIEW REQUIRED[\s\S]*?---\n\n/, '');
+      // Remove review header - uses simple string operations instead of complex regex
+      // Find the first occurrence of '---' and the next '---' after it, then remove that section
+      let contentWithoutHeader = content;
+      const firstMarker = '---';
+      const reviewHeaderStart = 'REVIEW REQUIRED';
+
+      // Check if this is a review file
+      const reviewStartIndex = content.indexOf(reviewHeaderStart);
+      if (reviewStartIndex !== -1) {
+        // Find the first --- before REVIEW REQUIRED (start of header)
+        const headerStartIndex = content.lastIndexOf(firstMarker, reviewStartIndex);
+        if (headerStartIndex !== -1) {
+          // Find the next --- after the start (end of review header)
+          const headerEndIndex = content.indexOf(firstMarker, headerStartIndex + firstMarker.length);
+          if (headerEndIndex !== -1) {
+            // Find the newline after the closing --- and remove everything up to that point
+            const newlineAfterEnd = content.indexOf('\n', headerEndIndex);
+            if (newlineAfterEnd !== -1) {
+              contentWithoutHeader = content.slice(newlineAfterEnd + 1);
+            }
+          }
+        }
+      }
       writeFileSync(targetFile, contentWithoutHeader, 'utf8');
 
       // Delete from review
@@ -296,5 +326,265 @@ Confidence: ${(candidate.confidence * 100).toFixed(0)}%
         }
       }
     }
+  }
+
+  /**
+   * Write a persona skill to a persona-specific subdirectory
+   * Creates directory structure: targetDir/@username-persona/SKILL.md
+   *
+   * @param persona - The persona result to write
+   * @param targetDir - Base directory for persona skills (defaults to skillsDir)
+   * @returns WriteResult with written/review paths
+   */
+  async writePersonaSkill(persona: PersonaResult, targetDir?: string): Promise<WriteResult> {
+    const result: WriteResult = {
+      written: [],
+      review: [],
+      skipped: [],
+      errors: [],
+    };
+
+    try {
+      // Generate persona skill template
+      const template = generatePersonaSkillTemplate(persona);
+
+      // Validate template
+      const validation = validatePersonaSkillTemplate(template);
+      if (!validation.valid) {
+        result.errors.push({
+          skill: `@${persona.username}-persona`,
+          error: `Validation failed: ${validation.errors.join(', ')}`,
+        });
+        return result;
+      }
+
+      // Generate markdown
+      const markdown = formatPersonaSkillMarkdown(template);
+
+      // Create persona-specific directory
+      const outputDir = targetDir ?? this.skillsDir;
+      const personaDir = join(outputDir, `@${persona.username}-persona`);
+
+      if (!existsSync(personaDir)) {
+        mkdirSync(personaDir, { recursive: true });
+      }
+
+      // Determine write path based on autoApprove setting
+      const filepath = join(personaDir, 'SKILL.md');
+
+      if (this.autoApprove) {
+        // Write directly to persona directory
+        writeFileSync(filepath, markdown, 'utf8');
+        result.written.push(filepath);
+      } else {
+        // Write to review directory with persona-specific structure
+        const reviewPersonaDir = join(this.reviewDir, `@${persona.username}-persona`);
+        if (!existsSync(reviewPersonaDir)) {
+          mkdirSync(reviewPersonaDir, { recursive: true });
+        }
+
+        const reviewFilepath = join(reviewPersonaDir, 'SKILL.md');
+
+        // Add review header
+        const reviewHeader = `---
+# REVIEW REQUIRED
+
+This persona skill was auto-generated from Twitter content analysis.
+Please review before moving to .claude/skills/.
+
+Generated: ${new Date().toISOString()}
+Username: @${persona.username}
+Analysis Date: ${persona.analyzedAt}
+---
+
+`;
+
+        writeFileSync(reviewFilepath, reviewHeader + markdown, 'utf8');
+        result.review.push(reviewFilepath);
+      }
+    } catch (error) {
+      result.errors.push({
+        skill: `@${persona.username}-persona`,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+
+    return result;
+  }
+
+  /**
+   * Write multiple persona skills
+   *
+   * @param personas - Array of persona results to write
+   * @param targetDir - Base directory for persona skills (defaults to skillsDir)
+   * @returns Aggregate WriteResult for all personas
+   */
+  async writePersonaSkills(personas: PersonaResult[], targetDir?: string): Promise<WriteResult> {
+    const aggregateResult: WriteResult = {
+      written: [],
+      review: [],
+      skipped: [],
+      errors: [],
+    };
+
+    for (const persona of personas) {
+      const result = await this.writePersonaSkill(persona, targetDir);
+
+      aggregateResult.written.push(...result.written);
+      aggregateResult.review.push(...result.review);
+      aggregateResult.skipped.push(...result.skipped);
+      aggregateResult.errors.push(...result.errors);
+    }
+
+    return aggregateResult;
+  }
+
+  /**
+   * Approve persona skill from review directory
+   * Moves persona from skills-review/@username-persona/ to .claude/skills/@username-persona/
+   *
+   * @param username - Twitter username (with or without @)
+   * @returns Success status and optional error message
+   */
+  approvePersonaSkill(username: string): { success: boolean; error?: string } {
+    // Normalize username (remove @ if present)
+    const normalizedUsername = username.startsWith('@') ? username.slice(1) : username;
+    const personaName = `@${normalizedUsername}-persona`;
+
+    const sourceDir = join(this.reviewDir, personaName);
+    const targetDir = join(this.skillsDir, personaName);
+    const sourceFile = join(sourceDir, 'SKILL.md');
+    const targetFile = join(targetDir, 'SKILL.md');
+
+    // Check if source exists
+    if (!existsSync(sourceFile)) {
+      return {
+        success: false,
+        error: `Persona skill not found in review directory: ${personaName}`,
+      };
+    }
+
+    // Check if target already exists
+    if (existsSync(targetFile)) {
+      return {
+        success: false,
+        error: `Persona skill already exists: ${personaName}`,
+      };
+    }
+
+    try {
+      // Create target directory if needed
+      if (!existsSync(targetDir)) {
+        mkdirSync(targetDir, { recursive: true });
+      }
+
+      // Read from review, remove header, write to skills
+      const content = readFileSync(sourceFile, 'utf8');
+      // Remove review header - uses simple string operations instead of complex regex
+      // Find the first occurrence of '---' and the next '---' after it, then remove that section
+      let contentWithoutHeader = content;
+      const firstMarker = '---';
+      const reviewHeaderStart = 'REVIEW REQUIRED';
+
+      // Check if this is a review file
+      const reviewStartIndex = content.indexOf(reviewHeaderStart);
+      if (reviewStartIndex !== -1) {
+        // Find the first --- before REVIEW REQUIRED (start of header)
+        const headerStartIndex = content.lastIndexOf(firstMarker, reviewStartIndex);
+        if (headerStartIndex !== -1) {
+          // Find the next --- after the start (end of review header)
+          const headerEndIndex = content.indexOf(firstMarker, headerStartIndex + firstMarker.length);
+          if (headerEndIndex !== -1) {
+            // Find the newline after the closing --- and remove everything up to that point
+            const newlineAfterEnd = content.indexOf('\n', headerEndIndex);
+            if (newlineAfterEnd !== -1) {
+              contentWithoutHeader = content.slice(newlineAfterEnd + 1);
+            }
+          }
+        }
+      }
+      writeFileSync(targetFile, contentWithoutHeader, 'utf8');
+
+      // Delete source directory
+      const files = readdirSync(sourceDir);
+      for (const file of files) {
+        unlinkSync(join(sourceDir, file));
+      }
+      // Note: We don't remove the empty directory for safety
+
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
+  }
+
+  /**
+   * Reject persona skill from review directory
+   * Removes the persona directory from skills-review
+   *
+   * @param username - Twitter username (with or without @)
+   * @returns Success status and optional error message
+   */
+  rejectPersonaSkill(username: string): { success: boolean; error?: string } {
+    // Normalize username (remove @ if present)
+    const normalizedUsername = username.startsWith('@') ? username.slice(1) : username;
+    const personaName = `@${normalizedUsername}-persona`;
+
+    const sourceDir = join(this.reviewDir, personaName);
+
+    if (!existsSync(sourceDir)) {
+      return {
+        success: false,
+        error: `Persona skill not found in review directory: ${personaName}`,
+      };
+    }
+
+    try {
+      // Remove all files in directory
+      const files = readdirSync(sourceDir);
+      for (const file of files) {
+        unlinkSync(join(sourceDir, file));
+      }
+
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
+  }
+
+  /**
+   * List existing persona skills
+   *
+   * @returns Array of persona usernames that have skills
+   */
+  listPersonaSkills(): string[] {
+    if (!existsSync(this.skillsDir)) {
+      return [];
+    }
+
+    const items = readdirSync(this.skillsDir, { withFileTypes: true });
+    return items
+      .filter((item) => item.isDirectory() && item.name.endsWith('-persona'))
+      .map((item) => item.name);
+  }
+
+  /**
+   * Check if persona skill already exists
+   *
+   * @param username - Twitter username (with or without @)
+   * @returns True if persona skill exists
+   */
+  personaSkillExists(username: string): boolean {
+    // Normalize username (remove @ if present)
+    const normalizedUsername = username.startsWith('@') ? username.slice(1) : username;
+    const personaDir = join(this.skillsDir, `@${normalizedUsername}-persona`);
+    const filepath = join(personaDir, 'SKILL.md');
+    return existsSync(filepath);
   }
 }

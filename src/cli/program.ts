@@ -19,6 +19,14 @@ import { registerRecapCommand } from '../commands/recap.js';
 import { registerSearchCommands } from '../commands/search.js';
 import { registerSetupCommand } from '../commands/setup.js';
 import { registerSummarizeCommand } from '../commands/summarize.js';
+import { registerPersonaArchiveCommand } from '../commands/persona-archive.js';
+import { registerPersonaExtractCommand } from '../commands/persona-extract.js';
+import { registerPersonaSkillCommand } from '../commands/persona-skill.js';
+import {
+  registerPersonaSkillApproveCommand,
+  registerPersonaSkillRejectCommand,
+  registerPersonaSkillListCommand,
+} from '../commands/persona-skill-approve.js';
 import { registerTemplateCommands } from '../commands/templates.js';
 import { registerUnbookmarkCommand } from '../commands/unbookmark.js';
 import { registerUserTimelineCommand } from '../commands/user-timeline.js';
@@ -42,6 +50,11 @@ export const KNOWN_COMMANDS = new Set([
   'bookmarks',
   'bookmarks-archive',
   'archive',
+  'persona-archive',
+  'persona-extract',
+  'persona-skill-approve',
+  'persona-skill-reject',
+  'persona-skill-list',
   'cache',
   'unbookmark',
   'following',
@@ -60,6 +73,7 @@ export const KNOWN_COMMANDS = new Set([
   'metrics',
   'generate-skills',
   'learn',
+  'persona-skill',
   'recap',
   'summarize',
   'template',
@@ -218,6 +232,12 @@ export function createProgram(ctx: CliContext): Command {
   registerMetricsCommand(program, ctx);
   registerGenerateSkillsCommand(program, ctx);
   registerLearnCommand(program, ctx);
+  registerPersonaArchiveCommand(program, ctx);
+  registerPersonaExtractCommand(program, ctx);
+  registerPersonaSkillCommand(program, ctx);
+  registerPersonaSkillApproveCommand(program, ctx);
+  registerPersonaSkillRejectCommand(program, ctx);
+  registerPersonaSkillListCommand(program, ctx);
   registerRecapCommand(program, ctx);
   registerSummarizeCommand(program, ctx);
   registerTemplateCommands(program, ctx);

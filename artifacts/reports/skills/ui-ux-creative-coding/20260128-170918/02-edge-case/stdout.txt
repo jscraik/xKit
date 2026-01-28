@@ -1,0 +1,22 @@
+## When to use
+Objective: apply `ui-ux-creative-coding` to define and implement a shippable UI direction and component work, starting from zero assets/constraints.
+
+## Inputs
+Please confirm these so I can lock scope and avoid rework:
+- What are we designing (screen/flow/component), and the primary user task?
+- Platform + stack (Tauri desktop vs web, React/Vite, Tailwind v4, Radix, etc.).
+- Audience + tone (e.g., pro tool, consumer, playful, serious).
+- Success criteria (“done means…”), plus any required states (loading/error/empty/disabled).
+- Brand direction (even 2–3 adjectives) or competitors you want to outclass.
+- Any constraints on time, performance, or accessibility targets (e.g., WCAG AA).
+
+## Outputs
+Plan (3–7 steps):
+1) Draft a concise UI brief with goals, users, success metrics, and constraints.  
+2) Define tokens + component system (states, variants, a11y).  
+3) Create 2–3 visual/motion directions and pick one with rationale.  
+4) Produce the component + motion plans with Tailwind v4/Radix implementation notes.  
+5) Provide a micro‑playbook and verification checklist for a11y/perf/visual regression.
+
+## Next step
+Should I use /interview-me to explore this systematically? (yes/no)

@@ -1,0 +1,10 @@
+{
+  "name": "happy-path",
+  "passed": false,
+  "failures": [
+    "codex exec returned non-zero exit code: 124",
+    "contains failed: '## Outputs'"
+  ],
+  "dir": "/Users/jamiecraik/dev/xKit/artifacts/reports/skills/ui-ux-creative-coding/20260128-170446/01-happy-path",
+  "used_schema": false
+}

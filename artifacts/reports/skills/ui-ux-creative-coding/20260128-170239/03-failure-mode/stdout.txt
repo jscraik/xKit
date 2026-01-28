@@ -1,0 +1,13 @@
+Objective: you want a brand logo + full identity kit with **no UI deliverables**.  
+Note: the `ui-ux-creative-coding` skill is UI-focused and flags pure brand identity as an anti‑pattern; I can still help, but it will be a **brand system spec** only (no UI code).
+
+Plan (if you want to proceed):
+1) Run /interview-me to lock scope, audience, tone, and usage constraints.
+2) Produce a brand strategy snapshot (positioning, personality, differentiators).
+3) Define the logo system (wordmark + mark + clearspace + sizing + misuse).
+4) Build the identity kit (color, type, grid, imagery, voice, accessibility).
+5) Deliver export specs + usage checklist (no UI deliverables).
+
+Next step: decide whether to run /interview-me for this brand‑only request.
+
+Should I use /interview-me to explore this systematically?

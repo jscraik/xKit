@@ -1,0 +1,35 @@
+## When to use
+This skill is for UI/UX creative coding and shippable interface work. Your request is a pure brand identity task (logo + identity kit, no UI), which is an explicit anti-pattern for this skill. I can still help, but I will switch to a brand-identity workflow (no UI deliverables) and call out any assumptions.
+
+## Inputs
+Objective: Create a brand logo and a full identity kit with no UI deliverables.  
+Missing essentials I need to avoid guessing:
+- Brand name, tagline (if any), and legal entity name
+- Audience + category (what you do, who it’s for)
+- Positioning + differentiators (why you, why now)
+- Brand personality (3–5 adjectives)
+- Must-keep elements (colors, symbols, legacy marks) or hard “don’ts”
+
+Plan (3–7 steps, single-threaded):
+1) Capture a concise brand brief and constraints.
+2) Generate 2–3 logo concept directions with rationale.
+3) Select one direction and refine into primary + secondary marks.
+4) Define core identity kit (color, type, spacing, grid, clearspace showings).
+5) Produce usage rules + do/don’t examples (no UI).
+
+## Outputs
+I will deliver a brand-only identity kit (no UI):
+- Logo system: primary mark, secondary/stacked, symbol-only, monochrome
+- Color palette: primary, secondary, accent, neutrals + usage guidance
+- Typography system: headline + body + fallbacks
+- Spacing + clearspace rules, minimum size, and safe use
+- Brand voice + tone summary
+- Usage do/don’t examples (still non-UI)
+- File list + export guidance (SVG, PNG, PDF)
+
+Assumptions I will make if you don’t provide details:
+- I’ll propose a neutral, modern identity aligned to your stated category.
+- I’ll avoid tropes unless you request them.
+
+## Next step
+Do you want me to proceed with a short brand brief interview (yes/no)?

@@ -22,3 +22,6 @@ export interface BookmarkWithMedia {
   id: string;
   media: MediaAttachment[];
 }
+
+// Re-export MediaDownloaderConfig from media-downloader for convenience
+export type { MediaDownloaderConfig } from './media-downloader.js';

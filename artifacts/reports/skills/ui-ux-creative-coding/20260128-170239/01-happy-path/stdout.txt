@@ -1,0 +1,22 @@
+Objective: design a new settings panel for a Tauri app with motion polish using the `ui-ux-creative-coding` skill.
+
+Plan:
+1) Load required standards and profile instructions (hard gate) plus the skill templates.
+2) Draft the UI brief and user model.
+3) Produce component + motion + tokens plans.
+4) Provide implementation guidance (Radix + Tailwind v4) and a11y/perf notes.
+5) Provide verification checklist and ELI5 summary.
+
+Next step: I’m blocked on the hard gate because I can’t read the required instruction files outside `/Users/jamiecraik/dev`.
+
+Please paste the contents of these files (or copy them into this repo so I can read them):  
+- `/Users/jamiecraik/.codex/USER_PROFILE.md`  
+- `/Users/jamiecraik/.codex/USER_PROFILE.detail.md`  
+- `/Users/jamiecraik/.codex/instructions/standards.md`  
+- `/Users/jamiecraik/.codex/instructions/engineering-guidance.md`  
+- `/Users/jamiecraik/.codex/instructions/tooling.md`  
+- `/Users/jamiecraik/.codex/instructions/README.checklist.md`  
+- `/Users/jamiecraik/.codex/instructions/work-rules.md`  
+- `/Users/jamiecraik/.codex/instructions/CODESTYLE.md`
+
+Question: Can you paste those files here (or move copies into `/Users/jamiecraik/dev/agent-skills/.codex/`)?

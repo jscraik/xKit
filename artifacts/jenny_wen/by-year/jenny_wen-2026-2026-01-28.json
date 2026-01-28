@@ -1,0 +1,700 @@
+[
+  {
+    "id": "2015856031855714668",
+    "text": "when two of your friends meet and get along really well",
+    "createdAt": "Mon Jan 26 18:35:05 +0000 2026",
+    "replyCount": 18,
+    "retweetCount": 65,
+    "likeCount": 1429,
+    "conversationId": "2015856031855714668",
+    "author": {
+      "username": "jenny_wen",
+      "name": "jenny wen"
+    },
+    "authorId": "26312789",
+    "quotedTweet": {
+      "id": "2015849391379124642",
+      "text": "FigJam diagramming is now available in Claude, and to show you we’re going to settle the “feature or bug” debate once and for all https://t.co/Y8HzZscFHE",
+      "createdAt": "Mon Jan 26 18:08:42 +0000 2026",
+      "replyCount": 55,
+      "retweetCount": 194,
+      "likeCount": 2174,
+      "conversationId": "2015849391379124642",
+      "author": {
+        "username": "figma",
+        "name": "Figma"
+      },
+      "authorId": "3181020308",
+      "media": [
+        {
+          "type": "video",
+          "url": "https://pbs.twimg.com/amplify_video_thumb/2015847014760681472/img/9vDby6ZyBtt00Cx4.jpg",
+          "width": 1920,
+          "height": 1080,
+          "previewUrl": "https://pbs.twimg.com/amplify_video_thumb/2015847014760681472/img/9vDby6ZyBtt00Cx4.jpg:small",
+          "videoUrl": "https://video.twimg.com/amplify_video/2015847014760681472/vid/avc1/1920x1080/rck-XF5TwGRPfASW.mp4?tag=21",
+          "durationMs": 50600
+        }
+      ]
+    }
+  },
+  {
+    "id": "2015239166435409996",
+    "text": "why does alex honnold give me the same vibes as nathan fielder",
+    "createdAt": "Sun Jan 25 01:43:53 +0000 2026",
+    "replyCount": 5,
+    "retweetCount": 0,
+    "likeCount": 66,
+    "conversationId": "2015239166435409996",
+    "author": {
+      "username": "jenny_wen",
+      "name": "jenny wen"
+    },
+    "authorId": "26312789"
+  },
+  {
+    "id": "2015438521306091677",
+    "text": "https://t.co/QadfNmJocG",
+    "createdAt": "Sun Jan 25 14:56:03 +0000 2026",
+    "replyCount": 0,
+    "retweetCount": 0,
+    "likeCount": 7,
+    "conversationId": "2015239166435409996",
+    "inReplyToStatusId": "2015239166435409996",
+    "author": {
+      "username": "jenny_wen",
+      "name": "jenny wen"
+    },
+    "authorId": "26312789",
+    "media": [
+      {
+        "type": "photo",
+        "url": "https://pbs.twimg.com/media/G_hGnZ1XUAA9GZ0.png",
+        "width": 640,
+        "height": 360,
+        "previewUrl": "https://pbs.twimg.com/media/G_hGnZ1XUAA9GZ0.png:small"
+      },
+      {
+        "type": "photo",
+        "url": "https://pbs.twimg.com/media/G_hGnZnXYAExgof.jpg",
+        "width": 1198,
+        "height": 762,
+        "previewUrl": "https://pbs.twimg.com/media/G_hGnZnXYAExgof.jpg:small"
+      }
+    ]
+  },
+  {
+    "id": "2014815249795301573",
+    "text": "as a canadian i actually don't understand why every trader joe's in new york city is being emptied out for a 12-hour snowstorm??? what?",
+    "createdAt": "Fri Jan 23 21:39:23 +0000 2026",
+    "replyCount": 187,
+    "retweetCount": 185,
+    "likeCount": 8732,
+    "conversationId": "2014815249795301573",
+    "author": {
+      "username": "jenny_wen",
+      "name": "jenny wen"
+    },
+    "authorId": "26312789"
+  },
+  {
+    "id": "2014768514511376398",
+    "text": "It has been 8(!) working days since we launched Cowork @claudeai and we've just rolled it out to Team &amp; Enterprise plans and continued to add more improvements.\n\nMore to come, as always.",
+    "createdAt": "Fri Jan 23 18:33:41 +0000 2026",
+    "replyCount": 12,
+    "retweetCount": 0,
+    "likeCount": 101,
+    "conversationId": "2014768514511376398",
+    "author": {
+      "username": "jenny_wen",
+      "name": "jenny wen"
+    },
+    "authorId": "26312789",
+    "quotedTweet": {
+      "id": "2014748925144793476",
+      "text": "While still in research preview, we've shipped two new updates:\n\nYou can @-mention projects to bring context into Cowork sessions, and Claude in Chrome now shows live screenshots as it works.\n\nGive it a try: https://t.co/kWnDq1psWQ https://t.co/Qa8LgcTehS",
+      "createdAt": "Fri Jan 23 17:15:50 +0000 2026",
+      "replyCount": 10,
+      "retweetCount": 12,
+      "likeCount": 274,
+      "conversationId": "2014748923278311855",
+      "inReplyToStatusId": "2014748923278311855",
+      "author": {
+        "username": "claudeai",
+        "name": "Claude"
+      },
+      "authorId": "1943306828697550848",
+      "media": [
+        {
+          "type": "photo",
+          "url": "https://pbs.twimg.com/media/G_XLYlwWcAEhFyg.jpg",
+          "width": 1920,
+          "height": 1080,
+          "previewUrl": "https://pbs.twimg.com/media/G_XLYlwWcAEhFyg.jpg:small"
+        }
+      ]
+    }
+  },
+  {
+    "id": "2014571192624021664",
+    "text": "RT @can: nobody puts baby in a starter pack",
+    "createdAt": "Fri Jan 23 05:29:35 +0000 2026",
+    "replyCount": 0,
+    "retweetCount": 1,
+    "likeCount": 0,
+    "conversationId": "2014571192624021664",
+    "author": {
+      "username": "jenny_wen",
+      "name": "jenny wen"
+    },
+    "authorId": "26312789"
+  },
+  {
+    "id": "2014479445738893649",
+    "text": "this talk was the first i did that was really polarizing. that was... kind of the point though!\n\nto me it shows a bifurcation in the industry — it was either a confirmation of something you were already feeling, or a new, deeply uncomfortable thing.\n\nhttps://t.co/GAicljLb6y",
+    "createdAt": "Thu Jan 22 23:25:01 +0000 2026",
+    "replyCount": 43,
+    "retweetCount": 56,
+    "likeCount": 731,
+    "conversationId": "2014479445738893649",
+    "author": {
+      "username": "jenny_wen",
+      "name": "jenny wen"
+    },
+    "authorId": "26312789"
+  },
+  {
+    "id": "2014479743718973622",
+    "text": "the wacky part is, looking back on this now... it feels outdated, already. \n\nwe might be even more deeply bifurcated... or trifurcated, even?",
+    "createdAt": "Thu Jan 22 23:26:12 +0000 2026",
+    "replyCount": 4,
+    "retweetCount": 0,
+    "likeCount": 46,
+    "conversationId": "2014479445738893649",
+    "inReplyToStatusId": "2014479445738893649",
+    "author": {
+      "username": "jenny_wen",
+      "name": "jenny wen"
+    },
+    "authorId": "26312789"
+  },
+  {
+    "id": "2014365583383359560",
+    "text": "RT @bcherny: Cowork update: @-mention files, MCP resources, or windows from your desktop apps directly in the chat. \n\nAnd if your task call…",
+    "createdAt": "Thu Jan 22 15:52:34 +0000 2026",
+    "replyCount": 0,
+    "retweetCount": 30,
+    "likeCount": 0,
+    "conversationId": "2014365583383359560",
+    "author": {
+      "username": "jenny_wen",
+      "name": "jenny wen"
+    },
+    "authorId": "26312789"
+  },
+  {
+    "id": "2012273570689302996",
+    "text": "RT @felixrieseberg: More Cowork improvements shipped today!\n\n• We've taught Claude to always request explicit permission before deleting an…",
+    "createdAt": "Fri Jan 16 21:19:40 +0000 2026",
+    "replyCount": 0,
+    "retweetCount": 32,
+    "likeCount": 0,
+    "conversationId": "2012273570689302996",
+    "author": {
+      "username": "jenny_wen",
+      "name": "jenny wen"
+    },
+    "authorId": "26312789"
+  },
+  {
+    "id": "2012222681467215985",
+    "text": "the team has been hard at work in the days since launch and taking in your feedback. \n\nthe hard work's not done, but we're excited to roll out to more users today ☺️ give us a try! available in the mac app for pro &amp; max users: https://t.co/lcnG8L9jPJ",
+    "createdAt": "Fri Jan 16 17:57:27 +0000 2026",
+    "replyCount": 2,
+    "retweetCount": 2,
+    "likeCount": 47,
+    "conversationId": "2012222681467215985",
+    "author": {
+      "username": "jenny_wen",
+      "name": "jenny wen"
+    },
+    "authorId": "26312789",
+    "quotedTweet": {
+      "id": "2012215329070493971",
+      "text": "Claude Cowork is now available to Pro subscribers.",
+      "createdAt": "Fri Jan 16 17:28:14 +0000 2026",
+      "replyCount": 357,
+      "retweetCount": 558,
+      "likeCount": 8453,
+      "conversationId": "2012215329070493971",
+      "author": {
+        "username": "claudeai",
+        "name": "Claude"
+      },
+      "authorId": "1943306828697550848"
+    }
+  },
+  {
+    "id": "2012217898220081350",
+    "text": "RT @claudeai: Claude Cowork is now available to Pro subscribers.",
+    "createdAt": "Fri Jan 16 17:38:26 +0000 2026",
+    "replyCount": 0,
+    "retweetCount": 558,
+    "likeCount": 0,
+    "conversationId": "2012217898220081350",
+    "author": {
+      "username": "jenny_wen",
+      "name": "jenny wen"
+    },
+    "authorId": "26312789"
+  },
+  {
+    "id": "2010936656476414346",
+    "text": "RT @messedupfoods: https://t.co/XwVnl1hLJD",
+    "createdAt": "Tue Jan 13 04:47:14 +0000 2026",
+    "replyCount": 0,
+    "retweetCount": 1276,
+    "likeCount": 0,
+    "conversationId": "2010936656476414346",
+    "author": {
+      "username": "jenny_wen",
+      "name": "jenny wen"
+    },
+    "authorId": "26312789",
+    "media": [
+      {
+        "type": "photo",
+        "url": "https://pbs.twimg.com/media/G-dl2sSbQAAhpbC.jpg",
+        "width": 1179,
+        "height": 1160,
+        "previewUrl": "https://pbs.twimg.com/media/G-dl2sSbQAAhpbC.jpg:small"
+      }
+    ]
+  },
+  {
+    "id": "2010809258292764817",
+    "text": "👋 excited for y’all to try out Cowork today!! \n\ni’ve been using it for basically everything in the past few weeks — planning my week, interview and hiring processes, organizing my desktop, and more.",
+    "createdAt": "Mon Jan 12 20:21:00 +0000 2026",
+    "replyCount": 21,
+    "retweetCount": 9,
+    "likeCount": 270,
+    "conversationId": "2010809258292764817",
+    "author": {
+      "username": "jenny_wen",
+      "name": "jenny wen"
+    },
+    "authorId": "26312789",
+    "quotedTweet": {
+      "id": "2010805682434666759",
+      "text": "Introducing Cowork: Claude Code for the rest of your work.\n\nCowork lets you complete non-technical tasks much like how developers use Claude Code. https://t.co/EqckycvFH3",
+      "createdAt": "Mon Jan 12 20:06:48 +0000 2026",
+      "replyCount": 2572,
+      "retweetCount": 8705,
+      "likeCount": 88021,
+      "conversationId": "2010805682434666759",
+      "author": {
+        "username": "claudeai",
+        "name": "Claude"
+      },
+      "authorId": "1943306828697550848",
+      "media": [
+        {
+          "type": "video",
+          "url": "https://pbs.twimg.com/media/G-k8KoibgAAuiOj.jpg",
+          "width": 1920,
+          "height": 1080,
+          "previewUrl": "https://pbs.twimg.com/media/G-k8KoibgAAuiOj.jpg:small",
+          "videoUrl": "https://video.twimg.com/amplify_video/2010792398280929280/vid/avc1/3840x2160/28TgKr7KSXuhnodl.mp4?tag=21",
+          "durationMs": 68583
+        }
+      ]
+    }
+  },
+  {
+    "id": "2010809889954939153",
+    "text": "it’s in research preview, so just like our models — it’ll only get better from here.\n\nwe’ll be waiting for your feedback and iterating a ton in weeks to come.",
+    "createdAt": "Mon Jan 12 20:23:31 +0000 2026",
+    "replyCount": 3,
+    "retweetCount": 0,
+    "likeCount": 34,
+    "conversationId": "2010809258292764817",
+    "inReplyToStatusId": "2010809258292764817",
+    "author": {
+      "username": "jenny_wen",
+      "name": "jenny wen"
+    },
+    "authorId": "26312789"
+  },
+  {
+    "id": "2011129868935733437",
+    "text": "Usage-based pricing with no upfront commitments. Start building Voice AI apps with AssemblyAI today.",
+    "createdAt": "Tue Jan 13 17:35:00 +0000 2026",
+    "replyCount": 3,
+    "retweetCount": 2,
+    "likeCount": 31,
+    "conversationId": "2011129868935733437",
+    "author": {
+      "username": "AssemblyAI",
+      "name": "AssemblyAI"
+    },
+    "authorId": "921169886054715394"
+  },
+  {
+    "id": "2010588646496469095",
+    "text": "over time i’ve come to really respect both:\n\n- things that some people *love* and some people don’t. not everything needs to be for everyone. \n- things that have mass appeal and resonate with something deeply human in all of us.",
+    "createdAt": "Mon Jan 12 05:44:22 +0000 2026",
+    "replyCount": 10,
+    "retweetCount": 1,
+    "likeCount": 71,
+    "conversationId": "2010588646496469095",
+    "author": {
+      "username": "jenny_wen",
+      "name": "jenny wen"
+    },
+    "authorId": "26312789"
+  },
+  {
+    "id": "2010057200052621691",
+    "text": "IMO waterloo probably trains young people better for the AI era than most:\n\n- no prestige, so people are valued based on side projects and job experiences \n- values application over academics\n- “you can just do/learn things” culture",
+    "createdAt": "Sat Jan 10 18:32:36 +0000 2026",
+    "replyCount": 28,
+    "retweetCount": 54,
+    "likeCount": 1340,
+    "conversationId": "2010057200052621691",
+    "author": {
+      "username": "jenny_wen",
+      "name": "jenny wen"
+    },
+    "authorId": "26312789",
+    "quotedTweet": {
+      "id": "2009724958537044140",
+      "text": "Introducing Design Waterloo.\n\nA directory of @UWaterloo’s &amp; @Laurier’s best design talent.\n\nYour next design hire is a Waterloo intern (link below). https://t.co/EDhTHvTRHf",
+      "createdAt": "Fri Jan 09 20:32:23 +0000 2026",
+      "replyCount": 56,
+      "retweetCount": 80,
+      "likeCount": 1463,
+      "conversationId": "2009724958537044140",
+      "author": {
+        "username": "bmptrsn",
+        "name": "brayden petersen ⁂"
+      },
+      "authorId": "1417857112814800900",
+      "media": [
+        {
+          "type": "video",
+          "url": "https://pbs.twimg.com/amplify_video_thumb/2009724797240868864/img/Qxgm-C4rAz_-FxVr.jpg",
+          "width": 1920,
+          "height": 1080,
+          "previewUrl": "https://pbs.twimg.com/amplify_video_thumb/2009724797240868864/img/Qxgm-C4rAz_-FxVr.jpg:small",
+          "videoUrl": "https://video.twimg.com/amplify_video/2009724797240868864/vid/avc1/1920x1080/9WsqWP5VUFCYUC74.mp4?tag=21",
+          "durationMs": 41633
+        }
+      ]
+    }
+  },
+  {
+    "id": "2010056294464639405",
+    "text": "all the discourse is around AI putting us out of work, but all of my friends are working harder than they have in years",
+    "createdAt": "Sat Jan 10 18:29:00 +0000 2026",
+    "replyCount": 21,
+    "retweetCount": 10,
+    "likeCount": 176,
+    "conversationId": "2010056294464639405",
+    "author": {
+      "username": "jenny_wen",
+      "name": "jenny wen"
+    },
+    "authorId": "26312789"
+  },
+  {
+    "id": "2009818517625856087",
+    "text": "RT @bmptrsn: Introducing Design Waterloo.\n\nA directory of @UWaterloo’s &amp; @Laurier’s best design talent.\n\nYour next design hire is a Waterlo…",
+    "createdAt": "Sat Jan 10 02:44:09 +0000 2026",
+    "replyCount": 0,
+    "retweetCount": 80,
+    "likeCount": 0,
+    "conversationId": "2009818517625856087",
+    "author": {
+      "username": "jenny_wen",
+      "name": "jenny wen"
+    },
+    "authorId": "26312789"
+  },
+  {
+    "id": "2008623187475480994",
+    "text": "team has been doing a really good job polishing, iterating, and sweating the details as of late. \n\nexcited that folks are noticing! more to come. watch this space.",
+    "createdAt": "Tue Jan 06 19:34:20 +0000 2026",
+    "replyCount": 12,
+    "retweetCount": 4,
+    "likeCount": 220,
+    "conversationId": "2008623187475480994",
+    "author": {
+      "username": "jenny_wen",
+      "name": "jenny wen"
+    },
+    "authorId": "26312789",
+    "quotedTweet": {
+      "id": "2008571550258393107",
+      "text": "The 1px stroke icons on the @claudeai UI give me all the feels! 🥰 https://t.co/B9oSnFB4Rp",
+      "createdAt": "Tue Jan 06 16:09:09 +0000 2026",
+      "replyCount": 28,
+      "retweetCount": 5,
+      "likeCount": 277,
+      "conversationId": "2008571550258393107",
+      "author": {
+        "username": "jamesm",
+        "name": "James McDonald"
+      },
+      "authorId": "14275130",
+      "media": [
+        {
+          "type": "photo",
+          "url": "https://pbs.twimg.com/media/G9_g-hYWMAAILd6.png",
+          "width": 570,
+          "height": 616,
+          "previewUrl": "https://pbs.twimg.com/media/G9_g-hYWMAAILd6.png:small"
+        }
+      ]
+    }
+  },
+  {
+    "id": "2008609987770413123",
+    "text": "RT @parthsareen: i wanna know which coding agent is gonna work like a waterloo intern",
+    "createdAt": "Tue Jan 06 18:41:53 +0000 2026",
+    "replyCount": 0,
+    "retweetCount": 3,
+    "likeCount": 0,
+    "conversationId": "2008609987770413123",
+    "author": {
+      "username": "jenny_wen",
+      "name": "jenny wen"
+    },
+    "authorId": "26312789"
+  },
+  {
+    "id": "2006805018029207859",
+    "text": "happy new year, tigers https://t.co/TO4w0T5u6D",
+    "createdAt": "Thu Jan 01 19:09:35 +0000 2026",
+    "replyCount": 3,
+    "retweetCount": 1,
+    "likeCount": 50,
+    "conversationId": "2006805018029207859",
+    "author": {
+      "username": "jenny_wen",
+      "name": "jenny wen"
+    },
+    "authorId": "26312789",
+    "media": [
+      {
+        "type": "photo",
+        "url": "https://pbs.twimg.com/media/G9mab89WMAAdN4a.jpg",
+        "width": 1206,
+        "height": 979,
+        "previewUrl": "https://pbs.twimg.com/media/G9mab89WMAAdN4a.jpg:small"
+      }
+    ]
+  },
+  {
+    "id": "2011833382582575539",
+    "text": "Been vibe-coding something small:\n\n- Studied 2,000+ tech brand logos\n- Turned patterns into ready-to-use logos\n- All human-designed\n- $69 for a full brand kit",
+    "createdAt": "Thu Jan 15 16:10:31 +0000 2026",
+    "replyCount": 11,
+    "retweetCount": 10,
+    "likeCount": 212,
+    "conversationId": "2011833382582575539",
+    "author": {
+      "username": "RaananTz",
+      "name": "Raanan Tzory"
+    },
+    "authorId": "2434743794"
+  },
+  {
+    "id": "2015791685595537698",
+    "text": "Welcoming G-DRAGON as our inaugural Global iCON, marking a pivotal step into cultural influence with boundless creativity for our 15th anniversary.",
+    "createdAt": "Mon Jan 26 14:19:24 +0000 2026",
+    "replyCount": 0,
+    "retweetCount": 2,
+    "likeCount": 15,
+    "conversationId": "2015791685595537698",
+    "author": {
+      "username": "Casetify",
+      "name": "CASETiFY"
+    },
+    "authorId": "368835879"
+  },
+  {
+    "id": "2008655294734430307",
+    "text": "It’s giving minimum effort, maximum vacation vibes.",
+    "createdAt": "Tue Jan 06 21:41:55 +0000 2026",
+    "replyCount": 3,
+    "retweetCount": 6,
+    "likeCount": 96,
+    "conversationId": "2008655294734430307",
+    "author": {
+      "username": "VISITFLORIDA",
+      "name": "VISIT FLORIDA"
+    },
+    "authorId": "14385055"
+  },
+  {
+    "id": "2014094577557246138",
+    "text": "Our very efficient Phenom 100 fleet is ideal for business trips. https://t.co/ELE4SFWV66",
+    "createdAt": "Wed Jan 21 21:55:42 +0000 2026",
+    "replyCount": 6,
+    "retweetCount": 8,
+    "likeCount": 45,
+    "conversationId": "2014094577557246138",
+    "author": {
+      "username": "Onwardjets",
+      "name": "Onward Jets"
+    },
+    "authorId": "1499472232934002697",
+    "media": [
+      {
+        "type": "photo",
+        "url": "https://pbs.twimg.com/media/G_OAV16W8AAXdr5.jpg",
+        "width": 1536,
+        "height": 2048,
+        "previewUrl": "https://pbs.twimg.com/media/G_OAV16W8AAXdr5.jpg:small"
+      }
+    ]
+  },
+  {
+    "id": "2014716807836213668",
+    "text": "Pinpoint Policy Institute stands with @GovMikeKehoe in supporting a phased elimination of the state individual income tax over the next five years.\n\nThis move modernizes a 1931-era tax code, rewards work, attracts families and businesses, and positions Missouri to compete with no-income-tax states like Texas and Florida.\n\nZero-income-tax states have seen ~12% population growth over the past decade.\n\nRead more here: https://t.co/DAVPGuzBpE",
+    "createdAt": "Fri Jan 23 15:08:13 +0000 2026",
+    "replyCount": 0,
+    "retweetCount": 0,
+    "likeCount": 23,
+    "conversationId": "2014716807836213668",
+    "author": {
+      "username": "Pinpoint_Policy",
+      "name": "Pinpoint Policy Institute"
+    },
+    "authorId": "1765747349400305665"
+  },
+  {
+    "id": "2016022734757826619",
+    "text": "Say goodbye to cold hands.\nWaterproof, windproof, and fully touch-screen compatible.\nGet yours here ➡️ https://t.co/GFjEEEDKwG https://t.co/fzmv3FE2TJ",
+    "createdAt": "Tue Jan 27 05:37:30 +0000 2026",
+    "replyCount": 0,
+    "retweetCount": 1,
+    "likeCount": 6,
+    "conversationId": "2016022734757826619",
+    "author": {
+      "username": "wayfearn_com",
+      "name": "Wayfearn"
+    },
+    "authorId": "1368830931281186820",
+    "media": [
+      {
+        "type": "video",
+        "url": "https://pbs.twimg.com/amplify_video_thumb/1987497206392426496/img/nsEwX0zY5wPmDfgp.jpg",
+        "width": 720,
+        "height": 900,
+        "previewUrl": "https://pbs.twimg.com/amplify_video_thumb/1987497206392426496/img/nsEwX0zY5wPmDfgp.jpg:small",
+        "videoUrl": "https://video.twimg.com/amplify_video/1987497206392426496/vid/avc1/720x900/-D4EwvoQeBDLbGSh.mp4?tag=21",
+        "durationMs": 21989
+      }
+    ]
+  },
+  {
+    "id": "2012766751193530634",
+    "text": "Until Jan 28, STRANGER SAGA is on sale for $5.34 (46% OFF) — recommended if you:\n\n- Don’t like learning complicated systems\n- Love training weak, ordinary Civilians into powerful units\n- Want to build an armored knight faster than a swordsman\n- Want to throw a LOT of axes",
+    "createdAt": "Sun Jan 18 05:59:23 +0000 2026",
+    "replyCount": 1,
+    "retweetCount": 2,
+    "likeCount": 10,
+    "conversationId": "2012766751193530634",
+    "author": {
+      "username": "MST_dowameikyu",
+      "name": "MST@SRPG『STRANGER SAGA』販売中"
+    },
+    "authorId": "225726450"
+  },
+  {
+    "id": "2016593432584831104",
+    "text": "In the spring of 1945, comedian Joe E. Brown came to Lingayen, Luzon to entertain members of the 49th Fighter Group, along with a USO troupe that was performing the musical \"Oklahoma.\"  Brown's son had been killed while flying Stateside with the USAAF, so he had a deep soft spot for our aviators.\n\nWhile at Lingayen, he reconnected with LTC Gerald Johnson, whom he'd met earlier in the war in New Guinea. The two became friends, and Johnson took him on a combat mission in his P-38.  The 49th's maintainers pulled out Johnson's radio gear, which allowed Joe E. Brown to wedge in behind the pilot's seat and watch the action from over Gerald's shoulder.\n\nJohnson led a close air support bombing mission that day against Japanese defenses around Baguio, the Philippine summer capital. Joe E. Brown snapped this photo during the raid from over Johnson's right shoulder.\n\nBrown was 54 years old at the time.  Along with MacKinlay Kantor, Brown's example was part of my own inspiration to embed with a combat aviation brigade while in my mid-forties. I figured, if a mid-fifties comedian could fly combat missions, why not a middle aged military historian?",
+    "createdAt": "Wed Jan 28 19:25:15 +0000 2026",
+    "replyCount": 0,
+    "retweetCount": 0,
+    "likeCount": 4,
+    "conversationId": "2016593432584831104",
+    "author": {
+      "username": "JohnRBruning",
+      "name": "John R Bruning"
+    },
+    "authorId": "85591723",
+    "media": [
+      {
+        "type": "photo",
+        "url": "https://pbs.twimg.com/media/G_xflMQWoAAEHJK.jpg",
+        "width": 1274,
+        "height": 823,
+        "previewUrl": "https://pbs.twimg.com/media/G_xflMQWoAAEHJK.jpg:small"
+      }
+    ]
+  },
+  {
+    "id": "2015802910412796291",
+    "text": "Our Anniversary is almost here 🎉\nTournament and ring game rewards for everyone.\nJan 29 to Feb 1.\n\nFreerolls. Bigger guarantees. Chip Dumps.",
+    "createdAt": "Mon Jan 26 15:04:00 +0000 2026",
+    "replyCount": 0,
+    "retweetCount": 1,
+    "likeCount": 4,
+    "conversationId": "2015802910412796291",
+    "author": {
+      "username": "ClubWPTGold",
+      "name": "ClubWPT Gold"
+    },
+    "authorId": "1823498498916147201"
+  },
+  {
+    "id": "2015857779492442388",
+    "text": "Kicking off RESO Success Week, we’re celebrating the milestones, members and moments that shaped RESO – starting with you. Drop a comment, swag pic or your RESO Success story for a chance to win exclusive swag. https://t.co/zi1AykFMqn",
+    "createdAt": "Mon Jan 26 18:42:02 +0000 2026",
+    "replyCount": 0,
+    "retweetCount": 0,
+    "likeCount": 1,
+    "conversationId": "2015857779492442388",
+    "author": {
+      "username": "RESOStandards",
+      "name": "RESOStandards"
+    },
+    "authorId": "529625060",
+    "media": [
+      {
+        "type": "photo",
+        "url": "https://pbs.twimg.com/media/G_nD9zWXAAAB0n8.jpg",
+        "width": 1109,
+        "height": 566,
+        "previewUrl": "https://pbs.twimg.com/media/G_nD9zWXAAAB0n8.jpg:small"
+      }
+    ]
+  },
+  {
+    "id": "2016565886103003212",
+    "text": "So @bgurley recently said \"Institutional VC have ZERO interest in funding anything not AI right now\". My latest guest @nbt strongly begs to differ.\n\nFounders are likely tired of hearing that if your startup does not scream “AI why now?” in the first slide, you're unfundable in 2026. If you think that's you, you need to hear what Nikhil has to say.\n\nHis pushback is sharp and refreshing: AI is a powerful unlock, but not a free pass to get sloppy on distribution, valuations and customer experience. The fundamentals will matter especially when the capital markets reset.\n\nAs an an early backer of breakout founders like @melaniecanva at @canva , @PayalKadakia at @classpass, and Brett and Jonathan  at @thefarmersdog and now as co-founder of @footworkvc  alongside @msmith492, Nikhil knows a great early stage opportunity when he sees one.\n\nOur conversation was full of his thoughtful, contrarian takes. \n\nIf you care about building durable companies in an AI-oversaturated market, this conversation with Nikhil is well worth your time",
+    "createdAt": "Wed Jan 28 17:35:47 +0000 2026",
+    "replyCount": 1,
+    "retweetCount": 1,
+    "likeCount": 5,
+    "conversationId": "2016565886103003212",
+    "author": {
+      "username": "JayKapoorNYC",
+      "name": "Jay Kapoor"
+    },
+    "authorId": "464988798",
+    "media": [
+      {
+        "type": "video",
+        "url": "https://pbs.twimg.com/amplify_video_thumb/2016564732317089792/img/0gu6nfX1gcptyyVi.jpg",
+        "width": 2048,
+        "height": 1152,
+        "previewUrl": "https://pbs.twimg.com/amplify_video_thumb/2016564732317089792/img/0gu6nfX1gcptyyVi.jpg:small",
+        "videoUrl": "https://video.twimg.com/amplify_video/2016564732317089792/vid/avc1/3840x2160/bdVW57Cg7Vf3QU1J.mp4?tag=21",
+        "durationMs": 62187
+      }
+    ]
+  }
+]

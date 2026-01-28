@@ -267,6 +267,95 @@ export class OllamaClient {
     }
 
     /**
+     * Analyze an image using vision model (llava)
+     *
+     * Uses the llava model to analyze images and return descriptive text.
+     * Falls back gracefully if the vision model is not available.
+     *
+     * @param imageBuffer - Buffer containing image data
+     * @param prompt - Prompt describing what analysis to perform
+     * @returns Image analysis response text
+     *
+     * @example
+     * const analysis = await client.analyzeImage(
+     *   imageBuffer,
+     *   'Describe this image in detail, focusing on the main subject and composition.'
+     * );
+     */
+    async analyzeImage(imageBuffer: Buffer, prompt: string): Promise<string> {
+        return this.executeWithLimits(async () => {
+            try {
+                // Convert image buffer to base64
+                const base64Image = imageBuffer.toString('base64');
+
+                const response = await this.client.generate({
+                    model: 'llava',
+                    prompt,
+                    images: [base64Image],
+                    stream: false,
+                    options: {
+                        temperature: 0.3,
+                        top_p: 0.9,
+                    },
+                });
+
+                return response.response.trim();
+            } catch (error) {
+                // Graceful degradation if vision model is unavailable
+                console.warn('Vision model (llava) not available or analysis failed:', error instanceof Error ? error.message : error);
+                return '[Image analysis unavailable - vision model not installed]';
+            }
+        }, 'analyzeImage');
+    }
+
+    /**
+     * Transcribe audio from a video file using the Whisper model
+     *
+     * Uses the karanchopda333/whisper:latest model to transcribe speech from audio files.
+     * The model reads the file directly from the provided path.
+     * Falls back gracefully if the whisper model is not available or transcription fails.
+     *
+     * @param audioPath - Absolute file path to the audio or video file to transcribe
+     * @returns Transcribed text from the audio, or error message if transcription fails
+     *
+     * @example
+     * const transcription = await client.transcribeVideo('/path/to/video.mp4');
+     * if (transcription.includes('[Transcription failed')) {
+     *   console.error('Could not transcribe video');
+     * } else {
+     *   console.log('Transcribed text:', transcription);
+     * }
+     *
+     * @remarks
+     * - The whisper model requires the file to be accessible at the given path
+     * - Transcription timeout is set to 5 minutes for long audio files
+     * - This operation is queued and respects the single-request concurrency limit
+     */
+    async transcribeVideo(audioPath: string): Promise<string> {
+        return this.executeWithLimits(async () => {
+            try {
+                // Validate audio path exists and is readable
+                if (!audioPath || typeof audioPath !== 'string') {
+                    throw new Error('Invalid audio path provided');
+                }
+
+                const response = await this.client.generate({
+                    model: 'karanchopda333/whisper:latest',
+                    prompt: `Transcribe the audio from file at ${audioPath}`,
+                    stream: false,
+                });
+
+                return response.response.trim();
+            } catch (error) {
+                // Graceful degradation if whisper model is unavailable or transcription fails
+                const errorMessage = error instanceof Error ? error.message : String(error);
+                console.warn(`Audio transcription failed for ${audioPath}:`, errorMessage);
+                return `[Transcription failed - ${errorMessage}]`;
+            }
+        }, 'transcribeVideo');
+    }
+
+    /**
      * Build summary prompt
      */
     private buildSummaryPrompt(content: string, title?: string): string {

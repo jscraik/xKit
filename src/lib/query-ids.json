@@ -1,18 +1,15 @@
 {
-  "CreateTweet": "Uf3io9zVp1DsYxrmL5FJ7g",
+  "CreateTweet": "z0m4Q8u_67R9VOSMXU_MWg",
   "CreateRetweet": "LFho5rIi4xcKO90p9jwG7A",
   "FavoriteTweet": "lI07N6Otwv1PhnEgXILM7A",
   "DeleteBookmark": "Wlmlj2-xzyS1GN3a6cj-mQ",
-  "TweetDetail": "97JF30KziU00483E_8elBA",
-  "SearchTimeline": "M1jEez78PEfVfbQLvlWMvQ",
+  "TweetDetail": "Kzfv17rukSzjT96BerOWZA",
+  "SearchTimeline": "f_A-Gyo204PRxixpkrchJg",
+  "UserTweets": "a3SQAz_VP9k8VWDr9bMcXQ",
+  "UserByScreenName": "-oaLodhGbbnzJBACb1kk2Q",
   "Bookmarks": "RV1g3b8n_SGOHwkqKYSCFw",
   "BookmarkFolderTimeline": "KJIQpsvxrTfRIlbaRIySHQ",
-  "Following": "BEkNpEt5pNETESoqMsTEGA",
-  "Followers": "kuFUYP9eV1FPoEy4N-pi7w",
-  "Likes": "JR2gceKucIKcVNB_9JkhsA",
-  "ListOwnerships": "wQcOSjSQ8NtgxIwvYl1lMg",
-  "ListMemberships": "BlEXXdARdSeL_0KyKHHvvg",
-  "ListLatestTweetsTimeline": "2TemLyqrMpTeAmysdbnVqw",
-  "ListByRestId": "wXzyA5vM_aVkBL9G8Vp3kw",
-  "ExplorePage": "gCKhXL4VRpxTNNsE_RJCdA"
+  "Following": "i2GOldCH2D3OUEhAdimLrA",
+  "Followers": "oQWxG6XdR5SPvMBsPiKUPQ",
+  "Likes": "fuBEtiFu3uQFuPDTsv4bfg"
 }

@@ -1,0 +1,13 @@
+Objective: Use `ui-ux-creative-coding` to design a shippable UI direction + implementation plan, but first gather the minimum inputs you want to provide.
+
+Plan (3–7 steps):
+1) Confirm whether to run /interview-me for structured requirements.
+2) Capture the core UI target (surface, users, goal, success signal).
+3) Define constraints (platform/stack, routes, states, accessibility, motion).
+4) Choose a visual direction + token strategy.
+5) Draft the UI brief, component plan, and motion plan.
+6) Propose the first implementation slice and verification steps.
+
+Next step: decide if I should run the /interview-me flow to collect requirements in a structured way.
+
+Should I use /interview-me to explore this systematically?

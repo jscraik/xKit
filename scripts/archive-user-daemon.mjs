@@ -9,7 +9,7 @@
  *   node scripts/archive-user-daemon.mjs --config archive-config.json
  */
 
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -105,9 +105,9 @@ async function archiveUser(username) {
 
     try {
         const query = `from:${username}`;
-        const xkitCmd = `pnpm xkit search "${query}" --count ${config.limit} --json`;
+        const args = ['xkit', 'search', query, '--count', String(config.limit), '--json'];
 
-        const output = execSync(xkitCmd, {
+        const output = execFileSync('pnpm', args, {
             encoding: 'utf-8',
             stdio: ['inherit', 'pipe', 'inherit'],
             maxBuffer: 10 * 1024 * 1024,

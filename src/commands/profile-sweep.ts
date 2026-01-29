@@ -451,34 +451,58 @@ function extractCodeSnippets(tweets: TweetData[]): CodeSnippet[] {
     const inlineCodeRegex = /`([^`]+)`/g;
     const urlRegex = /https?:\/\/[^\s]+/g;
 
+    // Code sharing platforms
+    const codePlatforms = [
+        'github.com',
+        'codepen.io',
+        'jsfiddle.net',
+        'codesandbox.io',
+        'stackblitz.com',
+        'replit.com',
+        'glitch.com',
+        'jsbin.com',
+        'playcode.io',
+        'runkit.com',
+    ];
+
     for (const tweet of tweets) {
         const text = tweet.text || '';
         const author = tweet.author?.username || 'unknown';
         const date = tweet.createdAt || '';
+        const tweetUrl = `https://x.com/${author}/status/${tweet.id}`;
 
-        // Extract code blocks
+        // Extract code blocks (markdown style)
         let match: RegExpExecArray | null;
         while ((match = codeBlockRegex.exec(text)) !== null) {
             snippets.push({
-                language: match[1],
+                language: match[1] || 'unknown',
                 code: match[2].trim(),
-                context: `Tweet by @${author} on ${date}`,
+                context: `Code block from @${author} on ${date}\nTweet: ${tweetUrl}`,
             });
         }
 
-        // Extract inline code (only if substantial)
+        // Extract inline code (only if substantial - likely component names or APIs)
         const inlineMatches = Array.from(text.matchAll(inlineCodeRegex));
         for (const inlineMatch of inlineMatches) {
             const code = inlineMatch[1];
-            if (code.length > 20 || code.includes('(') || code.includes('{')) {
+            // Look for component-like patterns or substantial code
+            if (
+                code.length > 20 ||
+                code.includes('(') ||
+                code.includes('{') ||
+                /^[A-Z][a-zA-Z]+$/.test(code) || // PascalCase (React components)
+                code.includes('Component') ||
+                code.includes('Hook') ||
+                code.includes('use[A-Z]') // React hooks
+            ) {
                 snippets.push({
                     code: code.trim(),
-                    context: `Inline code from @${author} on ${date}`,
+                    context: `Inline code from @${author} on ${date}\nTweet: ${tweetUrl}`,
                 });
             }
         }
 
-        // Check URLs for code repositories
+        // Check URLs for code repositories and playgrounds
         const urls = text.match(urlRegex);
         if (urls) {
             for (const url of urls) {
@@ -489,16 +513,37 @@ function extractCodeSnippets(tweets: TweetData[]): CodeSnippet[] {
 
                 try {
                     const linkType = detectLinkType(url);
+                    const lowerUrl = url.toLowerCase();
 
-                    if (linkType === 'github') {
+                    // Check if it's a code platform
+                    const isCodePlatform = codePlatforms.some(platform => lowerUrl.includes(platform));
+
+                    if (linkType === 'github' || isCodePlatform) {
                         snippets.push({
                             code: url,
-                            context: `Code link from @${author}: ${text.substring(0, 100)}`,
+                            context: `Code link from @${author}: ${text.substring(0, 150)}\nTweet: ${tweetUrl}`,
                         });
                     }
                 } catch (error) {
                     // Skip invalid URLs
                     continue;
+                }
+            }
+        }
+
+        // Check for code in images (note: requires vision analysis to extract)
+        if (tweet.media && tweet.media.length > 0) {
+            const hasImages = tweet.media.some(m => m.type === 'photo');
+            if (hasImages) {
+                // Add a marker that this tweet has images that might contain code
+                const codeKeywords = ['component', 'code', 'snippet', 'function', 'const', 'let', 'var', 'import', 'export', 'react', 'vue', 'svelte'];
+                const hasCodeKeywords = codeKeywords.some(keyword => text.toLowerCase().includes(keyword));
+
+                if (hasCodeKeywords) {
+                    snippets.push({
+                        code: `[IMAGE: Potential code screenshot - requires vision analysis]`,
+                        context: `Tweet with image from @${author} on ${date}\nText: ${text}\nTweet: ${tweetUrl}`,
+                    });
                 }
             }
         }

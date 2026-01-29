@@ -12,21 +12,22 @@ import { registerLearnCommand } from '../commands/learn.js';
 import { registerListsCommand } from '../commands/lists.js';
 import { registerMetricsCommand } from '../commands/metrics.js';
 import { registerNewsCommands } from '../commands/news.js';
+import { registerPersonaArchiveCommand } from '../commands/persona-archive.js';
+import { registerPersonaExtractCommand } from '../commands/persona-extract.js';
+import {
+  registerPersonaSkillApproveCommand,
+  registerPersonaSkillListCommand,
+  registerPersonaSkillRejectCommand,
+} from '../commands/persona-skill-approve.js';
+import { registerPersonaSkillCommand } from '../commands/persona-skill.js';
 import { registerPostCommands } from '../commands/post.js';
+import { registerProfileSweepCommand } from '../commands/profile-sweep.js';
 import { registerQueryIdsCommand } from '../commands/query-ids.js';
 import { registerReadCommands } from '../commands/read.js';
 import { registerRecapCommand } from '../commands/recap.js';
 import { registerSearchCommands } from '../commands/search.js';
 import { registerSetupCommand } from '../commands/setup.js';
 import { registerSummarizeCommand } from '../commands/summarize.js';
-import { registerPersonaArchiveCommand } from '../commands/persona-archive.js';
-import { registerPersonaExtractCommand } from '../commands/persona-extract.js';
-import { registerPersonaSkillCommand } from '../commands/persona-skill.js';
-import {
-  registerPersonaSkillApproveCommand,
-  registerPersonaSkillRejectCommand,
-  registerPersonaSkillListCommand,
-} from '../commands/persona-skill-approve.js';
 import { registerTemplateCommands } from '../commands/templates.js';
 import { registerUnbookmarkCommand } from '../commands/unbookmark.js';
 import { registerUserTimelineCommand } from '../commands/user-timeline.js';
@@ -78,6 +79,8 @@ export const KNOWN_COMMANDS = new Set([
   'summarize',
   'template',
   'templates',
+  'profile-sweep',
+  'user-timeline',
 ]);
 
 /**
@@ -218,6 +221,7 @@ export function createProgram(ctx: CliContext): Command {
   registerReadCommands(program, ctx);
   registerSearchCommands(program, ctx);
   registerUserTimelineCommand(program, ctx);
+  registerProfileSweepCommand(program, ctx);
   registerNewsCommands(program, ctx);
   registerBookmarksCommand(program, ctx);
   registerBookmarksArchiveCommand(program, ctx);

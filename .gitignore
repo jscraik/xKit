@@ -33,6 +33,12 @@ test-archive/
 .tmp/
 knowledge/
 
+# Profile sweep artifacts
+artifacts/
+*-sweep.log
+*-state.json
+bookmark-state.json
+
 # Runtime state
 .xkit/
 

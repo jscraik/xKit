@@ -259,7 +259,7 @@ export function buildUserTweetsFeatures(): Record<string, boolean> {
     hidden_profile_subscriptions_enabled: false,
     subscriptions_feature_can_gift_premium: false,
     responsive_web_twitter_article_notes_tab_enabled: false,
-    post_ctas_fetch_enabled: false,
+    post_ctas_fetch_enabled: true,
     articles_preview_enabled: true,
   });
 }

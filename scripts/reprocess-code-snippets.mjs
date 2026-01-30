@@ -317,7 +317,7 @@ async function processUser(username) {
 }
 
 // Main
-const users = ['emilkowalski', 'jh3yy', 'kubadesign'];
+const users = ['emilkowalski', 'jh3yy', 'kubadesign', 'benjitaylor'];
 
 console.log('🔄 Re-processing code snippets with enhanced extraction...');
 

@@ -19,6 +19,7 @@ const TARGET_OPERATIONS = [
   'Following',
   'Followers',
   'Likes',
+  'UserTweets',
 ] as const;
 
 type OperationName = (typeof TARGET_OPERATIONS)[number];

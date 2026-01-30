@@ -18,6 +18,22 @@ import {
     type PersonaAnalysisOptions,
 } from '../persona-extraction/index.js';
 import { SkillWriter } from '../skill-generator/index.js';
+import {
+    extractArticlesEnhanced,
+    type EnhancedArticleItem,
+} from './article-extractor-enhanced.js';
+import {
+    calculateStatistics,
+    extractProfileMetadata,
+    type ProfileMetadata,
+    type ProfileStatistics,
+} from './profile-metadata.js';
+import {
+    CheckpointManager,
+    ErrorLogger,
+    ProgressTracker,
+    deduplicateByKey,
+} from './shared/index.js';
 
 interface SweepOptions {
     limit?: string;
@@ -31,6 +47,12 @@ interface SweepOptions {
     model?: string;
     host?: string;
     autoApprove?: boolean;
+    minLikes?: string;
+    excludeRetweets?: boolean;
+    dateFrom?: string;
+    dateTo?: string;
+    outputFormat?: string;
+    resume?: boolean;
 }
 
 interface MediaItem {
@@ -43,9 +65,17 @@ interface MediaItem {
 
 interface ArticleItem {
     url: string;
+    originalUrl?: string;
     title?: string;
     content?: string;
     publishedTime?: string;
+    author?: string;
+    description?: string;
+    tags?: string[];
+    tweetId?: string;
+    tweetText?: string;
+    tweetUrl?: string;
+    tweetDate?: string;
 }
 
 interface CodeSnippet {
@@ -75,18 +105,19 @@ interface OrganizedCodeSnippets {
 
 interface ProfileSweepResult {
     username: string;
-    displayName?: string;
-    bio?: string;
-    profileImageUrl?: string;
-    followerCount?: number;
-    followingCount?: number;
+    profile?: ProfileMetadata;
+    statistics?: ProfileStatistics;
     tweets: TweetData[];
     media: MediaItem[];
     articles: ArticleItem[];
-    codeSnippets: CodeSnippet[]; // Keep for backward compatibility
-    organizedCode?: OrganizedCodeSnippets; // New organized structure
+    codeSnippets: CodeSnippet[];
+    organizedCode?: OrganizedCodeSnippets;
     archivedAt: string;
     persona?: unknown;
+    errors?: {
+        count: number;
+        summary: Record<string, number>;
+    };
 }
 
 /**
@@ -95,6 +126,7 @@ interface ProfileSweepResult {
 export function registerProfileSweepCommand(program: Command, ctx: CliContext): void {
     program
         .command('profile-sweep')
+        .alias('ps')
         .description('Comprehensive profile archive with media, articles, code, and optional persona extraction')
         .argument('<username>', 'Username (e.g., @jh3yy or jh3yy)')
         .option('-n, --limit <number>', 'Number of tweets to fetch (default: 200, max: 3200)', '200')
@@ -104,10 +136,16 @@ export function registerProfileSweepCommand(program: Command, ctx: CliContext): 
         .option('--include-images', 'Download and analyze images', false)
         .option('--include-videos', 'Download videos', false)
         .option('--create-skill', 'Extract persona and generate Claude skill', false)
-        .option('-t, --target <path>', 'Target directory for skill output', join(homedir(), 'dev', 'agents-skills', 'personas'))
+        .option('-t, --target <path>', 'Target directory for skill output', join(homedir(), 'dev', 'agent-skills', 'personas'))
         .option('--model <name>', 'Ollama model for persona extraction (default: qwen2.5:7b)', 'qwen2.5:7b')
         .option('--host <url>', 'Ollama host URL (default: http://localhost:11434)', 'http://localhost:11434')
         .option('--auto-approve', 'Write skill directly without review', false)
+        .option('--min-likes <number>', 'Only include tweets with at least this many likes')
+        .option('--exclude-retweets', 'Exclude retweets from the archive', false)
+        .option('--date-from <date>', 'Only include tweets from this date onwards (YYYY-MM-DD)')
+        .option('--date-to <date>', 'Only include tweets up to this date (YYYY-MM-DD)')
+        .option('--output-format <format>', 'Additional output formats: csv, html, sqlite', 'json,markdown')
+        .option('--resume', 'Resume from previous checkpoint if available', false)
         .action(async (username: string, cmdOpts: SweepOptions) => {
             const opts = program.opts();
             const timeoutMs = ctx.resolveTimeoutFromOptions(opts);
@@ -123,6 +161,34 @@ export function registerProfileSweepCommand(program: Command, ctx: CliContext): 
             }
             const count = countResult.value;
 
+            // Parse filter options
+            let minLikes = 0;
+            if (cmdOpts.minLikes) {
+                const likesResult = ctx.parseIntegerOption(cmdOpts.minLikes, { name: '--min-likes', min: 0 });
+                if (!likesResult.ok) {
+                    console.error(`${ctx.p('err')}${likesResult.error}`);
+                    process.exit(2);
+                }
+                minLikes = likesResult.value;
+            }
+
+            let dateFrom: Date | undefined;
+            let dateTo: Date | undefined;
+            if (cmdOpts.dateFrom) {
+                dateFrom = new Date(cmdOpts.dateFrom);
+                if (isNaN(dateFrom.getTime())) {
+                    console.error(`${ctx.p('err')}Invalid date format for --date-from. Use YYYY-MM-DD`);
+                    process.exit(2);
+                }
+            }
+            if (cmdOpts.dateTo) {
+                dateTo = new Date(cmdOpts.dateTo);
+                if (isNaN(dateTo.getTime())) {
+                    console.error(`${ctx.p('err')}Invalid date format for --date-to. Use YYYY-MM-DD`);
+                    process.exit(2);
+                }
+            }
+
             const normalizedUsername = normalizeHandle(username);
             if (!normalizedUsername) {
                 console.error(`${ctx.p('err')}Invalid username: ${username}`);
@@ -132,6 +198,19 @@ export function registerProfileSweepCommand(program: Command, ctx: CliContext): 
             // Create artifacts directory
             const artifactsDir = join(process.cwd(), 'artifacts', normalizedUsername);
             mkdirSync(artifactsDir, { recursive: true });
+
+            // Initialize utilities
+            const errorLogger = new ErrorLogger(artifactsDir);
+            const checkpointManager = new CheckpointManager(artifactsDir, normalizedUsername);
+
+            // Check for resume
+            let checkpoint = null;
+            if (cmdOpts.resume) {
+                checkpoint = checkpointManager.load();
+                if (checkpoint) {
+                    console.log(`📍 Resuming from checkpoint (${checkpoint.tweetsProcessed} tweets processed)`);
+                }
+            }
 
             console.log(`📱 Authenticating...`);
             const { cookies, warnings } = await ctx.resolveCredentialsFromOptions(opts);
@@ -147,9 +226,9 @@ export function registerProfileSweepCommand(program: Command, ctx: CliContext): 
 
             const client = new TwitterClient({ cookies, timeoutMs, quoteDepth });
 
-            // Fetch user timeline
+            // Fetch user timeline with full data (includeRaw: true for URL entities)
             console.log(`\n📥 Fetching tweets from @${normalizedUsername}...`);
-            const result = await client.getUserTweets(normalizedUsername, count, { includeRaw: false });
+            const result = await client.getUserTweets(normalizedUsername, count, { includeRaw: true });
 
             if (!result.success || !result.tweets) {
                 console.error(`${ctx.p('err')}Failed to fetch user timeline: ${result.error}`);
@@ -158,15 +237,61 @@ export function registerProfileSweepCommand(program: Command, ctx: CliContext): 
 
             console.log(`✅ Fetched ${result.tweets.length} tweets`);
 
+            // Apply filters
+            let filteredTweets = result.tweets;
+
+            if (cmdOpts.excludeRetweets) {
+                const beforeCount = filteredTweets.length;
+                filteredTweets = filteredTweets.filter((t) => !t.text?.startsWith('RT @'));
+                console.log(`   Filtered out ${beforeCount - filteredTweets.length} retweets`);
+            }
+
+            if (minLikes > 0) {
+                const beforeCount = filteredTweets.length;
+                filteredTweets = filteredTweets.filter((t) => (t.likeCount || 0) >= minLikes);
+                console.log(`   Filtered to ${filteredTweets.length} tweets with ${minLikes}+ likes`);
+            }
+
+            if (dateFrom || dateTo) {
+                const beforeCount = filteredTweets.length;
+                filteredTweets = filteredTweets.filter((t) => {
+                    if (!t.createdAt) return false;
+                    const tweetDate = new Date(t.createdAt);
+                    if (dateFrom && tweetDate < dateFrom) return false;
+                    if (dateTo && tweetDate > dateTo) return false;
+                    return true;
+                });
+                console.log(`   Filtered to ${filteredTweets.length} tweets in date range`);
+            }
+
+            // Extract profile metadata
+            console.log('\n👤 Extracting profile metadata...');
+            const profileMetadata = extractProfileMetadata(filteredTweets, normalizedUsername);
+            console.log(`✓ Profile: ${profileMetadata.displayName || normalizedUsername}`);
+            if (profileMetadata.followerCount) {
+                console.log(`   Followers: ${profileMetadata.followerCount.toLocaleString()}`);
+            }
+
+            // Calculate statistics
+            console.log('\n📊 Calculating statistics...');
+            const statistics = calculateStatistics(filteredTweets);
+            console.log(`✓ Stats: ${statistics.totalLikes.toLocaleString()} likes, ${statistics.totalRetweets.toLocaleString()} retweets`);
+
             // Save tweets to artifacts
             const tweetsPath = join(artifactsDir, 'tweets.json');
-            writeFileSync(tweetsPath, JSON.stringify(result.tweets, null, 2), 'utf8');
+            writeFileSync(tweetsPath, JSON.stringify(filteredTweets, null, 2), 'utf8');
             console.log(`💾 Saved tweets to ${tweetsPath}`);
 
             // Extract media
             console.log('\n🖼️  Extracting media...');
-            const media = extractMedia(result.tweets);
+            const media = extractMedia(filteredTweets);
             console.log(`✓ Found ${media.length} media items`);
+
+            // Deduplicate media by URL
+            const uniqueMedia = deduplicateByKey(media, (m: MediaItem) => m.url);
+            if (uniqueMedia.length < media.length) {
+                console.log(`   Deduplicated to ${uniqueMedia.length} unique items`);
+            }
 
             // Download media if requested
             let imageBuffers: Buffer[] = [];
@@ -184,9 +309,11 @@ export function registerProfileSweepCommand(program: Command, ctx: CliContext): 
                     mediaDir,
                 });
 
-                const allMedia = result.tweets.flatMap((tweet) => tweet.media || []);
+                const allMedia = filteredTweets.flatMap((tweet) => tweet.media || []);
 
                 if (allMedia.length > 0) {
+                    const progress = new ProgressTracker(allMedia.length, 'Downloading');
+
                     const downloadedPaths = await mediaHandler.downloadMedia(
                         allMedia.map((m) => ({
                             type: m.type,
@@ -202,10 +329,12 @@ export function registerProfileSweepCommand(program: Command, ctx: CliContext): 
                         const mediaItem = allMedia[i];
                         const path = downloadedPaths[i];
 
+                        progress.increment();
+
                         if (!path) continue;
 
-                        if (i < media.length) {
-                            media[i].localPath = path;
+                        if (i < uniqueMedia.length) {
+                            uniqueMedia[i].localPath = path;
                         }
 
                         if (mediaItem.type === 'photo' && cmdOpts.includeImages !== false) {
@@ -215,6 +344,7 @@ export function registerProfileSweepCommand(program: Command, ctx: CliContext): 
                                 imageBuffers.push(buffer);
                             } catch (error) {
                                 console.warn(`${ctx.p('warn')}Failed to read image ${path}`);
+                                errorLogger.log('media-read', (error as Error).message, path);
                             }
                         } else if (mediaItem.type === 'video' && cmdOpts.includeVideos !== false) {
                             videoPaths.push(path);
@@ -226,10 +356,30 @@ export function registerProfileSweepCommand(program: Command, ctx: CliContext): 
             }
 
             // Extract articles
-            let articles: ArticleItem[] = [];
+            let articles: EnhancedArticleItem[] = [];
             if (cmdOpts.extractArticles) {
                 console.log('\n📰 Extracting articles...');
-                articles = await extractArticles(result.tweets);
+
+                const progress = new ProgressTracker(filteredTweets.length, 'Processing');
+
+                articles = await extractArticlesEnhanced(filteredTweets, {
+                    batchSize: 5,
+                    maxRetries: 3,
+                    errorLogger,
+                    onProgress: (current: number, total: number) => {
+                        // Progress is handled by the tracker
+                    },
+                });
+
+                progress.complete();
+
+                // Deduplicate articles by URL
+                const uniqueArticles = deduplicateByKey(articles, (a: EnhancedArticleItem) => a.url);
+                if (uniqueArticles.length < articles.length) {
+                    console.log(`   Deduplicated to ${uniqueArticles.length} unique articles`);
+                    articles = uniqueArticles;
+                }
+
                 console.log(`✓ Found ${articles.length} articles`);
             }
 
@@ -238,7 +388,7 @@ export function registerProfileSweepCommand(program: Command, ctx: CliContext): 
             let organizedCode: OrganizedCodeSnippets | undefined;
             if (cmdOpts.includeCode) {
                 console.log('\n💻 Extracting code snippets...');
-                codeSnippets = extractCodeSnippets(result.tweets);
+                codeSnippets = extractCodeSnippets(filteredTweets);
                 console.log(`✓ Found ${codeSnippets.length} code snippets`);
 
                 // Organize code snippets
@@ -253,16 +403,32 @@ export function registerProfileSweepCommand(program: Command, ctx: CliContext): 
                 }
             }
 
+            // Save error log
+            errorLogger.save();
+            const errorCount = errorLogger.getCount();
+            if (errorCount > 0) {
+                console.log(`\n⚠️  ${errorCount} errors logged (see errors.log)`);
+                const errorSummary = errorLogger.getSummary();
+                for (const [operation, count] of Object.entries(errorSummary)) {
+                    console.log(`   ${operation}: ${count}`);
+                }
+            }
+
             // Build result
             const sweepResult: ProfileSweepResult = {
                 username: normalizedUsername,
-                displayName: result.tweets[0]?.author?.name,
-                tweets: result.tweets,
-                media,
+                profile: profileMetadata,
+                statistics,
+                tweets: filteredTweets,
+                media: uniqueMedia,
                 articles,
                 codeSnippets,
                 organizedCode,
                 archivedAt: new Date().toISOString(),
+                errors: errorCount > 0 ? {
+                    count: errorCount,
+                    summary: errorLogger.getSummary(),
+                } : undefined,
             };
 
             // Extract persona if requested
@@ -339,7 +505,7 @@ export function registerProfileSweepCommand(program: Command, ctx: CliContext): 
 
                 const targetDir = cmdOpts.target
                     ? resolve(cmdOpts.target)
-                    : join(homedir(), 'dev', 'agents-skills', 'personas');
+                    : join(homedir(), 'dev', 'agent-skills', 'personas');
 
                 // Create a prompt file for skill-creator
                 const skillPromptPath = join(artifactsDir, 'skill-creator-prompt.md');
@@ -380,6 +546,11 @@ export function registerProfileSweepCommand(program: Command, ctx: CliContext): 
             writeFileSync(markdownPath, markdown, 'utf-8');
             console.log(`💾 Saved markdown report to ${markdownPath}`);
 
+            // Save statistics separately
+            const statsPath = join(artifactsDir, 'statistics.json');
+            writeFileSync(statsPath, JSON.stringify(statistics, null, 2), 'utf-8');
+            console.log(`💾 Saved statistics to ${statsPath}`);
+
             // Generate summary
             const summaryPath = join(artifactsDir, 'SWEEP_SUMMARY.md');
             const summary = generateSummary(sweepResult, {
@@ -391,21 +562,35 @@ export function registerProfileSweepCommand(program: Command, ctx: CliContext): 
             writeFileSync(summaryPath, summary, 'utf-8');
             console.log(`💾 Saved summary to ${summaryPath}`);
 
+            // Clear checkpoint on success
+            if (checkpoint) {
+                checkpointManager.clear();
+            }
+
             // Final summary
             const duration = Math.round((Date.now() - startTime) / 1000);
 
             console.log('\n📊 Summary:');
             console.log(`   Username: @${normalizedUsername}`);
-            console.log(`   Tweets: ${result.tweets.length}`);
-            console.log(`   Media: ${media.length}`);
+            if (profileMetadata.displayName) {
+                console.log(`   Name: ${profileMetadata.displayName}`);
+            }
+            console.log(`   Tweets: ${filteredTweets.length}`);
+            console.log(`   Media: ${uniqueMedia.length}`);
             console.log(`   Articles: ${articles.length}`);
             console.log(`   Code snippets: ${codeSnippets.length}`);
+            if (statistics) {
+                console.log(`   Total engagement: ${statistics.totalLikes.toLocaleString()} likes, ${statistics.totalRetweets.toLocaleString()} retweets`);
+            }
             if (cmdOpts.createSkill) {
                 console.log(`   Images analyzed: ${imageBuffers.length}`);
                 console.log(`   Videos analyzed: ${videoPaths.length}`);
             }
+            if (errorCount > 0) {
+                console.log(`   Errors: ${errorCount} (see errors.log)`);
+            }
             console.log(`   Artifacts: ${artifactsDir}`);
-            console.log(`   Duration: ${duration}s`);
+            console.log(`   Duration: ${duration}s (${(filteredTweets.length / duration).toFixed(2)} tweets/s)`);
 
             console.log('\n✨ Profile sweep complete!');
         });
@@ -735,17 +920,60 @@ function generateMarkdown(result: ProfileSweepResult): string {
     lines.push(`**Source:** https://x.com/${result.username}`);
     lines.push('');
 
-    if (result.displayName) {
+    if (result.profile) {
         lines.push('## Profile');
         lines.push('');
-        lines.push(`**Name:** ${result.displayName}`);
-        if (result.followerCount) lines.push(`**Followers:** ${result.followerCount.toLocaleString()}`);
-        if (result.followingCount) lines.push(`**Following:** ${result.followingCount.toLocaleString()}`);
-        if (result.bio) {
-            lines.push('');
-            lines.push(`**Bio:** ${result.bio}`);
-        }
+        if (result.profile.displayName) lines.push(`**Name:** ${result.profile.displayName}`);
+        if (result.profile.bio) lines.push(`**Bio:** ${result.profile.bio}`);
+        if (result.profile.location) lines.push(`**Location:** ${result.profile.location}`);
+        if (result.profile.website) lines.push(`**Website:** ${result.profile.website}`);
+        if (result.profile.followerCount) lines.push(`**Followers:** ${result.profile.followerCount.toLocaleString()}`);
+        if (result.profile.followingCount) lines.push(`**Following:** ${result.profile.followingCount.toLocaleString()}`);
+        if (result.profile.tweetCount) lines.push(`**Total Tweets:** ${result.profile.tweetCount.toLocaleString()}`);
+        if (result.profile.joinDate) lines.push(`**Joined:** ${result.profile.joinDate}`);
         lines.push('');
+    }
+
+    if (result.statistics) {
+        lines.push('## Statistics');
+        lines.push('');
+        lines.push(`- **Total Engagement:** ${result.statistics.totalLikes.toLocaleString()} likes, ${result.statistics.totalRetweets.toLocaleString()} retweets`);
+        lines.push(`- **Average Engagement:** ${result.statistics.averageLikes} likes, ${result.statistics.averageRetweets} retweets per tweet`);
+        lines.push('');
+
+        if (result.statistics.topTweets.length > 0) {
+            lines.push('### Top Tweets');
+            lines.push('');
+            for (const tweet of result.statistics.topTweets.slice(0, 5)) {
+                lines.push(`- [${tweet.likes.toLocaleString()} ❤️, ${tweet.retweets.toLocaleString()} 🔄] ${tweet.text}`);
+                lines.push(`  ${tweet.url}`);
+            }
+            lines.push('');
+        }
+
+        const topHashtags = Object.entries(result.statistics.hashtagFrequency)
+            .sort(([, a], [, b]) => (b as number) - (a as number))
+            .slice(0, 10);
+        if (topHashtags.length > 0) {
+            lines.push('### Top Hashtags');
+            lines.push('');
+            for (const [tag, count] of topHashtags) {
+                lines.push(`- ${tag} (${count})`);
+            }
+            lines.push('');
+        }
+
+        const topDomains = Object.entries(result.statistics.linkDomains)
+            .sort(([, a], [, b]) => (b as number) - (a as number))
+            .slice(0, 10);
+        if (topDomains.length > 0) {
+            lines.push('### Most Linked Domains');
+            lines.push('');
+            for (const [domain, count] of topDomains) {
+                lines.push(`- ${domain} (${count})`);
+            }
+            lines.push('');
+        }
     }
 
     lines.push('## Summary');
@@ -754,16 +982,22 @@ function generateMarkdown(result: ProfileSweepResult): string {
     lines.push(`- **Media items:** ${result.media.length}`);
     lines.push(`- **Articles:** ${result.articles.length}`);
     lines.push(`- **Code snippets:** ${result.codeSnippets.length}`);
+    if (result.errors) {
+        lines.push(`- **Errors:** ${result.errors.count}`);
+    }
     lines.push('');
 
     if (result.media.length > 0) {
         lines.push('## Media');
         lines.push('');
-        for (const item of result.media) {
+        for (const item of result.media.slice(0, 50)) {
             lines.push(`- [${item.type.toUpperCase()}] ${item.url}`);
             if (item.localPath) lines.push(`  - Local: ${item.localPath}`);
             if (item.videoUrl) lines.push(`  - Video: ${item.videoUrl}`);
             if (item.durationMs) lines.push(`  - Duration: ${(item.durationMs / 1000).toFixed(1)}s`);
+        }
+        if (result.media.length > 50) {
+            lines.push(`\n... and ${result.media.length - 50} more`);
         }
         lines.push('');
     }
@@ -771,16 +1005,25 @@ function generateMarkdown(result: ProfileSweepResult): string {
     if (result.articles.length > 0) {
         lines.push('## Articles');
         lines.push('');
-        for (const article of result.articles) {
+        for (const article of result.articles.slice(0, 20)) {
             lines.push(`### ${article.title || 'Untitled'}`);
             lines.push('');
             lines.push(`**URL:** ${article.url}`);
+            if (article.author) lines.push(`**Author:** ${article.author}`);
             if (article.publishedTime) lines.push(`**Published:** ${article.publishedTime}`);
-            if (article.content) {
+            if (article.tweetUrl) lines.push(`**Shared in:** ${article.tweetUrl}`);
+            if (article.description) {
                 lines.push('');
-                lines.push(article.content.substring(0, 500));
-                if (article.content.length > 500) lines.push('...');
+                lines.push(article.description);
+            } else if (article.content) {
+                lines.push('');
+                lines.push(article.content.substring(0, 300));
+                if (article.content.length > 300) lines.push('...');
             }
+            lines.push('');
+        }
+        if (result.articles.length > 20) {
+            lines.push(`... and ${result.articles.length - 20} more articles`);
             lines.push('');
         }
     }
@@ -788,7 +1031,7 @@ function generateMarkdown(result: ProfileSweepResult): string {
     if (result.codeSnippets.length > 0) {
         lines.push('## Code Snippets');
         lines.push('');
-        for (const snippet of result.codeSnippets) {
+        for (const snippet of result.codeSnippets.slice(0, 20)) {
             lines.push(`### ${snippet.context}`);
             lines.push('');
             if (snippet.language) {
@@ -800,22 +1043,10 @@ function generateMarkdown(result: ProfileSweepResult): string {
             lines.push('```');
             lines.push('');
         }
-    }
-
-    lines.push('## Tweets');
-    lines.push('');
-    for (const tweet of result.tweets) {
-        lines.push(`### ${tweet.createdAt || 'Unknown date'}`);
-        lines.push('');
-        lines.push(tweet.text || '');
-        lines.push('');
-        lines.push(`**Link:** https://x.com/${tweet.author.username}/status/${tweet.id}`);
-        if (tweet.likeCount) lines.push(`**Likes:** ${tweet.likeCount}`);
-        if (tweet.retweetCount) lines.push(`**Retweets:** ${tweet.retweetCount}`);
-        if (tweet.replyCount) lines.push(`**Replies:** ${tweet.replyCount}`);
-        lines.push('');
-        lines.push('---');
-        lines.push('');
+        if (result.codeSnippets.length > 20) {
+            lines.push(`... and ${result.codeSnippets.length - 20} more snippets`);
+            lines.push('');
+        }
     }
 
     return lines.join('\n');
@@ -849,9 +1080,37 @@ function generateSummary(
         lines.push(`| **Images Analyzed** | ✅ | ${stats.imageCount} | Vision analysis |`);
         lines.push(`| **Videos Analyzed** | ${stats.videoCount > 0 ? '✅' : '⚠️'} | ${stats.videoCount} | Transcription |`);
     }
+    if (result.errors) {
+        lines.push(`| **Errors** | ⚠️ | ${result.errors.count} | See errors.log |`);
+    }
     lines.push('');
     lines.push('---');
     lines.push('');
+
+    if (result.profile) {
+        lines.push('## 👤 Profile Info');
+        lines.push('');
+        if (result.profile.displayName) lines.push(`**Name:** ${result.profile.displayName}`);
+        if (result.profile.bio) lines.push(`**Bio:** ${result.profile.bio}`);
+        if (result.profile.followerCount) lines.push(`**Followers:** ${result.profile.followerCount.toLocaleString()}`);
+        if (result.profile.followingCount) lines.push(`**Following:** ${result.profile.followingCount.toLocaleString()}`);
+        lines.push('');
+        lines.push('---');
+        lines.push('');
+    }
+
+    if (result.statistics) {
+        lines.push('## 📈 Engagement Stats');
+        lines.push('');
+        lines.push(`**Total Likes:** ${result.statistics.totalLikes.toLocaleString()}`);
+        lines.push(`**Total Retweets:** ${result.statistics.totalRetweets.toLocaleString()}`);
+        lines.push(`**Average Likes:** ${result.statistics.averageLikes} per tweet`);
+        lines.push(`**Average Retweets:** ${result.statistics.averageRetweets} per tweet`);
+        lines.push('');
+        lines.push('---');
+        lines.push('');
+    }
+
     lines.push('## 📁 Archive Structure');
     lines.push('');
     lines.push('```');
@@ -859,9 +1118,16 @@ function generateSummary(
     lines.push('├── tweets.json                    # Full tweet data');
     lines.push('├── *-sweep-YYYY-MM-DD.json        # Comprehensive sweep data');
     lines.push('├── *-sweep-YYYY-MM-DD.md          # Human-readable report');
+    lines.push('├── statistics.json                # Engagement and posting stats');
     lines.push('├── SWEEP_SUMMARY.md               # This file');
     if (result.persona) {
         lines.push('├── persona.json                   # AI-extracted persona');
+    }
+    if (result.organizedCode) {
+        lines.push('├── code-snippets-organized.json   # Organized code snippets');
+    }
+    if (result.errors) {
+        lines.push('├── errors.log                     # Error log');
     }
     if (result.media.length > 0) {
         lines.push('└── media/                         # Downloaded media files');
@@ -874,6 +1140,9 @@ function generateSummary(
     lines.push('');
     lines.push(`**Total Duration:** ${stats.duration}s`);
     lines.push(`**Tweets/second:** ${(result.tweets.length / stats.duration).toFixed(2)}`);
+    if (result.articles.length > 0) {
+        lines.push(`**Articles/second:** ${(result.articles.length / stats.duration).toFixed(2)}`);
+    }
     lines.push('');
 
     return lines.join('\n');
@@ -920,7 +1189,7 @@ function generateSkillCreatorPrompt(username: string, persona: unknown, artifact
     lines.push('   - Understanding perspective and viewpoints');
     lines.push('   - Generating content in their voice');
     lines.push('');
-    lines.push('3. Output location: ~/dev/agents-skills/personas/@' + username + '-persona/');
+    lines.push('3. Output location: ~/dev/agent-skills/personas/@' + username + '-persona/');
     lines.push('');
     lines.push('## Persona Summary');
     lines.push('');

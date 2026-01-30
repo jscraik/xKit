@@ -3,7 +3,6 @@
  * Wraps ContentExtractor with caching support
  */
 
-import { createHash } from 'node:crypto';
 import type { LinkedContent } from './types.js';
 import { ContentExtractor } from './content-extractor.js';
 import { CacheManager, type ExtractOptions } from '../cache/cache-manager.js';
@@ -16,6 +15,7 @@ export class CachedContentExtractor {
   private contentExtractor: ContentExtractor;
   private cache: CacheManager;
   private cacheEnabled: boolean;
+  private enableFullContent: boolean;
 
   constructor(
     options: {
@@ -29,6 +29,7 @@ export class CachedContentExtractor {
     } = {}
   ) {
     this.cacheEnabled = options.cacheEnabled ?? true;
+    this.enableFullContent = options.enableFullContent ?? true;
     this.cache = new CacheManager(options.cachePath);
     this.contentExtractor = new ContentExtractor(options);
   }
@@ -40,7 +41,7 @@ export class CachedContentExtractor {
     // Check cache first
     if (this.cacheEnabled) {
       const cacheKey = this.cache.getExtractKey(url, {
-        extractFullContent: true, // TODO: get from options
+        extractFullContent: this.enableFullContent,
       });
 
       const cached = this.cache.get(cacheKey);
@@ -60,7 +61,7 @@ export class CachedContentExtractor {
     // Cache the result if successful
     if (this.cacheEnabled && result) {
       const cacheKey = this.getExtractKey(url, {
-        extractFullContent: true,
+        extractFullContent: this.enableFullContent,
       });
       this.cache.set(cacheKey, JSON.stringify(result));
     }
@@ -102,11 +103,4 @@ export class CachedContentExtractor {
   enableCache(): void {
     this.cacheEnabled = true;
   }
-}
-
-/**
- * Calculate hash of string for cache keys
- */
-function hashString(content: string): string {
-  return createHash('sha256').update(content).digest('hex');
 }

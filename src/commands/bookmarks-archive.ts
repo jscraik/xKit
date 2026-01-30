@@ -17,6 +17,7 @@ import { WebhookNotifier } from '../webhook-notifications/index.js';
 import { TokenTracker } from '../bookmark-analysis/token-tracker.js';
 import { WorkerPool } from '../bookmark-analysis/worker-pool.js';
 import type { ParallelConfig } from '../bookmark-analysis/work-item.js';
+import { ErrorLogger, deduplicateByKey } from './shared/index.js';
 
 interface ArchiveOptions {
   count?: string;
@@ -46,6 +47,12 @@ interface ArchiveOptions {
   // Custom template support (Phase 4)
   template?: string;
   var?: string[];
+  // Filter options
+  minLikes?: string;
+  excludeRetweets?: boolean;
+  dateFrom?: string;
+  dateTo?: string;
+  excludeReplies?: boolean;
 }
 
 /**
@@ -129,6 +136,10 @@ async function archiveBookmarks(options: ArchiveOptions, program: Command, ctx: 
     });
     const folderManager = new FolderManager();
 
+    // Initialize error logger
+    const outputDir = options.outputDir || './knowledge';
+    const errorLogger = new ErrorLogger(outputDir);
+
     // Step 3: Fetch bookmarks
     console.log('📥 Fetching bookmarks...');
 
@@ -170,7 +181,70 @@ async function archiveBookmarks(options: ArchiveOptions, program: Command, ctx: 
     // Step 4: Convert TweetData to BookmarkRecord format
     let bookmarksToProcess = tweetDataBatchToBookmarkRecords(result.tweets);
 
-    // Step 4.5: Add folder tags if folder ID specified
+    // Step 4.1: Apply filter options if specified
+    const beforeFilters = bookmarksToProcess.length;
+
+    if (options.minLikes) {
+      const minLikesResult = ctx.parseIntegerOption(options.minLikes, { name: '--min-likes', min: 0 });
+      if (minLikesResult.ok) {
+        const minLikes = minLikesResult.value;
+        bookmarksToProcess = bookmarksToProcess.filter((b: any) => (b.likeCount || 0) >= minLikes);
+        console.log(`🔍 Filtered by min likes (${minLikes}): ${beforeFilters - bookmarksToProcess.length} removed`);
+      }
+    }
+
+    if (options.excludeRetweets) {
+      const beforeRetweets = bookmarksToProcess.length;
+      bookmarksToProcess = bookmarksToProcess.filter((b: any) => !b.isRetweet);
+      if (beforeRetweets - bookmarksToProcess.length > 0) {
+        console.log(`🔍 Excluded ${beforeRetweets - bookmarksToProcess.length} retweets`);
+      }
+    }
+
+    if (options.excludeReplies) {
+      const beforeReplies = bookmarksToProcess.length;
+      bookmarksToProcess = bookmarksToProcess.filter((b: any) => !b.isReply);
+      if (beforeReplies - bookmarksToProcess.length > 0) {
+        console.log(`🔍 Excluded ${beforeReplies - bookmarksToProcess.length} replies`);
+      }
+    }
+
+    if (options.dateFrom) {
+      const fromDate = new Date(options.dateFrom);
+      if (!isNaN(fromDate.getTime())) {
+        const beforeDate = bookmarksToProcess.length;
+        bookmarksToProcess = bookmarksToProcess.filter((b: any) => {
+          const tweetDate = new Date(b.createdAt || b.date);
+          return tweetDate >= fromDate;
+        });
+        console.log(`🔍 Filtered by date from (${options.dateFrom}): ${beforeDate - bookmarksToProcess.length} removed`);
+      } else {
+        console.warn(`${ctx.p('warn')}Invalid date-from format, skipping date filter. Use YYYY-MM-DD`);
+      }
+    }
+
+    if (options.dateTo) {
+      const toDate = new Date(options.dateTo);
+      if (!isNaN(toDate.getTime())) {
+        const beforeDate = bookmarksToProcess.length;
+        bookmarksToProcess = bookmarksToProcess.filter((b: any) => {
+          const tweetDate = new Date(b.createdAt || b.date);
+          return tweetDate <= toDate;
+        });
+        console.log(`🔍 Filtered by date to (${options.dateTo}): ${beforeDate - bookmarksToProcess.length} removed`);
+      } else {
+        console.warn(`${ctx.p('warn')}Invalid date-to format, skipping date filter. Use YYYY-MM-DD`);
+      }
+    }
+
+    // Step 4.2: Deduplicate by ID
+    const uniqueBookmarks = deduplicateByKey(bookmarksToProcess, (b: any) => b.id);
+    if (uniqueBookmarks.length < bookmarksToProcess.length) {
+      console.log(`🔍 Deduplicated ${bookmarksToProcess.length - uniqueBookmarks.length} duplicate bookmarks`);
+      bookmarksToProcess = uniqueBookmarks;
+    }
+
+    // Step 4.3: Add folder tags if folder ID specified
     if (options.folderId) {
       bookmarksToProcess = folderManager.addFolderTags(bookmarksToProcess, options.folderId);
     }
@@ -233,22 +307,28 @@ async function archiveBookmarks(options: ArchiveOptions, program: Command, ctx: 
       }
       const enrichStart = Date.now();
 
-      const enrichedBookmarks = await enricher.enrichBatch(bookmarksToProcess, {
-        concurrency: 5,
-        onProgress: (current, total) => {
-          if (options.stats) {
-            const progressBar = stats.generateProgressBar(current, total);
-            process.stdout.write(`\r  ${progressBar}`);
-          } else {
-            process.stdout.write(`\r  Progress: ${current}/${total}`);
-          }
-        },
-      });
+      try {
+        const enrichedBookmarks = await enricher.enrichBatch(bookmarksToProcess, {
+          concurrency: 5,
+          onProgress: (current, total) => {
+            if (options.stats) {
+              const progressBar = stats.generateProgressBar(current, total);
+              process.stdout.write(`\r  ${progressBar}`);
+            } else {
+              process.stdout.write(`\r  Progress: ${current}/${total}`);
+            }
+          },
+        });
 
-      const enrichTime = Date.now() - enrichStart;
-      stats.recordEnrichmentTime(enrichTime);
-      console.log('\n✅ Content enrichment complete');
-      bookmarksToProcess = enrichedBookmarks;
+        const enrichTime = Date.now() - enrichStart;
+        stats.recordEnrichmentTime(enrichTime);
+        console.log('\n✅ Content enrichment complete');
+        bookmarksToProcess = enrichedBookmarks;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        errorLogger.log('enrichment', errorMessage);
+        console.error(`${ctx.p('warn')}Some enrichment failed, continuing with partial results`);
+      }
     }
 
     // Step 7: Categorize bookmarks
@@ -309,6 +389,42 @@ async function archiveBookmarks(options: ArchiveOptions, program: Command, ctx: 
     console.log(`   Total in archive: ${archiveStats.totalEntries}`);
     console.log(`   Duration: ${Math.round((Date.now() - startTime) / 1000)}s`);
 
+    // Calculate enhanced statistics
+    const totalLikes = bookmarksToProcess.reduce((sum: number, b: any) => sum + (b.likeCount || 0), 0);
+    const averageLikes = bookmarksToProcess.length > 0 ? Math.round(totalLikes / bookmarksToProcess.length) : 0;
+    const retweetCount = bookmarksToProcess.filter((b: any) => b.isRetweet).length;
+    const replyCount = bookmarksToProcess.filter((b: any) => b.isReply).length;
+
+    console.log('\n📈 Enhanced Statistics:');
+    console.log(`   Total likes: ${totalLikes}`);
+    console.log(`   Average likes per bookmark: ${averageLikes}`);
+    console.log(`   Retweets: ${retweetCount} (${Math.round((retweetCount / bookmarksToProcess.length) * 100)}%)`);
+    console.log(`   Replies: ${replyCount} (${Math.round((replyCount / bookmarksToProcess.length) * 100)}%)`);
+
+    // Calculate top domains if URL expansion happened
+    const domains = new Map<string, number>();
+    for (const bookmark of bookmarksToProcess) {
+      if ((bookmark as any).expandedUrl) {
+        try {
+          const url = new URL((bookmark as any).expandedUrl);
+          const domain = url.hostname.replace('www.', '');
+          domains.set(domain, (domains.get(domain) || 0) + 1);
+        } catch {
+          // Invalid URL, skip
+        }
+      }
+    }
+
+    if (domains.size > 0) {
+      const topDomains = Array.from(domains.entries())
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+      console.log('\n   Top domains:');
+      for (const [domain, count] of topDomains) {
+        console.log(`     ${domain}: ${count}`);
+      }
+    }
+
     // Display detailed stats if requested
     if (options.stats) {
       console.log('\n' + stats.formatStats());
@@ -328,6 +444,19 @@ async function archiveBookmarks(options: ArchiveOptions, program: Command, ctx: 
     const tokenReport = tokenTracker.getReport();
     if (tokenReport.total.input > 0 || tokenReport.total.output > 0) {
       console.log('\n' + tokenTracker.formatReport());
+    }
+
+    // Save error log if there were any errors
+    if (errorLogger.getCount() > 0) {
+      errorLogger.save();
+      console.log(`\n⚠️  Logged ${errorLogger.getCount()} errors to ${outputDir}/errors.log`);
+      const summary = errorLogger.getSummary();
+      if (Object.keys(summary).length > 0) {
+        console.log('   Error summary:');
+        for (const [operation, count] of Object.entries(summary)) {
+          console.log(`     ${operation}: ${count}`);
+        }
+      }
     }
 
     console.log('\n✨ Done!\n');
@@ -350,6 +479,7 @@ export function registerBookmarksArchiveCommand(program: Command, ctx: CliContex
   program
     .command('bookmarks-archive')
     .alias('archive')
+    .alias('ba')
     .description('Archive bookmarks to markdown with enrichment and categorization')
     .option('-n, --count <number>', 'Number of bookmarks to fetch', '20')
     .option('--all', 'Fetch all bookmarks (paged)')
@@ -381,6 +511,12 @@ export function registerBookmarksArchiveCommand(program: Command, ctx: CliContex
       previous.push(value);
       return previous;
     }, [])
+    // Filter options
+    .option('--min-likes <number>', 'Only archive bookmarks with at least this many likes')
+    .option('--exclude-retweets', 'Exclude retweeted bookmarks')
+    .option('--exclude-replies', 'Exclude reply tweets')
+    .option('--date-from <date>', 'Only archive bookmarks from this date onwards (YYYY-MM-DD)')
+    .option('--date-to <date>', 'Only archive bookmarks up to this date (YYYY-MM-DD)')
     .action(async (options: ArchiveOptions) => {
       try {
         await archiveBookmarks(options, program, ctx);

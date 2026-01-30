@@ -52,6 +52,25 @@ interface CodeSnippet {
     language?: string;
     code: string;
     context: string;
+    type?: 'code-block' | 'inline-code' | 'component' | 'css-property' | 'code-link' | 'image-code';
+    category?: string; // e.g., 'animation', 'component', 'styling', 'api'
+    componentName?: string; // e.g., 'Drawer', 'Sonner', 'Vaul'
+    tweetId?: string;
+    tweetUrl?: string;
+}
+
+interface OrganizedCodeSnippets {
+    byType: {
+        codeBlocks: CodeSnippet[];
+        inlineCode: CodeSnippet[];
+        components: CodeSnippet[];
+        cssProperties: CodeSnippet[];
+        codeLinks: CodeSnippet[];
+        imageCode: CodeSnippet[];
+    };
+    byComponent: Record<string, CodeSnippet[]>;
+    byCategory: Record<string, CodeSnippet[]>;
+    all: CodeSnippet[];
 }
 
 interface ProfileSweepResult {
@@ -64,7 +83,8 @@ interface ProfileSweepResult {
     tweets: TweetData[];
     media: MediaItem[];
     articles: ArticleItem[];
-    codeSnippets: CodeSnippet[];
+    codeSnippets: CodeSnippet[]; // Keep for backward compatibility
+    organizedCode?: OrganizedCodeSnippets; // New organized structure
     archivedAt: string;
     persona?: unknown;
 }
@@ -215,10 +235,22 @@ export function registerProfileSweepCommand(program: Command, ctx: CliContext): 
 
             // Extract code snippets
             let codeSnippets: CodeSnippet[] = [];
+            let organizedCode: OrganizedCodeSnippets | undefined;
             if (cmdOpts.includeCode) {
                 console.log('\n💻 Extracting code snippets...');
                 codeSnippets = extractCodeSnippets(result.tweets);
                 console.log(`✓ Found ${codeSnippets.length} code snippets`);
+
+                // Organize code snippets
+                if (codeSnippets.length > 0) {
+                    organizedCode = organizeCodeSnippets(codeSnippets);
+                    console.log(`   Organized by type, component, and category`);
+
+                    // Save organized code separately
+                    const organizedPath = join(artifactsDir, 'code-snippets-organized.json');
+                    writeFileSync(organizedPath, JSON.stringify(organizedCode, null, 2), 'utf-8');
+                    console.log(`   💾 Saved organized code to ${organizedPath}`);
+                }
             }
 
             // Build result
@@ -229,6 +261,7 @@ export function registerProfileSweepCommand(program: Command, ctx: CliContext): 
                 media,
                 articles,
                 codeSnippets,
+                organizedCode,
                 archivedAt: new Date().toISOString(),
             };
 
@@ -443,6 +476,116 @@ async function extractArticles(tweets: TweetData[]): Promise<ArticleItem[]> {
 }
 
 /**
+ * Categorize code based on content and context
+ */
+function categorizeCode(code: string, context: string): string {
+    const lower = code.toLowerCase() + ' ' + context.toLowerCase();
+
+    if (lower.includes('animation') || lower.includes('transition') || lower.includes('ease') || lower.includes('transform')) {
+        return 'animation';
+    }
+    if (lower.includes('component') || lower.includes('drawer') || lower.includes('modal') || lower.includes('dialog')) {
+        return 'component';
+    }
+    if (lower.includes('style') || lower.includes('css') || code.includes(':') || code.startsWith('--')) {
+        return 'styling';
+    }
+    if (lower.includes('hook') || lower.includes('use')) {
+        return 'hooks';
+    }
+    if (lower.includes('api') || lower.includes('fetch') || lower.includes('promise')) {
+        return 'api';
+    }
+
+    return 'general';
+}
+
+/**
+ * Extract component name from code
+ */
+function extractComponentName(code: string): string | undefined {
+    // Handle patterns like "Drawer.NestedRoot"
+    const dotMatch = code.match(/^([A-Z][a-zA-Z]+)\./);
+    if (dotMatch) {
+        return dotMatch[1];
+    }
+
+    // Handle PascalCase component names
+    if (/^[A-Z][a-zA-Z]+$/.test(code)) {
+        return code;
+    }
+
+    // Handle "ComponentName" pattern
+    const componentMatch = code.match(/([A-Z][a-zA-Z]+)Component/);
+    if (componentMatch) {
+        return componentMatch[1];
+    }
+
+    return undefined;
+}
+
+/**
+ * Organize code snippets by type, component, and category
+ */
+function organizeCodeSnippets(snippets: CodeSnippet[]): OrganizedCodeSnippets {
+    const organized: OrganizedCodeSnippets = {
+        byType: {
+            codeBlocks: [],
+            inlineCode: [],
+            components: [],
+            cssProperties: [],
+            codeLinks: [],
+            imageCode: [],
+        },
+        byComponent: {},
+        byCategory: {},
+        all: snippets,
+    };
+
+    for (const snippet of snippets) {
+        // Organize by type
+        switch (snippet.type) {
+            case 'code-block':
+                organized.byType.codeBlocks.push(snippet);
+                break;
+            case 'inline-code':
+                organized.byType.inlineCode.push(snippet);
+                break;
+            case 'component':
+                organized.byType.components.push(snippet);
+                break;
+            case 'css-property':
+                organized.byType.cssProperties.push(snippet);
+                break;
+            case 'code-link':
+                organized.byType.codeLinks.push(snippet);
+                break;
+            case 'image-code':
+                organized.byType.imageCode.push(snippet);
+                break;
+        }
+
+        // Organize by component
+        if (snippet.componentName) {
+            if (!organized.byComponent[snippet.componentName]) {
+                organized.byComponent[snippet.componentName] = [];
+            }
+            organized.byComponent[snippet.componentName].push(snippet);
+        }
+
+        // Organize by category
+        if (snippet.category) {
+            if (!organized.byCategory[snippet.category]) {
+                organized.byCategory[snippet.category] = [];
+            }
+            organized.byCategory[snippet.category].push(snippet);
+        }
+    }
+
+    return organized;
+}
+
+/**
  * Extract code snippets from tweets
  */
 function extractCodeSnippets(tweets: TweetData[]): CodeSnippet[] {
@@ -474,10 +617,17 @@ function extractCodeSnippets(tweets: TweetData[]): CodeSnippet[] {
         // Extract code blocks (markdown style)
         let match: RegExpExecArray | null;
         while ((match = codeBlockRegex.exec(text)) !== null) {
+            const code = match[2].trim();
+            const language = match[1] || 'unknown';
+
             snippets.push({
-                language: match[1] || 'unknown',
-                code: match[2].trim(),
+                language,
+                code,
                 context: `Code block from @${author} on ${date}\nTweet: ${tweetUrl}`,
+                type: 'code-block',
+                category: categorizeCode(code, text),
+                tweetId: tweet.id,
+                tweetUrl,
             });
         }
 
@@ -485,19 +635,32 @@ function extractCodeSnippets(tweets: TweetData[]): CodeSnippet[] {
         const inlineMatches = Array.from(text.matchAll(inlineCodeRegex));
         for (const inlineMatch of inlineMatches) {
             const code = inlineMatch[1];
-            // Look for component-like patterns or substantial code
+
+            const isPascalCase = /^[A-Z][a-zA-Z]+$/.test(code);
+            const isComponent = isPascalCase || code.includes('Component') || (code.includes('.') && /^[A-Z]/.test(code));
+            const isCSSProperty = code.includes(':') || code.includes('-') || code.startsWith('--');
+            const isHook = code.startsWith('use') && /^use[A-Z]/.test(code);
+
+            // Capture substantial or interesting code
             if (
-                code.length > 20 ||
+                code.length > 15 ||
                 code.includes('(') ||
                 code.includes('{') ||
-                /^[A-Z][a-zA-Z]+$/.test(code) || // PascalCase (React components)
-                code.includes('Component') ||
-                code.includes('Hook') ||
-                code.includes('use[A-Z]') // React hooks
+                isComponent ||
+                isCSSProperty ||
+                isHook
             ) {
+                const type = isComponent ? 'component' : isCSSProperty ? 'css-property' : 'inline-code';
+                const componentName = isComponent ? extractComponentName(code) : undefined;
+
                 snippets.push({
                     code: code.trim(),
                     context: `Inline code from @${author} on ${date}\nTweet: ${tweetUrl}`,
+                    type,
+                    category: categorizeCode(code, text),
+                    componentName,
+                    tweetId: tweet.id,
+                    tweetUrl,
                 });
             }
         }
@@ -522,6 +685,10 @@ function extractCodeSnippets(tweets: TweetData[]): CodeSnippet[] {
                         snippets.push({
                             code: url,
                             context: `Code link from @${author}: ${text.substring(0, 150)}\nTweet: ${tweetUrl}`,
+                            type: 'code-link',
+                            category: 'repository',
+                            tweetId: tweet.id,
+                            tweetUrl,
                         });
                     }
                 } catch (error) {
@@ -543,6 +710,10 @@ function extractCodeSnippets(tweets: TweetData[]): CodeSnippet[] {
                     snippets.push({
                         code: `[IMAGE: Potential code screenshot - requires vision analysis]`,
                         context: `Tweet with image from @${author} on ${date}\nText: ${text}\nTweet: ${tweetUrl}`,
+                        type: 'image-code',
+                        category: categorizeCode('', text),
+                        tweetId: tweet.id,
+                        tweetUrl,
                     });
                 }
             }

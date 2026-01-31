@@ -66,3 +66,5 @@ knowledge_backup_*/
 .spec/
 .specs/
 .xkitrc.json5
+zai_settings.json
+kimi_setting.json

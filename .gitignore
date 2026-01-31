@@ -61,6 +61,7 @@ knowledge_backup_*/
 # Developer tools and local state
 .ralph/
 .kiro/
+.repo/
 .spec/
 .specs/
 .xkitrc.json5

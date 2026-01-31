@@ -60,3 +60,10 @@ test-embeddings.ts
 /ai/tmp/
 /ai/cache/
 /ai/raw/
+
+# Developer tools and local state
+.ralph/
+.kiro/
+.spec/
+.specs/
+.xkitrc.json5

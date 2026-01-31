@@ -38,6 +38,7 @@ artifacts/
 *-sweep.log
 *-state.json
 bookmark-state.json
+logs/
 
 # Runtime state
 .xkit/

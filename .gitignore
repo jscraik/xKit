@@ -43,18 +43,15 @@ bookmark-state.json
 .xkit/
 
 # Temporary test directories
-analysis-engine-test-*/
-analysis-engine-error-test-*/
-analysis-engine-property-test-*/
-analysis-engine-error-property-test-*/
+*-test-*/
 *-property-test-*/
-script-runner-test-*/
-script-runner-property-test-*/
+tmp/
 
 # Test data and embeddings
 embeddings/
 test-data/
 test-embeddings.ts
+knowledge_backup_*/
 
 # AI artifacts - transient only
 /ai/tmp/
